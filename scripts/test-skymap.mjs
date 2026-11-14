@@ -7,6 +7,7 @@ const origin = { ra: 83.8221, dec: -5.3911, wavelength: 3.29, size: .1 };
 // Lightweight DOM harness exercises the actual shipped browser script, not a
 // separate model of its state transitions. Browser QA covers layout and input.
 const elements = [];
+let rasterizations = 0;
 class Element {
   constructor(tag = 'div') {
     this.tag = tag;
@@ -28,7 +29,7 @@ class Element {
       remove: (value) => { this.className = this.className.split(' ').filter((item) => item !== value).join(' '); },
     };
     this.context = {
-      createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
+      createImageData: (width, height) => { rasterizations++; return { data: new Uint8ClampedArray(width * height * 4) }; },
       putImageData: (image) => { this.image = image; },
       drawImage: (source) => { this.image = source.image; },
     };
@@ -39,6 +40,11 @@ class Element {
   append(...children) { this.children.push(...children); children.forEach(child => { child.parent = this; }); }
   prepend(child) { this.children.unshift(child); child.parent = this; }
   remove() { this.removed = true; if (this.parent) this.parent.children.splice(this.parent.children.indexOf(this), 1); }
+  replaceWith(next) {
+    if (!this.parent) return;
+    const parent = this.parent, index = parent.children.indexOf(this);
+    parent.children.splice(index, 1, next); next.parent = parent; this.parent = null;
+  }
   focus() { this.focused = true; }
   scrollTo(position) { this.scrollPosition = position; }
   getContext() { return this.context; }
@@ -46,7 +52,7 @@ class Element {
   toDataURL() { return 'data:image/png;base64,test'; }
 }
 const ids = new Map();
-for (const id of ['search-form', 'submit-button', 'cancel-button', 'status', 'status-text', 'image-canvas', 'empty-state', 'download-png', 'download-fits', 'open-irsa', 'map-list', 'map-count', 'selected-position', 'meta-observation', 'meta-band', 'meta-size', 'ra', 'dec', 'size', 'wavelength']) {
+for (const id of ['search-form', 'submit-button', 'cancel-button', 'status', 'status-text', 'image-canvas', 'empty-state', 'download-png', 'download-fits', 'open-irsa', 'map-list', 'map-count', 'selected-position', 'meta-observation', 'meta-band', 'meta-size', 'ra', 'dec', 'size', 'wavelength', 'original-pixels']) {
   const element = new Element();
   if (id.startsWith('navigate-')) element.className = 'sky-arrow';
   ids.set(id, element);
@@ -75,7 +81,7 @@ const context = vm.createContext({
     const pixels = Array.from({ length: 160 * 160 }, (_, index) => fetchMode === 'blank' ? null : 1 + index / 1000);
     return {
       ok: true, headers: new Headers(),
-      json: async () => ({ width: 160, height: 160, pixels, wcs, observation: 'observation-' + fetchCount, bandpass: 'test band', fitsUrl: '/api/cutout?observation=' + fetchCount + '&format=fits' }),
+      json: async () => ({ width: 160, height: 160, pixels, wcs, observation: query.observation || 'observation-' + fetchCount, bandpass: 'test band', fitsUrl: '/api/cutout?observation=' + fetchCount + '&format=fits' }),
     };
   },
 });
@@ -88,6 +94,20 @@ assert.equal(read('skyMaps.length'), 1);
 assert.equal(read('selectedTile.map.tiles.size'), 1);
 assert.equal(read('currentFitsUrl'), '/api/cutout?observation=1&format=fits');
 const rootTile = read('selectedTile');
+const afterFirst = fetchCount;
+const firstObservation = JSON.stringify(rootTile.preview.observation);
+const exactFirst = await read('getPreview(' + root + ', new AbortController().signal, ' + firstObservation + ', true)');
+assert.equal(exactFirst.cached, true);
+assert.equal(fetchCount, afterFirst, 'Returning to the initially loaded date must not query the archive');
+exactFirst.preview.pixels[0] = -999;
+const firstAgain = await read('getPreview(' + root + ', new AbortController().signal, ' + firstObservation + ', true)');
+assert.notEqual(firstAgain.preview.pixels[0], -999, 'Display edits cannot contaminate saved observations');
+await read('getPreview(' + root + ', new AbortController().signal, "ANOTHER-DATE", true)');
+const afterSecond = fetchCount;
+await read('getPreview(' + root + ', new AbortController().signal, "ANOTHER-DATE", true)');
+assert.equal(fetchCount, afterSecond, 'Revisiting a loaded timeline frame must not download it again');
+// Keep the existing spatial-map request-count assertions independent of this extra date.
+fetchCount = afterFirst;
 const rootImage = ids.get('image-canvas').image;
 assert.equal(rootTile.thumbnail.width, 50);
 assert.equal(rootTile.thumbnail.height, 50);
@@ -210,4 +230,47 @@ assert.equal(read('skyMaps[0].id'), 4);
 assert.equal(read('tileCount'), 1);
 assert.equal(ids.get('empty-state').hidden, true);
 assert.equal(ids.get('download-png').disabled, false);
-console.log('Sky-map navigation, retention, Stop, capacity, close selection fallback, observer cleanup, last-map reset and reopening passed.');
+
+// Exercise the actual timeline display path, not just its raw-pixel cache.
+const frameA = read('selectedTile.thumbnail');
+const observationA = read('selectedTile.preview.observation');
+context.dateA = { id: observationA, date: '2025-05-01T00:00:00.000Z' };
+context.dateB = { id: 'TIMELINE-B', date: '2025-11-01T00:00:00.000Z' };
+await read('showObservation(selectedTile, dateB)');
+const frameB = read('selectedTile.thumbnail');
+assert.notEqual(frameA, frameB);
+const frameRequests = fetchCount, renders = rasterizations;
+read('const displayStates = []; const previousStatus = setStatus; setStatus = (state, message) => { displayStates.push(state); previousStatus(state, message); };');
+await read('showObservation(selectedTile, dateA)');
+assert.equal(read('selectedTile.thumbnail'), frameA, 'Returning to the initial date reuses its rendered canvas');
+await read('showObservation(selectedTile, dateB)');
+assert.equal(read('selectedTile.thumbnail'), frameB, 'Repeating a date reuses its rendered canvas');
+assert.equal(fetchCount, frameRequests, 'Rendered cache hits must make zero archive/API requests');
+assert.equal(rasterizations, renders, 'Rendered cache hits must not reproject/repaint the science pixels');
+assert.equal(read('displayStates.includes("loading")'), false, 'Saved dates must never flash an archive-loading state');
+assert.equal(read('activeController'), null);
+assert.match(ids.get('status-text').textContent, /saved frame.*no reload/);
+
+// Expelling rendered frames still reuses previously downloaded raw pixels.
+read('renderedFrames.closeMap(selectedTile.map.id)');
+await read('showObservation(selectedTile, dateA)');
+assert.equal(fetchCount, frameRequests, 'Evicted rendered frames fall back to the raw-pixel cache, not the network');
+assert.equal(read('displayStates.includes("loading")'), false);
+assert.match(ids.get('status-text').textContent, /saved pixels.*no archive request/);
+const stopped = new AbortController(); stopped.abort(); context.stopped = stopped;
+await assert.rejects(read('showObservation(selectedTile, dateB, stopped.signal)'), { name: 'AbortError' });
+assert.equal(read('selectedTile.preview.observation'), observationA, 'A stopped playback must not swap a cached frame');
+const originalPixels = ids.get('original-pixels');
+originalPixels.checked = true;
+originalPixels.listeners.change();
+const originalA = read('selectedTile.thumbnail'), originalImage = originalA.image;
+originalPixels.checked = false;
+originalPixels.listeners.change();
+assert.notEqual(read('selectedTile.thumbnail'), originalA, 'Original/repaired modes retain distinct canvases');
+assert.equal(originalA.image, originalImage, 'Toggling repair cannot overwrite a cached original canvas');
+await read('showObservation(selectedTile, dateB)');
+originalPixels.checked = true;
+originalPixels.listeners.change();
+await read('showObservation(selectedTile, dateA)');
+assert.equal(read('selectedTile.thumbnail'), originalA, 'Each observation reuses the matching original/repaired variant');
+console.log('Sky maps, Stop, close cleanup, rendered timeline reuse, zero-fetch/zero-repaint revisits and raw-cache fallback passed.');

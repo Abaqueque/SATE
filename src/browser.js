@@ -2,9 +2,12 @@ import * as geometry from './wcs.js';
 import { installMapPanning } from './pan.js';
 import { installTimeline } from './timeline.js';
 import { repairPreviewGaps } from './repair.js';
+import { targetCatalogue, predictPosition, measureSource, registerProjected } from './targets.js';
+import { installScience } from './science.js';
+import { createObservationCache, createRenderedFrameCache } from './observation-cache.js';
 
 // Share the tested coordinate calculation without adding a browser dependency.
-export const browserScript = [...Object.values(geometry), installMapPanning, installTimeline, repairPreviewGaps].map(fn => fn.toString()).join('\n') + '\n' + String.raw`
+export const browserScript = [...Object.values(geometry), installMapPanning, installTimeline, repairPreviewGaps, predictPosition, measureSource, registerProjected, installScience, createObservationCache, createRenderedFrameCache].map(fn => fn.toString()).join('\n') + '\nconst targetCatalogue = ' + JSON.stringify(targetCatalogue) + ';\n' + String.raw`
 const form = document.getElementById('search-form');
 const submitButton = document.getElementById('submit-button');
 const cancelButton = document.getElementById('cancel-button');
@@ -18,7 +21,8 @@ const openIrsa = document.getElementById('open-irsa');
 let currentFitsUrl = null;
 let currentName = 'spherex-cutout';
 let activeController = null;
-const previewCache = new Map();
+const observationCache = createObservationCache();
+const renderedFrames = createRenderedFrameCache();
 const skyMaps = [];
 const mapList = document.getElementById('map-list');
 const mapCount = document.getElementById('map-count');
@@ -32,29 +36,58 @@ let selectedTile = null;
 let tileCount = 0;
 let nextMapId = 1;
 const tileLimit = 64;
-const timeline = installTimeline({ paused: function () {
+const science = installScience(targetCatalogue);
+const timeline = installTimeline({ dated: function (tile) { science.select(tile); updateFocusView(); }, paused: function () {
   if (selectedTile) setStatus('ready', 'Observation: ' + (selectedTile.preview.observedAt || selectedTile.preview.observation));
-}, show: async function (tile, item, playbackSignal) {
+}, show: showObservation }, observationCache);
+function frameKey(tile, observation = tile.preview.observation) {
+  return tile.map.id + ':' + JSON.stringify([tile.x, tile.y, observation, Boolean(document.getElementById('original-pixels')?.checked)]);
+}
+function rememberFrame(tile) {
+  renderedFrames.set(frameKey(tile), { preview: tile.preview, thumbnail: tile.thumbnail });
+}
+function displayFrame(tile, frame, item, message) {
+  tile.preview = frame.preview;
+  tile.preview.observedAt = item.date;
+  if (tile.thumbnail !== frame.thumbnail) tile.thumbnail.replaceWith(frame.thumbnail);
+  tile.thumbnail = frame.thumbnail;
+  tile.selectButton.title = coordinates(tile.query) + ' · ' + item.id;
+  selectTile(tile, true);
+  currentName += '-' + item.date.replace(/[:.]/g, '-');
+  setStatus('ready', 'Observation: ' + item.date.replace('T', ' ') + ' · ' + message);
+}
+async function showObservation(tile, item, playbackSignal) {
   if (activeController) throw new Error('Wait for the current request to finish.');
-  const controller = startAction('Loading observation…');
-  setStatus('loading', 'Loading exposure from ' + item.date);
+  playbackSignal?.throwIfAborted();
+  const saved = renderedFrames.get(frameKey(tile, item.id));
+  if (saved) {
+    displayFrame(tile, saved, item, 'saved frame — no reload');
+    return;
+  }
+  if (tile.preview.observation === item.id) {
+    rememberFrame(tile);
+    displayFrame(tile, { preview: tile.preview, thumbnail: tile.thumbnail }, item, 'current frame — no reload');
+    return;
+  }
+  const controller = startAction('Switching observation…');
+  setStatus('ready', 'Checking saved observation…');
   try {
-    const result = await getPreview(tile.query, playbackSignal ? AbortSignal.any([controller.signal, playbackSignal]) : controller.signal, item.id, true);
+    const result = await getPreview(tile.query, playbackSignal ? AbortSignal.any([controller.signal, playbackSignal]) : controller.signal, item.id, true, function () {
+      submitButton.textContent = 'Loading observation…';
+      setStatus('loading', 'Retrieving a new exposure from the archive: ' + item.date);
+    });
     controller.signal.throwIfAborted();
     playbackSignal?.throwIfAborted();
     const projected = reprojectImage(result.preview, tile.map.imageGrid, tile.x, tile.y);
     const thumbnail = document.createElement('canvas');
-    drawFits(projected, thumbnail, tile.map.range);
-    tile.preview = result.preview;
-    tile.preview.observedAt = item.date;
-    tile.thumbnail.replaceWith(thumbnail);
-    tile.thumbnail = thumbnail;
-    tile.selectButton.title = coordinates(tile.query) + ' · ' + item.id;
-    selectTile(tile, result.cached);
-    currentName += '-' + item.date.replace(/[:.]/g, '-');
-    setStatus('ready', 'Observation: ' + item.date.replace('T', ' '));
+    const registered = registerProjected(tile.map.referenceFrame, projected);
+    result.preview.registration = registered.registration;
+    drawFits(registered, thumbnail, tile.map.range);
+    const frame = { preview: result.preview, thumbnail };
+    renderedFrames.set(frameKey(tile, item.id), frame);
+    displayFrame(tile, frame, item, result.source === 'browser' ? 'saved pixels — no archive request' : 'saved for reuse');
   } finally { finishAction(controller); }
-} });
+}
 function key(query) {
   return [query.ra, query.dec, query.wavelength, query.size].map(Number).join(':');
 }
@@ -62,10 +95,13 @@ function queryFromForm() {
   const data = new FormData(form);
   return { ra: Number(data.get('ra')), dec: Number(data.get('dec')), wavelength: Number(data.get('wavelength')), size: Number(data.get('size')) };
 }
-function savePreview(cacheKey, preview) {
-  previewCache.delete(cacheKey);
-  previewCache.set(cacheKey, preview);
-  if (previewCache.size > 32) previewCache.delete(previewCache.keys().next().value);
+async function savePreview(cacheKey, preview, query = preview.query) {
+  await observationCache.set('preview:' + cacheKey, preview);
+  // Default/preferred searches and exact timeline requests must share a frame.
+  if (query && preview.observation) {
+    const exactKey = key(query) + ':exact:' + preview.observation;
+    if (exactKey !== cacheKey) await observationCache.set('preview:' + exactKey, preview);
+  }
 }
 const manifestReady = fetch('/presets/index.json?geometry=1').then(function (response) {
   return response.ok ? response.json() : { entries: [] };
@@ -82,7 +118,7 @@ manifestReady.then(function (manifest) {
         if (response.ok) {
           const preview = await response.json();
           preview.prepared = true;
-          if (preview.wcs) savePreview(entry.key, preview);
+          if (preview.wcs) await savePreview(entry.key, preview);
         }
       } catch (_) {}
     }
@@ -96,6 +132,13 @@ document.querySelectorAll('.chip').forEach(function (button) {
     document.getElementById('dec').value = button.dataset.dec;
     document.getElementById('wavelength').value = button.dataset.wave;
     if (button.dataset.size) document.getElementById('size').value = button.dataset.size;
+    const target = targetCatalogue.find(item => item.name === button.textContent);
+    if (target) {
+      const recent = predictPosition(target, new Date().toISOString());
+      document.getElementById('ra').value = recent.ra.toFixed(7);
+      document.getElementById('dec').value = recent.dec.toFixed(7);
+      document.getElementById('size').value = '0.05';
+    }
   });
 });
 function setStatus(state, message) {
@@ -132,12 +175,19 @@ function cancellable(promise, signal) {
     promise.then(function (value) { cleanup(); resolve(value); }, function (error) { cleanup(); reject(error); });
   });
 }
-async function getPreview(query, signal, preferred = '', exact = false) {
+async function getPreview(query, signal, preferred = '', exact = false, archiveMiss = null) {
   const cacheKey = key(query) + (preferred ? (exact ? ':exact:' : ':observation:') + preferred : '');
-  if (previewCache.has(cacheKey)) return { preview: previewCache.get(cacheKey), cached: true };
+  signal.throwIfAborted();
+  let saved = await cancellable(observationCache.get('preview:' + cacheKey), signal);
+  if (saved) return { preview: saved, cached: true, source: 'browser' };
+  if (preferred && !exact) {
+    saved = await cancellable(observationCache.get('preview:' + key(query) + ':exact:' + preferred), signal);
+    if (saved) return { preview: saved, cached: true, source: 'browser' };
+  }
   await cancellable(manifestReady, signal);
   signal.throwIfAborted();
-  if (previewCache.has(cacheKey)) return { preview: previewCache.get(cacheKey), cached: true };
+  saved = await cancellable(observationCache.get('preview:' + cacheKey), signal);
+  if (saved) return { preview: saved, cached: true, source: 'browser' };
   const preparedUrl = preferred ? null : presetFiles.get(cacheKey);
   if (preparedUrl) {
     try {
@@ -146,14 +196,16 @@ async function getPreview(query, signal, preferred = '', exact = false) {
         const preview = await response.json();
         preview.prepared = true;
         if (preview.wcs) {
-          savePreview(cacheKey, preview);
-          return { preview: preview, cached: true };
+          signal.throwIfAborted();
+          await savePreview(cacheKey, preview, query);
+          return { preview: preview, cached: true, source: 'prepared' };
         }
       }
     } catch (error) { if (signal.aborted) throw error; }
   }
   const parameters = new URLSearchParams({ ra: String(query.ra), dec: String(query.dec), wavelength: String(query.wavelength), size: String(query.size), format: 'preview', geometry: '1' });
   if (preferred) parameters.set(exact ? 'observation' : 'preferred', preferred);
+  archiveMiss?.();
   const response = await fetch('/api/cutout?' + parameters, { signal: signal });
   if (!response.ok) {
     let message = 'The SPHEREx request failed.';
@@ -161,8 +213,9 @@ async function getPreview(query, signal, preferred = '', exact = false) {
     throw new Error(message);
   }
   const preview = await response.json();
-  savePreview(cacheKey, preview);
-  return { preview: preview, cached: response.headers.get('x-vercel-cache') === 'HIT' || response.headers.get('x-app-cache') === 'HIT' };
+  signal.throwIfAborted();
+  await savePreview(cacheKey, preview, query);
+  return { preview: preview, cached: response.headers.get('x-vercel-cache') === 'HIT' || response.headers.get('x-app-cache') === 'HIT', source: 'archive' };
 }
 function percentile(sorted, fraction) {
   if (!sorted.length) return 0;
@@ -260,6 +313,7 @@ function closeSkyMap(map) {
   if (index === -1) return;
   const wasSelected = selectedTile && selectedTile.map === map;
   map.closed = true;
+  renderedFrames.closeMap(map.id);
   skyMaps.splice(index, 1);
   tileCount -= map.tiles.size;
   map.panning.observer?.disconnect();
@@ -274,6 +328,7 @@ function closeSkyMap(map) {
   }
   if (!skyMaps.length) {
     timeline.select(null);
+    science.select(null);
     selectedTile = null;
     currentFitsUrl = null;
     currentName = 'spherex-cutout';
@@ -302,6 +357,7 @@ function selectTile(tile, cached) {
   }
   selectedTile = tile;
   timeline.select(tile);
+  science.select(tile);
   tile.map.lastSelectedTile = tile;
   tile.card.classList.add('selected');
   tile.selectButton.setAttribute('aria-pressed', 'true');
@@ -332,9 +388,10 @@ function selectTile(tile, cached) {
   updateMapControls();
   // Pan the map viewport only, without jumping the page away from the viewer.
   centreMapTile(tile);
+  updateFocusView();
 }
 function createSkyMap(query, grid, range, observation) {
-  const map = { id: nextMapId++, origin: { ...query }, tiles: new Map(), imageGrid: grid, range: range, observation: observation };
+  const map = { referenceFrame: null, id: nextMapId++, origin: { ...query }, tiles: new Map(), imageGrid: grid, range: range, observation: observation };
   const section = document.createElement('section');
   section.className = 'sky-map';
   const heading = document.createElement('h3');
@@ -379,6 +436,7 @@ function createSkyMap(query, grid, range, observation) {
 }
 function appendTile(map, tile) {
   tile.map = map;
+  if (!map.referenceFrame) map.referenceFrame = reprojectImage(tile.preview, map.imageGrid, tile.x, tile.y);
   const card = document.createElement('article');
   card.className = 'map-tile';
   tile.card = card;
@@ -424,6 +482,7 @@ async function loadTile(query, map, x, y) {
     setStatus('error', 'This tab has reached its 64-tile memory limit. All loaded tiles are retained and can still be explored. Open another tab for a new map.');
     return;
   }
+  const single = document.getElementById('grid-mode');
   const controller = startAction('Loading preview…');
   setStatus('loading', 'Loading sky tile — existing images stay on the map');
   statusText.title = '';
@@ -438,14 +497,23 @@ async function loadTile(query, map, x, y) {
     // Render before committing: no blank tiles or lost selection on failed data.
     const range = drawFits(projected, thumbnail, map ? map.range : initialMapRange(preview));
     const tile = { query: query, preview: preview, thumbnail: thumbnail, x: x, y: y };
+    if (single && !single.checked && !map) {
+      // Commit only after a usable replacement has rendered; failed requests retain the old view.
+      for (const previous of [...skyMaps]) {
+        activeController = null;
+        closeSkyMap(previous);
+        activeController = controller;
+      }
+    }
     appendTile(map || createSkyMap(query, grid, range, preview.observation), tile);
+    rememberFrame(tile);
     selectTile(tile, result.cached);
   } catch (error) {
     setStatus(controller.signal.aborted ? 'idle' : 'error', controller.signal.aborted ? 'Search stopped — all loaded tiles retained' : error.message + ' Existing tiles are unchanged.');
   } finally { finishAction(controller); }
 }
 function navigateTile(tile, direction) {
-  if (activeController) return;
+  if (activeController || (document.getElementById('grid-mode') && !document.getElementById('grid-mode').checked)) return;
   const x = tile.x + direction.dx;
   const y = tile.y + direction.dy;
   const saved = tile.map.tiles.get(x + ':' + y);
@@ -453,6 +521,23 @@ function navigateTile(tile, direction) {
   loadTile(queryForImage(tile.map.imageGrid, tile.map.origin, x, y), tile.map, x, y);
 }
 
+function updateFocusView() {
+  const zoom = document.getElementById('zoom');
+  const image = document.querySelector?.('.focus-image');
+  if (!zoom || !image) return;
+  const follow = document.getElementById('follow-target');
+  const marker = document.getElementById('target-marker');
+  image.style.transformOrigin = follow.checked && marker.style.display !== 'none' ? marker.style.left + ' ' + marker.style.top : '50% 50%';
+  const following = follow.checked && marker.style.display !== 'none';
+  image.style.transform = (following ? 'translate(' + (50 - parseFloat(marker.style.left)) + '%,' + (50 - parseFloat(marker.style.top)) + '%) ' : '') + 'scale(' + zoom.value + ')';
+}
+document.getElementById('zoom')?.addEventListener('change', updateFocusView);
+document.getElementById('follow-target')?.addEventListener('change', updateFocusView);
+document.getElementById('grid-mode')?.addEventListener('change', function (event) {
+  timeline.clearFrames?.();
+  document.body.classList.toggle('grid-mode', event.target.checked);
+  if (selectedTile) centreMapTile(selectedTile);
+});
 form.addEventListener('submit', function (event) {
   event.preventDefault();
   if (activeController) return;
@@ -474,7 +559,12 @@ document.getElementById('original-pixels')?.addEventListener('change', function 
   timeline.clearFrames?.();
   for (const map of skyMaps) {
     for (const tile of map.tiles.values()) {
-      drawFits(reprojectImage(tile.preview, map.imageGrid, tile.x, tile.y), tile.thumbnail, map.range);
+      // Keep the cached repaired/original variants as separate immutable canvases.
+      const thumbnail = document.createElement('canvas');
+      drawFits(registerProjected(map.referenceFrame, reprojectImage(tile.preview, map.imageGrid, tile.x, tile.y)), thumbnail, map.range);
+      tile.thumbnail.replaceWith(thumbnail);
+      tile.thumbnail = thumbnail;
+      rememberFrame(tile);
     }
   }
   if (selectedTile) selectTile(selectedTile, true);

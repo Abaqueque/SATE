@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { handleCutout } from '../src/api.js';
 import { installTimeline } from '../src/timeline.js';
+import { createObservationCache } from '../src/observation-cache.js';
 
 const nativeFetch = globalThis.fetch;
 const nativeDocument = globalThis.document;
@@ -69,12 +70,34 @@ try {
   assert.deepEqual(shown, ['A'], 'Pause must cancel playback before further frames');
   assert.equal(element('timeline-play').textContent, 'Play');
   pauseOnShow = false;
+  await element('timeline-first').listeners.click();
+  assert.equal(tile.preview.observation, 'A', 'Earliest control selects the first usable exposure');
+  await element('timeline-last').listeners.click();
+  assert.equal(tile.preview.observation, 'B', 'Latest control selects the last usable exposure');
+  shown.length = 0;
+  await element('collect-measurements').listeners.click();
+  assert.deepEqual(shown, ['A', 'B'], 'Measurement scan visits all epochs oldest first');
   assert.equal(element('timeline-exposure').children.length, 2, 'All dated exposures remain available');
   timeline.busy(true);
   assert.equal(element('timeline-next').disabled, true);
   timeline.busy(false);
   timeline.select(null);
   assert.equal(element('timeline-load').disabled, true);
+  const saved = createObservationCache({ storage: null });
+  let discoveries = 0;
+  globalThis.fetch = async () => { discoveries++; return Response.json(data); };
+  const restored = installTimeline({}, saved);
+  restored.select(tile);
+  await element('timeline-load').listeners.click();
+  assert.equal(discoveries, 1);
+  const refreshedPage = installTimeline({}, saved);
+  refreshedPage.select(tile);
+  await element('timeline-load').listeners.click();
+  assert.equal(discoveries, 1, 'A new page timeline restores saved date lists without archive discovery');
+  assert.match(element('timeline-message').textContent, /cached dates/);
+  assert.equal(element('timeline-load').textContent, 'Refresh observations');
+  await element('timeline-load').listeners.click();
+  assert.equal(discoveries, 2, 'Explicit Refresh observations still discovers new dates');
   console.log('Timeline discovery, MJD dates, chronological ordering, playback, switching, error retention and busy states passed.');
 } finally {
   globalThis.fetch = nativeFetch;
