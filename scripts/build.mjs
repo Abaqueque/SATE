@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { cp, mkdir, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { page } from "../src/ui.js";
@@ -11,5 +11,6 @@ await rm(distRoot, { recursive: true, force: true });
 await mkdir(distRoot, { recursive: true });
 await writeFile(resolve(distRoot, "index.html"), page);
 await writeFile(resolve(distRoot, "app.js"), browserScript);
+await cp(resolve(projectRoot, "public"), distRoot, { recursive: true });
 
 console.log(`Built ${distRoot}`);

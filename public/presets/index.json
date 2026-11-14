@@ -1,0 +1,43 @@
+{
+  "release": "SPHEREx DR1",
+  "generatedAt": "2026-11-14T03:43:45.462Z",
+  "entries": [
+    {
+      "key": "10.6847:41.269:1.6:0.1",
+      "url": "/presets/andromeda.json"
+    },
+    {
+      "key": "133.795129:-7.245147:4.5:0.2",
+      "url": "/presets/wise-0855.json"
+    },
+    {
+      "key": "248.167611:66.754979:3.29:0.1",
+      "url": "/presets/r-draconis.json"
+    },
+    {
+      "key": "266.4168:-29.0078:4.5:0.1",
+      "url": "/presets/galactic-centre.json"
+    },
+    {
+      "key": "269.452077:4.693365:1.6:0.2",
+      "url": "/presets/barnards-star.json"
+    },
+    {
+      "key": "331.044125:-56.782806:4.5:0.1",
+      "url": "/presets/epsilon-indi-b.json"
+    },
+    {
+      "key": "76.956375:30.401389:2.2:0.1",
+      "url": "/presets/rw-aurigae.json"
+    },
+    {
+      "key": "83.8221:-5.3911:3.29:0.05",
+      "url": "/presets/orion-nebula.json"
+    },
+    {
+      "key": "83.8221:-5.3911:3.29:0.1",
+      "url": "/presets/orion-default.json"
+    }
+  ],
+  "failures": []
+}

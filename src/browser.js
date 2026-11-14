@@ -1,6 +1,4 @@
-// Browser/FITS processing module.
-// This is served verbatim at /app.js so frontend data-processing work stays
-// independent from the page layout and SPHEREx API implementation.
+// Browser rendering and interaction. Full FITS files are downloaded on demand.
 export const browserScript = String.raw`
 const form = document.getElementById('search-form');
 const submitButton = document.getElementById('submit-button');
@@ -12,11 +10,45 @@ const emptyState = document.getElementById('empty-state');
 const pngButton = document.getElementById('download-png');
 const fitsButton = document.getElementById('download-fits');
 const openIrsa = document.getElementById('open-irsa');
-
-let currentFits = null;
+let currentFitsUrl = null;
 let currentName = 'spherex-cutout';
 let activeController = null;
-
+const previewCache = new Map();
+function key(query) {
+  return [query.ra, query.dec, query.wavelength, query.size].map(Number).join(':');
+}
+function queryFromForm() {
+  const data = new FormData(form);
+  return { ra: Number(data.get('ra')), dec: Number(data.get('dec')), wavelength: Number(data.get('wavelength')), size: Number(data.get('size')) };
+}
+function savePreview(cacheKey, preview) {
+  previewCache.delete(cacheKey);
+  previewCache.set(cacheKey, preview);
+  if (previewCache.size > 32) previewCache.delete(previewCache.keys().next().value);
+}
+const manifestReady = fetch('/presets/index.json').then(function (response) {
+  return response.ok ? response.json() : { entries: [] };
+}).catch(function () { return { entries: [] }; });
+const presetFiles = new Map();
+manifestReady.then(function (manifest) {
+  manifest.entries.forEach(function (entry) { presetFiles.set(entry.key, entry.url); });
+  // Only static, prepared assets are prefetched. Page visits never launch archive searches.
+  const preload = async function () {
+    if (navigator.connection && navigator.connection.saveData) return;
+    for (const entry of manifest.entries) {
+      try {
+        const response = await fetch(entry.url);
+        if (response.ok) {
+          const preview = await response.json();
+          preview.prepared = true;
+          savePreview(entry.key, preview);
+        }
+      } catch (_) {}
+    }
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(preload);
+  else setTimeout(preload, 1000);
+});
 document.querySelectorAll('.chip').forEach(function (button) {
   button.addEventListener('click', function () {
     document.getElementById('ra').value = button.dataset.ra;
@@ -25,90 +57,67 @@ document.querySelectorAll('.chip').forEach(function (button) {
     if (button.dataset.size) document.getElementById('size').value = button.dataset.size;
   });
 });
-
 function setStatus(state, message) {
   statusBox.dataset.state = state;
   statusText.textContent = message;
 }
-
-function parseValue(raw) {
-  const value = raw.trim();
-  if (!value) return null;
-  if (value[0] === "'") {
-    let output = '';
-    for (let index = 1; index < value.length; index += 1) {
-      if (value[index] === "'" && value[index + 1] === "'") {
-        output += "'";
-        index += 1;
-      } else if (value[index] === "'") break;
-      else output += value[index];
-    }
-    return output.trim();
-  }
-  const clean = value.split('/')[0].trim();
-  if (clean === 'T') return true;
-  if (clean === 'F') return false;
-  const number = Number(clean.replace(/[dD]/, 'E'));
-  return Number.isNaN(number) ? clean : number;
+function startAction(label) {
+  const controller = new AbortController();
+  activeController = controller;
+  submitButton.disabled = true;
+  submitButton.textContent = label;
+  fitsButton.disabled = true;
+  cancelButton.disabled = false;
+  cancelButton.textContent = 'Stop';
+  return controller;
 }
-
-function parseFits(buffer) {
-  const bytes = new Uint8Array(buffer);
-  const view = new DataView(buffer);
-  const decoder = new TextDecoder('ascii');
-  let offset = 0;
-
-  while (offset + 2880 <= bytes.length) {
-    const header = {};
-    let cursor = offset;
-    let foundEnd = false;
-    while (cursor + 80 <= bytes.length) {
-      const card = decoder.decode(bytes.subarray(cursor, cursor + 80));
-      cursor += 80;
-      const key = card.slice(0, 8).trim();
-      if (key === 'END') {
-        foundEnd = true;
-        break;
-      }
-      if (key && card[8] === '=') header[key] = parseValue(card.slice(10));
-    }
-    if (!foundEnd) throw new Error('The archive returned an invalid FITS header.');
-
-    const dataOffset = Math.ceil(cursor / 2880) * 2880;
-    const naxis = Number(header.NAXIS || 0);
-    const dimensions = [];
-    for (let axis = 1; axis <= naxis; axis += 1) dimensions.push(Number(header['NAXIS' + axis] || 0));
-    const bitpix = Number(header.BITPIX || 0);
-    const bytesPerPixel = Math.abs(bitpix) / 8;
-    const pixelsPerGroup = naxis ? dimensions.reduce(function (a, b) { return a * b; }, 1) : 0;
-    const dataBytes = bytesPerPixel * Number(header.GCOUNT || 1) * (pixelsPerGroup + Number(header.PCOUNT || 0));
-
-    if (naxis >= 2 && dimensions[0] > 0 && dimensions[1] > 0 && dataOffset + dataBytes <= bytes.length) {
-      const width = dimensions[0];
-      const height = dimensions[1];
-      const values = new Float32Array(width * height);
-      const scale = Number(header.BSCALE == null ? 1 : header.BSCALE);
-      const zero = Number(header.BZERO == null ? 0 : header.BZERO);
-      const blank = header.BLANK;
-
-      for (let index = 0; index < values.length; index += 1) {
-        const position = dataOffset + index * bytesPerPixel;
-        let raw;
-        if (bitpix === 8) raw = view.getUint8(position);
-        else if (bitpix === 16) raw = view.getInt16(position, false);
-        else if (bitpix === 32) raw = view.getInt32(position, false);
-        else if (bitpix === -32) raw = view.getFloat32(position, false);
-        else if (bitpix === -64) raw = view.getFloat64(position, false);
-        else throw new Error('Unsupported FITS BITPIX value: ' + bitpix);
-        values[index] = blank != null && raw === blank ? NaN : raw * scale + zero;
-      }
-      return { width: width, height: height, values: values, header: header };
-    }
-    offset = dataOffset + Math.ceil(dataBytes / 2880) * 2880;
-  }
-  throw new Error('No two-dimensional science image was found in this FITS file.');
+function finishAction(controller) {
+  if (activeController !== controller) return;
+  activeController = null;
+  submitButton.disabled = false;
+  submitButton.textContent = 'Retrieve SPHEREx image';
+  cancelButton.disabled = true;
+  cancelButton.textContent = 'Stop';
+  fitsButton.disabled = !currentFitsUrl;
 }
-
+function cancellable(promise, signal) {
+  return new Promise(function (resolve, reject) {
+    function cleanup() { signal.removeEventListener('abort', abort); }
+    function abort() { cleanup(); reject(new DOMException('Stopped', 'AbortError')); }
+    if (signal.aborted) { abort(); return; }
+    signal.addEventListener('abort', abort, { once: true });
+    promise.then(function (value) { cleanup(); resolve(value); }, function (error) { cleanup(); reject(error); });
+  });
+}
+async function getPreview(query, signal) {
+  const cacheKey = key(query);
+  if (previewCache.has(cacheKey)) return { preview: previewCache.get(cacheKey), cached: true };
+  await cancellable(manifestReady, signal);
+  signal.throwIfAborted();
+  if (previewCache.has(cacheKey)) return { preview: previewCache.get(cacheKey), cached: true };
+  const preparedUrl = presetFiles.get(cacheKey);
+  if (preparedUrl) {
+    try {
+      const response = await fetch(preparedUrl, { signal: signal });
+      if (response.ok) {
+        const preview = await response.json();
+        preview.prepared = true;
+        savePreview(cacheKey, preview);
+        return { preview: preview, cached: true };
+      }
+    } catch (error) { if (signal.aborted) throw error; }
+  }
+  const parameters = new URLSearchParams({ ra: String(query.ra), dec: String(query.dec), wavelength: String(query.wavelength), size: String(query.size), format: 'preview' });
+  const response = await fetch('/api/cutout?' + parameters, { signal: signal });
+  if (!response.ok) {
+    let message = 'The SPHEREx request failed.';
+    try { message = (await response.json()).error || message; } catch (_) {}
+    throw new Error(message);
+  }
+  const preview = await response.json();
+  savePreview(cacheKey, preview);
+  return { preview: preview, cached: response.headers.get('x-vercel-cache') === 'HIT' || response.headers.get('x-app-cache') === 'HIT' };
+}
 function percentile(sorted, fraction) {
   if (!sorted.length) return 0;
   return sorted[Math.min(sorted.length - 1, Math.max(0, Math.floor((sorted.length - 1) * fraction)))];
@@ -166,93 +175,73 @@ function drawFits(fits) {
   canvas.classList.add('visible');
 }
 
-function safeHeader(response, name, fallback) {
-  try {
-    return decodeURIComponent(response.headers.get(name) || fallback);
-  } catch (_) {
-    return response.headers.get(name) || fallback;
-  }
-}
 
 form.addEventListener('submit', async function (event) {
   event.preventDefault();
-  const data = new FormData(form);
-  const ra = Number(data.get('ra'));
-  const dec = Number(data.get('dec'));
-  const wavelength = Number(data.get('wavelength'));
-  const size = Number(data.get('size'));
-  if (!(ra >= 0 && ra <= 360 && dec >= -90 && dec <= 90 && wavelength >= .75 && wavelength <= 5)) {
-    setStatus('error', 'Check the coordinate and wavelength ranges.');
+  if (activeController) return;
+  const query = queryFromForm();
+  if (![query.ra, query.dec, query.wavelength, query.size].every(Number.isFinite) ||
+      query.ra < 0 || query.ra > 360 || query.dec < -90 || query.dec > 90 ||
+      query.wavelength < .75 || query.wavelength > 5 || query.size < .01 || query.size > .35) {
+    setStatus('error', 'Check the coordinate, wavelength and field width ranges.');
     return;
   }
-
-  const controller = new AbortController();
-  activeController = controller;
-  submitButton.disabled = true;
-  submitButton.textContent = 'Searching the archive…';
-  cancelButton.disabled = false;
-  cancelButton.textContent = 'Stop';
-  setStatus('loading', 'Querying SPHEREx DR1 at IRSA');
+  const controller = startAction('Loading preview…');
+  currentFitsUrl = null;
   pngButton.disabled = true;
-  fitsButton.disabled = true;
-
-  const parameters = new URLSearchParams({ ra: String(ra), dec: String(dec), wavelength: String(wavelength), size: String(size) });
-  openIrsa.href = 'https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&ra=' + encodeURIComponent(ra) + '&dec=' + encodeURIComponent(dec) + '&sr=' + encodeURIComponent(size + 'd');
-
+  setStatus('loading', 'Loading science preview — full FITS stays on demand');
+  openIrsa.href = 'https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&ra=' + query.ra + '&dec=' + query.dec + '&sr=' + query.size + 'd';
   try {
-    const response = await fetch('/api/cutout?' + parameters.toString(), { signal: controller.signal });
-    if (!response.ok) {
-      let message = 'The SPHEREx request failed.';
-      try { message = (await response.json()).error || message; } catch (_) {}
-      throw new Error(message);
-    }
-    setStatus('loading', 'Rendering calibrated FITS pixels');
-    const buffer = await response.arrayBuffer();
-    const parsed = parseFits(buffer);
-    drawFits(parsed);
-    currentFits = buffer;
-    currentName = 'spherex-' + ra.toFixed(4) + '-' + dec.toFixed(4) + '-' + wavelength.toFixed(2) + 'um';
-    document.getElementById('meta-observation').textContent = safeHeader(response, 'X-Observation-ID', 'SPHEREx exposure');
-    document.getElementById('meta-band').textContent = safeHeader(response, 'X-Bandpass', wavelength.toFixed(2) + ' µm');
-    document.getElementById('meta-size').textContent = parsed.width + ' × ' + parsed.height + ' px';
-    setStatus('ready', 'Real SPHEREx observation rendered');
+    const result = await getPreview(query, controller.signal);
+    controller.signal.throwIfAborted();
+    const preview = result.preview;
+    drawFits({ width: preview.width, height: preview.height, values: preview.pixels.map(function (pixel) { return pixel == null ? NaN : pixel; }) });
+    currentFitsUrl = preview.fitsUrl;
+    currentName = 'spherex-' + query.ra.toFixed(4) + '-' + query.dec.toFixed(4) + '-' + query.wavelength.toFixed(2) + 'um';
+    document.getElementById('meta-observation').textContent = preview.observation;
+    document.getElementById('meta-band').textContent = preview.bandpass;
+    document.getElementById('meta-size').textContent = preview.width + ' × ' + preview.height + ' px';
+    const preparedDate = preview.preparedAt ? new Date(preview.preparedAt).toLocaleDateString() : '';
+    setStatus('ready', preview.prepared ? 'Prepared SPHEREx preview · ' + preparedDate : result.cached ? 'Cached SPHEREx preview loaded' : 'Real SPHEREx preview rendered');
+    statusText.title = preview.prepared ? 'Prepared from a real DR1 observation on ' + preview.preparedAt + '. FITS retrieves the same observation.' : '';
     pngButton.disabled = false;
-    fitsButton.disabled = false;
   } catch (error) {
-    if (error.name === 'AbortError') setStatus('idle', 'Search stopped — ready for new coordinates');
-    else setStatus('error', error.message || 'Unable to render this coordinate.');
-  } finally {
-    if (activeController === controller) {
-      activeController = null;
-      submitButton.disabled = false;
-      submitButton.textContent = 'Retrieve SPHEREx image';
-      cancelButton.disabled = true;
-      cancelButton.textContent = 'Stop';
-    }
-  }
+    setStatus(controller.signal.aborted ? 'idle' : 'error', controller.signal.aborted ? 'Search stopped — ready for new coordinates' : error.message);
+  } finally { finishAction(controller); }
 });
-
 cancelButton.addEventListener('click', function () {
   if (!activeController) return;
   cancelButton.disabled = true;
   cancelButton.textContent = 'Stopping…';
-  setStatus('loading', 'Stopping SPHEREx search');
   activeController.abort();
 });
-
 pngButton.addEventListener('click', function () {
   const link = document.createElement('a');
   link.download = currentName + '.png';
   link.href = canvas.toDataURL('image/png');
   link.click();
 });
-
-fitsButton.addEventListener('click', function () {
-  if (!currentFits) return;
-  const link = document.createElement('a');
-  link.download = currentName + '.fits';
-  link.href = URL.createObjectURL(new Blob([currentFits], { type: 'application/fits' }));
-  link.click();
-  setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
+fitsButton.addEventListener('click', async function () {
+  if (!currentFitsUrl || activeController) return;
+  const controller = startAction('Downloading FITS…');
+  setStatus('loading', 'Downloading full scientific FITS file');
+  try {
+    const response = await fetch(currentFitsUrl, { signal: controller.signal });
+    if (!response.ok) {
+      let message = 'The FITS download failed.';
+      try { message = (await response.json()).error || message; } catch (_) {}
+      throw new Error(message);
+    }
+    const blob = await response.blob();
+    controller.signal.throwIfAborted();
+    const link = document.createElement('a');
+    link.download = currentName + '.fits';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    setTimeout(function () { URL.revokeObjectURL(link.href); }, 1000);
+    setStatus('ready', 'Full FITS downloaded');
+  } catch (error) {
+    setStatus(controller.signal.aborted ? 'ready' : 'error', controller.signal.aborted ? 'FITS download stopped — preview retained' : error.message);
+  } finally { finishAction(controller); }
 });
 `;
