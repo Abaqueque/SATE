@@ -10,6 +10,11 @@ export function installTimeline(actions, observationCache = null) {
   let tile = null, items = [], filtered = [], controller = null, loading = false, busy = false;
   let playing = false, playback = null, mode = 'play';
   const cache = new Map();
+  function updateSlider() {
+    const maximum = Number(slider.max);
+    const progress = maximum > 0 ? Math.max(0, Math.min(100, Number(slider.value) / maximum * 100)) : 0;
+    slider.style.setProperty('--timeline-progress', progress + '%');
+  }
   function refresh() {
     filtered = items;
     select.replaceChildren();
@@ -23,6 +28,7 @@ export function installTimeline(actions, observationCache = null) {
     select.value = index < 0 ? '' : String(index);
     slider.max = String(Math.max(0, filtered.length - 1));
     slider.value = String(Math.max(0, index));
+    updateSlider();
     slider.setAttribute('aria-valuetext', index < 0 ? 'Choose an exposure' : filtered[index].date);
     const disabled = busy || loading || playing || !filtered.length;
     select.disabled = slider.disabled = disabled;
@@ -104,6 +110,7 @@ export function installTimeline(actions, observationCache = null) {
   }
   select.addEventListener('change', () => choose(Number(select.value)));
   slider.addEventListener('change', () => choose(Number(slider.value)));
+  slider.addEventListener('input', updateSlider);
   previous.addEventListener('click', () => choose(Number(select.value) - 1, -1));
   next.addEventListener('click', () => choose(select.value === '' ? 0 : Number(select.value) + 1));
   load.addEventListener('click', () => discover(items.length > 0));

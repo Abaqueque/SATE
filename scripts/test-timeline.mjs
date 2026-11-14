@@ -9,6 +9,7 @@ const elements = new Map();
 function element(id) {
   if (!elements.has(id)) elements.set(id, {
     value: '', children: [], listeners: {}, textContent: '',
+    style: { setProperty(name, value) { this[name] = value; } },
     replaceChildren() { this.children = []; this.value = ''; },
     append(child) { this.children.push(child); },
     setAttribute() {}, addEventListener(name, fn) { this.listeners[name] = fn; },
@@ -50,8 +51,14 @@ try {
   await element('timeline-load').listeners.click();
   assert.equal(element('timeline-exposure').children.length, 2);
   assert.equal(element('timeline-previous').disabled, true);
+  assert.equal(element('timeline-slider').style['--timeline-progress'], '0%');
   await element('timeline-next').listeners.click();
   assert.equal(tile.preview.observation, 'B');
+  assert.equal(element('timeline-slider').style['--timeline-progress'], '100%');
+  element('timeline-slider').value = '.5';
+  element('timeline-slider').listeners.input();
+  assert.equal(element('timeline-slider').style['--timeline-progress'], '50%', 'Track fill follows the thumb while dragging');
+  element('timeline-slider').value = '1';
   fail = true;
   await element('timeline-previous').listeners.click();
   assert.equal(tile.preview.observation, 'B');
