@@ -1,5 +1,5 @@
 import http from "node:http";
-import worker from "../worker/index.js";
+import app from "../src/app.js";
 
 const port = Number(process.argv[2] || process.env.SPHEREX_PREVIEW_PORT || 4173);
 const server = http.createServer(async (request, response) => {
@@ -9,7 +9,7 @@ const server = http.createServer(async (request, response) => {
       method: request.method,
       headers: request.headers,
     });
-    const webResponse = await worker.fetch(webRequest, {}, {});
+    const webResponse = await app.fetch(webRequest);
     response.writeHead(webResponse.status, Object.fromEntries(webResponse.headers));
     response.end(Buffer.from(await webResponse.arrayBuffer()));
   } catch (error) {

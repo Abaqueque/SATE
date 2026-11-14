@@ -2,8 +2,7 @@ dist/
 site.tar.gz
 node_modules/
 .wrangler/
-.dev.vars
-.dev.vars.*
+.vercel/
 .env
 .env.*
 !.env.example

@@ -1,21 +1,17 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { Script } from "node:vm";
+import { GET } from "../api/cutout.js";
+import app from "../src/app.js";
 
-const projectRoot = resolve(fileURLToPath(new URL("..", import.meta.url)));
-const workerPath = resolve(projectRoot, "dist/server/index.js");
-const manifestPath = resolve(projectRoot, "dist/.openai/hosting.json");
-
-const manifest = await readFile(manifestPath, "utf8");
-JSON.parse(manifest);
-
-// Import from disk so relative ES-module imports are validated as well.
-const workerModule = await import(`${pathToFileURL(workerPath).href}?validate=${Date.now()}`);
-assert.equal(
-  typeof workerModule.default?.fetch,
-  "function",
-  `${pathToFileURL(workerPath)} must export default.fetch`,
-);
-
-console.log("Artifact is valid ESM and exports default.fetch");
+const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
+const browser = await readFile(new URL("../dist/app.js", import.meta.url), "utf8");
+assert.match(html, /<title>SPHEREx Coordinate Lab<\/title>/);
+assert.match(html, /src="\/app.js"/);
+new Script(browser);
+assert.equal((await app.fetch(new Request("http://localhost/"))).status, 200);
+assert.equal((await app.fetch(new Request("http://localhost/app.js"))).status, 200);
+const invalid = await GET(new Request("http://localhost/api/cutout?ra=400&dec=0&wavelength=1"));
+assert.equal(invalid.status, 400);
+assert.match((await invalid.json()).error, /Right ascension/);
+console.log("Vercel static assets, browser script, local routes and API validation passed.");

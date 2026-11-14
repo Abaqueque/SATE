@@ -18,9 +18,7 @@ const scriptHeaders = {
 };
 
 export default {
-  async fetch(request, env, ctx) {
-    void env;
-    void ctx;
+  async fetch(request) {
     const url = new URL(request.url);
 
     if (url.pathname === "/api/cutout" && request.method === "GET") {

@@ -2,14 +2,11 @@
   "name": "sate",
   "private": true,
   "type": "module",
+  "engines": { "node": "22.x" },
   "scripts": {
     "build": "node scripts/build.mjs",
     "validate": "node scripts/validate-artifact.mjs",
-    "dev:cloudflare": "wrangler dev",
-    "deploy:cloudflare": "wrangler deploy",
-    "tail:cloudflare": "wrangler tail"
-  },
-  "devDependencies": {
-    "wrangler": "^4.161.0"
+    "dev": "node scripts/preview.mjs",
+    "deploy:vercel": "npx vercel --prod"
   }
 }
