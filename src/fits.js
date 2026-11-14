@@ -1,3 +1,5 @@
+import { extractWcs } from './wcs.js';
+
 // Read only the first science image; skip the large auxiliary FITS extensions.
 const block = 2880;
 const decoder = new TextDecoder("ascii");
@@ -66,7 +68,8 @@ export async function readSciencePreview(response, signal) {
               const calibrated = raw * scale + zero;
               pixels[index] = (header.BLANK != null && raw === header.BLANK) || !Number.isFinite(calibrated) ? null : calibrated;
             }
-            return { width, height, pixels };
+            const wcs = extractWcs(header);
+            return { width, height, pixels, ...(wcs ? { wcs } : {}) };
           }
         } else {
           const next = dataOffset + Math.ceil(dataBytes / block) * block;

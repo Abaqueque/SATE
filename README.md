@@ -18,17 +18,26 @@ SPHEREx DR1 FITS cutouts by sky coordinates, wavelength and field of view.
 
 ## Growing sky maps
 
-Each loaded image has four directional arrows. They query neighbouring sky
-centres with the same wavelength and field width; earlier tiles remain visible
-in a scrollable map. Clicking an existing tile or navigating back to it reuses
-the retained preview without another archive request. PNG/FITS export always
-targets the selected tile, with FITS pinned to its original observation.
+Images form one borderless, gapless grid in the main viewer. Small translucent
+edge arrows appear on hover, keyboard focus or the selected image (and remain
+available on touch). They extend the image in pixel space, rather than applying
+decimal increments to RA/Dec. The coordinate inputs remain the user's search.
+Clicking an existing image or navigating back to it reuses the retained preview.
 
-`src/skymap.js` derives centres from a fixed tangent-plane origin, accounting for
-spherical coordinates, RA wrap and polar positions. North is up and east left
-at the origin. Integer grid addresses avoid coordinate drift on closed paths.
-These are navigation maps, not reprojected mosaics: detector orientation,
-individual display stretch and observation dates can differ between tiles.
+`src/wcs.js` reads TAN/SIP spatial WCS, including the constant/linear SIP terms
+present in SPHEREx. The first exposure defines a common tangent-plane pixel
+grid. Neighbours continue at the next pixel boundary; real source pixels are
+nearest-neighbour reprojected to that grid, allowing rotated exposures to align.
+The backend requests 60% extra real edge pixels with `geometry=1` to cover
+rotation and interpolation margins. Unsupported/missing WCS never produces
+fake aligned tiles. All tiles share the first padded preview's display stretch.
+Neighbour requests prefer the first tile's exposure where it covers the sky,
+falling back to another matching exposure at its edge.
+Calibration, wavelength response and observation dates can still differ across
+exposures: this is an exploratory mosaic, not a photometrically matched product.
+
+PNG exports the selected reprojected tile. FITS exports the original, padded
+scientific cutout pinned to its preview observation, not a resampled FITS file.
 
 New manual searches create separate retained maps. Failed or cancelled requests
 do not alter existing tiles or the selection. Up to 64 tiles are held in memory

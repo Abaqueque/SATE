@@ -24,8 +24,10 @@ for (const entry of manifest.entries) {
   assert.equal(queryKey(preview.query), entry.key);
   assert.equal(preview.pixels.length, preview.width * preview.height);
   assert.ok(preview.pixels.some((pixel) => pixel !== null && Number.isFinite(pixel)));
+  assert.ok(preview.wcs && preview.wcs.cd.length === 4, 'Prepared images need sky-alignment metadata');
   const fitsUrl = new URL(preview.fitsUrl, "http://localhost");
   assert.equal(fitsUrl.pathname, "/api/cutout");
   assert.equal(fitsUrl.searchParams.get("observation"), preview.observation);
+  assert.equal(fitsUrl.searchParams.get("geometry"), '1', 'FITS preserves the preview cutout padding');
 }
 console.log("Vercel static assets, browser script, local routes and API validation passed.");

@@ -23,7 +23,7 @@ async function prepare() {
     const file = new URL(target.id + ".json", directory);
     let preview;
     try {
-      const parameters = new URLSearchParams({ ra, dec, wavelength, size, format: "preview" });
+      const parameters = new URLSearchParams({ ra, dec, wavelength, size, format: "preview", geometry: "1" });
       const response = await handleCutout(new Request("http://localhost/api/cutout?" + parameters));
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error);

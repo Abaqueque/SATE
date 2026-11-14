@@ -129,8 +129,10 @@ export async function handleCutout(request) {
     const format = url.searchParams.get("format") || "fits";
     if (!["preview", "fits"].includes(format)) throw new ArchiveError("Unknown image format.", 400);
     const wanted = url.searchParams.get("observation") || "";
+    const aligned = url.searchParams.get("geometry") === "1";
+    const preferred = aligned ? (url.searchParams.get("preferred") || "").slice(0, 160) : "";
     const key = queryKey(query);
-    const previewKey = key + ":" + wanted;
+    const previewKey = key + ":" + wanted + (aligned ? ":geometry1:" + preferred : "");
     if (format === "preview") {
       const cached = recalled(previewsCache, previewKey);
       if (cached) return json(cached, 200, { ...cacheHeaders, "x-app-cache": "HIT" });
@@ -159,11 +161,14 @@ export async function handleCutout(request) {
     let fitsResponse;
     // A search footprint can overlap the field without yielding a valid cutout.
     // Try another matching exposure only when no observation was pinned by a preview.
-    const candidates = wanted ? [observation] : observations.slice(0, 3);
+    const candidates = wanted ? [observation] : [...observations]
+      .sort((a, b) => Number(b.obs_id === preferred) - Number(a.obs_id === preferred)).slice(0, 3);
     for (const candidate of candidates) {
       const cutout = new URL(candidate.access_url);
       cutout.searchParams.set("center", `${ra},${dec}`);
-      cutout.searchParams.set("size", String(size));
+      // Extra real pixels allow rotated input exposures to cover a complete
+      // output tile after the browser reprojects it onto the shared image grid.
+      cutout.searchParams.set("size", String(aligned ? size * 1.6 : size));
       cutout.searchParams.set("gzip", "false");
       fitsResponse = await archiveFetch(cutout, signal);
       if (fitsResponse.ok) { observation = candidate; break; }
@@ -175,7 +180,7 @@ export async function handleCutout(request) {
       const science = await readSciencePreview(fitsResponse, signal);
       const parameters = new URLSearchParams({
         ra: String(ra), dec: String(dec), wavelength: String(wavelength), size: String(size),
-        observation: observation.obs_id, format: "fits",
+        observation: observation.obs_id, format: "fits", ...(aligned ? { geometry: "1" } : {}),
       });
       const preview = {
         ...science, observation: observation.obs_id,

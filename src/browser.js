@@ -1,7 +1,7 @@
-import { queryAtTile } from './skymap.js';
+import * as geometry from './wcs.js';
 
 // Share the tested coordinate calculation without adding a browser dependency.
-export const browserScript = `const queryAtTile = ${queryAtTile.toString()};\n` + String.raw`
+export const browserScript = Object.values(geometry).map(fn => fn.toString()).join('\n') + '\n' + String.raw`
 const form = document.getElementById('search-form');
 const submitButton = document.getElementById('submit-button');
 const cancelButton = document.getElementById('cancel-button');
@@ -20,19 +20,14 @@ const skyMaps = [];
 const mapList = document.getElementById('map-list');
 const mapCount = document.getElementById('map-count');
 const directions = [
-  { id: 'up', label: 'up / north', symbol: '↑', dx: 0, dy: -1 },
-  { id: 'right', label: 'right / west', symbol: '→', dx: 1, dy: 0 },
-  { id: 'down', label: 'down / south', symbol: '↓', dx: 0, dy: 1 },
-  { id: 'left', label: 'left / east', symbol: '←', dx: -1, dy: 0 },
+  { id: 'up', label: 'up', symbol: '↑', dx: 0, dy: -1 },
+  { id: 'right', label: 'right', symbol: '→', dx: 1, dy: 0 },
+  { id: 'down', label: 'down', symbol: '↓', dx: 0, dy: 1 },
+  { id: 'left', label: 'left', symbol: '←', dx: -1, dy: 0 },
 ];
 let selectedTile = null;
 let tileCount = 0;
 const tileLimit = 64;
-directions.forEach(function (direction) {
-  document.getElementById('navigate-' + direction.id).addEventListener('click', function () {
-    if (selectedTile) navigateTile(selectedTile, direction);
-  });
-});
 function key(query) {
   return [query.ra, query.dec, query.wavelength, query.size].map(Number).join(':');
 }
@@ -45,7 +40,7 @@ function savePreview(cacheKey, preview) {
   previewCache.set(cacheKey, preview);
   if (previewCache.size > 32) previewCache.delete(previewCache.keys().next().value);
 }
-const manifestReady = fetch('/presets/index.json').then(function (response) {
+const manifestReady = fetch('/presets/index.json?geometry=1').then(function (response) {
   return response.ok ? response.json() : { entries: [] };
 }).catch(function () { return { entries: [] }; });
 const presetFiles = new Map();
@@ -56,11 +51,11 @@ manifestReady.then(function (manifest) {
     if (navigator.connection && navigator.connection.saveData) return;
     for (const entry of manifest.entries) {
       try {
-        const response = await fetch(entry.url);
+        const response = await fetch(entry.url + '?geometry=1');
         if (response.ok) {
           const preview = await response.json();
           preview.prepared = true;
-          savePreview(entry.key, preview);
+          if (preview.wcs) savePreview(entry.key, preview);
         }
       } catch (_) {}
     }
@@ -110,25 +105,28 @@ function cancellable(promise, signal) {
     promise.then(function (value) { cleanup(); resolve(value); }, function (error) { cleanup(); reject(error); });
   });
 }
-async function getPreview(query, signal) {
-  const cacheKey = key(query);
+async function getPreview(query, signal, preferred = '') {
+  const cacheKey = key(query) + (preferred ? ':observation:' + preferred : '');
   if (previewCache.has(cacheKey)) return { preview: previewCache.get(cacheKey), cached: true };
   await cancellable(manifestReady, signal);
   signal.throwIfAborted();
   if (previewCache.has(cacheKey)) return { preview: previewCache.get(cacheKey), cached: true };
-  const preparedUrl = presetFiles.get(cacheKey);
+  const preparedUrl = preferred ? null : presetFiles.get(cacheKey);
   if (preparedUrl) {
     try {
-      const response = await fetch(preparedUrl, { signal: signal });
+      const response = await fetch(preparedUrl + '?geometry=1', { signal: signal });
       if (response.ok) {
         const preview = await response.json();
         preview.prepared = true;
-        savePreview(cacheKey, preview);
-        return { preview: preview, cached: true };
+        if (preview.wcs) {
+          savePreview(cacheKey, preview);
+          return { preview: preview, cached: true };
+        }
       }
     } catch (error) { if (signal.aborted) throw error; }
   }
-  const parameters = new URLSearchParams({ ra: String(query.ra), dec: String(query.dec), wavelength: String(query.wavelength), size: String(query.size), format: 'preview' });
+  const parameters = new URLSearchParams({ ra: String(query.ra), dec: String(query.dec), wavelength: String(query.wavelength), size: String(query.size), format: 'preview', geometry: '1' });
+  if (preferred) parameters.set('preferred', preferred);
   const response = await fetch('/api/cutout?' + parameters, { signal: signal });
   if (!response.ok) {
     let message = 'The SPHEREx request failed.';
@@ -159,7 +157,7 @@ function palette(value) {
   return stops[stops.length - 1][1];
 }
 
-function drawFits(fits, targetCanvas = canvas) {
+function drawFits(fits, targetCanvas = canvas, range = null) {
   const finite = [];
   const stride = Math.max(1, Math.floor(fits.values.length / 180000));
   for (let index = 0; index < fits.values.length; index += stride) {
@@ -167,8 +165,8 @@ function drawFits(fits, targetCanvas = canvas) {
   }
   if (!finite.length) throw new Error('The selected cutout contains no valid science pixels.');
   finite.sort(function (a, b) { return a - b; });
-  const low = percentile(finite, .01);
-  let high = percentile(finite, .995);
+  const low = range ? range.low : percentile(finite, .01);
+  let high = range ? range.high : percentile(finite, .995);
   if (!(high > low)) high = low + 1;
 
   targetCanvas.width = fits.width;
@@ -193,6 +191,17 @@ function drawFits(fits, targetCanvas = canvas) {
   }
   context.putImageData(image, 0, 0);
   targetCanvas.classList.add('visible');
+  return { low: low, high: high };
+}
+
+function initialMapRange(preview) {
+  // Include the real surrounding pixels so a bright first target does not
+  // immediately clip its fainter neighbours to black. All tiles reuse this.
+  const finite = preview.pixels.filter(function (value) { return value != null && Number.isFinite(value); });
+  finite.sort(function (a, b) { return a - b; });
+  const low = percentile(finite, .01);
+  const high = percentile(finite, .995);
+  return { low: low, high: high > low ? high : low + 1 };
 }
 
 function updateMapControls() {
@@ -222,15 +231,12 @@ function selectTile(tile, cached) {
   canvas.classList.add('visible');
   canvas.setAttribute('aria-label', 'SPHEREx observation at ' + coordinates(query));
   emptyState.hidden = true;
-  ['ra', 'dec', 'wavelength', 'size'].forEach(function (name) {
-    document.getElementById(name).value = query[name];
-  });
   currentFitsUrl = preview.fitsUrl;
   currentName = 'spherex-' + query.ra.toFixed(4) + '-' + query.dec.toFixed(4) + '-' + query.wavelength.toFixed(2) + 'um';
   openIrsa.href = 'https://irsa.ipac.caltech.edu/applications/spherex/?api=spectral-images&ra=' + query.ra + '&dec=' + query.dec + '&sr=' + query.size + 'd';
   document.getElementById('meta-observation').textContent = preview.observation;
   document.getElementById('meta-band').textContent = preview.bandpass;
-  document.getElementById('meta-size').textContent = preview.width + ' × ' + preview.height + ' px';
+  document.getElementById('meta-size').textContent = tile.thumbnail.width + ' × ' + tile.thumbnail.height + ' px';
   document.getElementById('selected-position').textContent = coordinates(query);
   const preparedDate = preview.preparedAt ? new Date(preview.preparedAt).toLocaleDateString() : '';
   setStatus('ready', preview.prepared ? 'Prepared SPHEREx preview · ' + preparedDate : cached ? 'Saved sky tile selected — no new search' : 'Real SPHEREx preview added to sky map');
@@ -242,23 +248,23 @@ function selectTile(tile, cached) {
   const scroller = tile.map.scroller;
   scroller.scrollTo({ left: Math.max(0, tile.card.offsetLeft - (scroller.clientWidth - tile.card.offsetWidth) / 2), top: Math.max(0, tile.card.offsetTop - (scroller.clientHeight - tile.card.offsetHeight) / 2) });
 }
-function createSkyMap(query) {
-  const map = { origin: { ...query }, tiles: new Map() };
+function createSkyMap(query, grid, range, observation) {
+  const map = { origin: { ...query }, tiles: new Map(), imageGrid: grid, range: range, observation: observation };
   const section = document.createElement('section');
   section.className = 'sky-map';
   const heading = document.createElement('h3');
-  heading.textContent = 'Map ' + (skyMaps.length + 1) + ' · ' + query.wavelength + ' µm · ' + query.size + '° fields';
+  heading.textContent = 'Map ' + (skyMaps.length + 1) + ' · ' + query.wavelength + ' µm · connected image grid';
   section.append(heading);
   const scroller = document.createElement('div');
   scroller.className = 'map-scroll';
   scroller.tabIndex = 0;
   scroller.setAttribute('role', 'region');
-  scroller.setAttribute('aria-label', heading.textContent + ', scroll to explore saved tiles');
-  const grid = document.createElement('div');
-  grid.className = 'map-grid';
-  scroller.append(grid);
+  scroller.setAttribute('aria-label', heading.textContent + ', scroll to explore');
+  const imageBoard = document.createElement('div');
+  imageBoard.className = 'map-grid';
+  scroller.append(imageBoard);
   section.append(scroller);
-  map.grid = grid;
+  map.grid = imageBoard;
   map.scroller = scroller;
   mapList.prepend(section);
   skyMaps.push(map);
@@ -274,10 +280,8 @@ function appendTile(map, tile) {
   selectButton.className = 'tile-select';
   selectButton.setAttribute('aria-label', 'Select tile at ' + coordinates(tile.query));
   selectButton.setAttribute('aria-pressed', 'false');
+  selectButton.title = coordinates(tile.query) + ' · ' + tile.preview.observation;
   selectButton.append(tile.thumbnail);
-  const caption = document.createElement('span');
-  caption.textContent = coordinates(tile.query);
-  selectButton.append(caption);
   selectButton.addEventListener('click', function () { if (!activeController) selectTile(tile, true); });
   tile.selectButton = selectButton;
   card.append(selectButton);
@@ -287,7 +291,7 @@ function appendTile(map, tile) {
     button.className = 'sky-arrow arrow-' + direction.id;
     button.textContent = direction.symbol;
     button.setAttribute('aria-label', 'Explore ' + direction.label + ' from ' + coordinates(tile.query));
-    button.title = 'Explore ' + direction.label + ' · one field-width step on this map';
+    button.title = 'Continue image ' + direction.label;
     button.addEventListener('click', function () { navigateTile(tile, direction); });
     card.append(button);
   });
@@ -299,14 +303,13 @@ function appendTile(map, tile) {
   const minY = Math.min(...tiles.map(function (item) { return item.y; }));
   const maxY = Math.max(...tiles.map(function (item) { return item.y; }));
   map.grid.style.gridTemplateColumns = 'repeat(' + (maxX - minX + 1) + ', 240px)';
-  map.grid.style.gridTemplateRows = 'repeat(' + (maxY - minY + 1) + ', 268px)';
+  map.grid.style.gridTemplateRows = 'repeat(' + (maxY - minY + 1) + ', 240px)';
   tiles.forEach(function (item) {
     item.card.style.gridColumn = String(item.x - minX + 1);
     item.card.style.gridRow = String(item.y - minY + 1);
   });
   tileCount += 1;
   mapCount.textContent = tileCount + ' / ' + tileLimit + ' tiles kept in this tab';
-  document.getElementById('map-empty').hidden = true;
 }
 async function loadTile(query, map, x, y) {
   if (activeController) return;
@@ -318,15 +321,17 @@ async function loadTile(query, map, x, y) {
   setStatus('loading', 'Loading sky tile — existing images stay on the map');
   statusText.title = '';
   try {
-    const result = await getPreview(query, controller.signal);
+    const result = await getPreview(query, controller.signal, map ? map.observation : '');
     controller.signal.throwIfAborted();
     const preview = result.preview;
+    const grid = map ? map.imageGrid : createImageGrid(query, preview);
+    const projected = reprojectImage(preview, grid, x, y);
     const thumbnail = document.createElement('canvas');
     thumbnail.setAttribute('aria-label', 'Sky tile at ' + coordinates(query));
     // Render before committing: no blank tiles or lost selection on failed data.
-    drawFits({ width: preview.width, height: preview.height, values: preview.pixels.map(function (pixel) { return pixel == null ? NaN : pixel; }) }, thumbnail);
+    const range = drawFits(projected, thumbnail, map ? map.range : initialMapRange(preview));
     const tile = { query: query, preview: preview, thumbnail: thumbnail, x: x, y: y };
-    appendTile(map || createSkyMap(query), tile);
+    appendTile(map || createSkyMap(query, grid, range, preview.observation), tile);
     selectTile(tile, result.cached);
   } catch (error) {
     setStatus(controller.signal.aborted ? 'idle' : 'error', controller.signal.aborted ? 'Search stopped — all loaded tiles retained' : error.message + ' Existing tiles are unchanged.');
@@ -338,7 +343,7 @@ function navigateTile(tile, direction) {
   const y = tile.y + direction.dy;
   const saved = tile.map.tiles.get(x + ':' + y);
   if (saved) { selectTile(saved, true); return; }
-  loadTile(queryAtTile(tile.map.origin, x, y), tile.map, x, y);
+  loadTile(queryForImage(tile.map.imageGrid, tile.map.origin, x, y), tile.map, x, y);
 }
 
 form.addEventListener('submit', function (event) {

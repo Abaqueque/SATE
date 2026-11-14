@@ -8,7 +8,7 @@ function header(fields) {
   return new TextEncoder().encode(cards.join("").padEnd(Math.ceil(cards.length * 80 / 2880) * 2880));
 }
 const primary = header({ SIMPLE: "T", BITPIX: "8", NAXIS: "0" });
-const imageHeader = header({ XTENSION: "'IMAGE'", BITPIX: "-32", NAXIS: "2", NAXIS1: "2", NAXIS2: "2", EXTNAME: "'IMAGE'", BSCALE: "2", BZERO: "1" });
+const imageHeader = header({ XTENSION: "'IMAGE'", BITPIX: "-32", NAXIS: "2", NAXIS1: "2", NAXIS2: "2", EXTNAME: "'IMAGE'", BSCALE: "2", BZERO: "1", CTYPE1: "'RA---TAN-SIP'", CTYPE2: "'DEC--TAN-SIP'", CRPIX1: "1.5", CRPIX2: "1.5", CRVAL1: "83.8", CRVAL2: "-5.3", CD1_1: "-.0017", CD2_2: ".0017", A_0_0: ".4", B_0_0: "-.8" });
 const pixels = new Uint8Array(2880);
 const view = new DataView(pixels.buffer);
 [1, 2, NaN, 4].forEach((value, index) => view.setFloat32(index * 4, value, false));
@@ -27,18 +27,20 @@ function fitsStream() {
   }, { highWaterMark: 0 });
 }
 const science = await readSciencePreview(new Response(fitsStream()), new AbortController().signal);
-assert.deepEqual(science, { width: 2, height: 2, pixels: [3, 5, null, 9] });
+assert.deepEqual(science, { width: 2, height: 2, pixels: [3, 5, null, 9], wcs: { crpix: [1.5, 1.5], crval: [83.8, -5.3], cd: [-.0017, 0, 0, .0017], sip: { a: [[0, 0, .4]], b: [[0, 0, -.8]] } } });
 assert.equal(cancelled, true, "Preview must cancel the unused auxiliary download");
 assert.equal(delivered, 8640, "Preview must stop after the science HDU");
 
 const nativeFetch = globalThis.fetch;
-const csv = "access_url,access_format,obs_id,energy_bandpassname,s_ra,s_dec\nhttps://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/science.fits,image/fits,TEST-OBS,D4,83.8,-5.3";
+const csv = "access_url,access_format,obs_id,energy_bandpassname,s_ra,s_dec\nhttps://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/science.fits,image/fits,TEST-OBS,D4,83.8,-5.3\nhttps://irsa.ipac.caltech.edu/ibe/data/spherex/dr1/other.fits,image/fits,OTHER-OBS,D4,84,-5.3";
 let searches = 0;
 let downloads = 0;
+const cutoutSizes = [];
 try {
   globalThis.fetch = async (url) => {
     if (String(url).includes("/SIA?")) { searches += 1; return new Response(csv); }
     downloads += 1;
+    cutoutSizes.push(Number(new URL(url).searchParams.get('size')));
     if (downloads === 1) return new Response("Temporary outage", { status: 503 });
     return new Response(fitsStream());
   };
@@ -62,6 +64,22 @@ try {
   assert.equal(full.headers.get("content-type"), "application/fits");
   assert.equal((await full.arrayBuffer()).byteLength, 8640 + auxiliary.length, "Explicit FITS download must retain every extension");
   assert.equal(searches, 1, "FITS download reuses discovery but pins the preview's observation");
+
+  const padded = await handleCutout(new Request(url + '&geometry=1'));
+  const alignedPreview = await padded.json();
+  assert.equal(padded.headers.get('x-app-cache'), 'MISS', 'Aligned previews must not reuse old unpadded cache entries');
+  assert.ok(Math.abs(cutoutSizes.at(-1) - .08) < 1e-12, 'Alignment downloads real edge pixels with a bounded 60% margin');
+  assert.match(alignedPreview.fitsUrl, /geometry=1/);
+  const paddedFull = await handleCutout(new Request('http://localhost' + alignedPreview.fitsUrl));
+  await paddedFull.arrayBuffer();
+  assert.ok(Math.abs(cutoutSizes.at(-1) - .08) < 1e-12, 'FITS export must preserve the original aligned cutout');
+
+  const preferred = await handleCutout(new Request(url + '&geometry=1&preferred=OTHER-OBS'));
+  assert.equal((await preferred.json()).observation, 'OTHER-OBS', 'Continue the original exposure when it covers the neighbour');
+  const fallback = await handleCutout(new Request(url + '&geometry=1&preferred=UNAVAILABLE'));
+  assert.equal((await fallback.json()).observation, 'TEST-OBS', 'Use another exposure where the preferred one is unavailable');
+  const pinnedMissing = await handleCutout(new Request(url + '&observation=UNAVAILABLE'));
+  assert.equal(pinnedMissing.status, 404, 'Scientific FITS observation pins must never silently switch exposure');
 
   const invalid = await handleCutout(new Request("http://localhost/api/cutout?ra=NaN&dec=0&wavelength=1&format=preview"));
   assert.equal(invalid.status, 400);
