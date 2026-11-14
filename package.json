@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "validate": "node scripts/validate-artifact.mjs",
-    "test": "node scripts/test-preview.mjs",
+    "test": "node --test scripts/test-*.mjs",
     "dev": "node scripts/preview.mjs",
     "prepare:presets": "node scripts/prepare-presets.mjs",
     "deploy:vercel": "npx vercel --prod"

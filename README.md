@@ -16,6 +16,25 @@ SPHEREx DR1 FITS cutouts by sky coordinates, wavelength and field of view.
 `api/cutout.js` exposes the backend as a Vercel Node.js function.
 `src/app.js` routes the same requests for local development.
 
+## Growing sky maps
+
+Each loaded image has four directional arrows. They query neighbouring sky
+centres with the same wavelength and field width; earlier tiles remain visible
+in a scrollable map. Clicking an existing tile or navigating back to it reuses
+the retained preview without another archive request. PNG/FITS export always
+targets the selected tile, with FITS pinned to its original observation.
+
+`src/skymap.js` derives centres from a fixed tangent-plane origin, accounting for
+spherical coordinates, RA wrap and polar positions. North is up and east left
+at the origin. Integer grid addresses avoid coordinate drift on closed paths.
+These are navigation maps, not reprojected mosaics: detector orientation,
+individual display stretch and observation dates can differ between tiles.
+
+New manual searches create separate retained maps. Failed or cancelled requests
+do not alter existing tiles or the selection. Up to 64 tiles are held in memory
+per tab, including their full-resolution preview canvases. Reloading or closing
+the tab clears them. Run `npm test` for backend and sky-map regression checks.
+
 ## Local development
 
 Install Node.js 22, then run:
