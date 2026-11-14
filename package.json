@@ -1,9 +1,15 @@
 {
-  "name": "sites-worker-esm-starter",
+  "name": "sate",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bash scripts/build.sh",
-    "validate": "node scripts/validate-artifact.mjs"
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate-artifact.mjs",
+    "dev:cloudflare": "wrangler dev",
+    "deploy:cloudflare": "wrangler deploy",
+    "tail:cloudflare": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.161.0"
   }
 }

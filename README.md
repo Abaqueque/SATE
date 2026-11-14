@@ -1,4 +1,6 @@
-# SPHEREx Coordinate Lab
+# SATE
+
+SPHEREx Coordinate Lab — a NASA hackathon project.
 
 A dependency-free Cloudflare Worker site that retrieves SPHEREx DR1 cutouts from NASA/IPAC IRSA and renders scientific FITS pixels in the browser.
 
@@ -23,6 +25,26 @@ node scripts/preview.mjs 4173
 ```
 
 Open `http://127.0.0.1:4173`. The build copies every Worker module into `dist/server/`, preserving ES-module imports.
+
+## Standalone Cloudflare Workers deployment
+
+The application can be deployed independently of ChatGPT Sites. The Cloudflare
+deployment uses `worker/index.js` directly, with configuration in
+`wrangler.jsonc`.
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm exec wrangler login
+pnpm run deploy:cloudflare
+```
+
+Cloudflare prints the public `workers.dev` URL after a successful deployment.
+Use `pnpm run dev:cloudflare` for local Worker-runtime development and
+`pnpm run tail:cloudflare` to inspect production logs. Install Node.js and pnpm
+before running these commands. No application secrets or database are required.
+
+The existing `.openai/hosting.json` is retained so the ChatGPT Sites deployment
+can remain available as a rollback during the hackathon.
 
 ## Request flow
 
