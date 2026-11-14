@@ -1,28 +1,37 @@
-# Sites Worker ESM starter
+# SPHEREx Coordinate Lab
 
-Use this starter for a static microsite, click counter, or simple internal UI whose state is browser-scoped. It has no dependencies and needs no install.
+A dependency-free Cloudflare Worker site that retrieves SPHEREx DR1 cutouts from NASA/IPAC IRSA and renders scientific FITS pixels in the browser.
 
-Edit `worker/index.js`, then publish through the Sites hosting workflow with this starter's build and validation in `commands`.
+## Team ownership
 
-The build copies only `worker/index.js` and `.openai/hosting.json`. Do not add standalone asset files. Embed any essential raster bytes in `worker/index.js` and serve or reference them as a data URL.
+The application is split into three independent work areas:
 
-Pass these argument arrays as `commands`:
+| Area | File | Responsibility |
+| --- | --- | --- |
+| User interface | `worker/ui.js` | Page structure, controls, styles, presets and accessible labels |
+| Browser processing | `worker/browser.js` | Form interactions, request cancellation, FITS parsing, false-colour rendering and downloads |
+| SPHEREx backend | `worker/api.js` | Input validation, IRSA SIA search, cutout retrieval and response metadata |
 
-```json
-[
-  ["bash", "scripts/build.sh"],
-  ["node", "scripts/validate-artifact.mjs"]
-]
+`worker/index.js` is intentionally small. It only routes `/`, `/app.js` and `/api/cutout` to those modules. Contributors should normally edit the module they own rather than the router.
+
+## Local development
+
+```powershell
+node scripts/build.mjs
+node scripts/validate-artifact.mjs
+node scripts/preview.mjs 4173
 ```
 
-The deterministic build produces:
+Open `http://127.0.0.1:4173`. The build copies every Worker module into `dist/server/`, preserving ES-module imports.
+
+## Request flow
 
 ```text
-dist/
-├── .openai/
-│   └── hosting.json
-└── server/
-    └── index.js
+worker/ui.js
+    ↓ loads /app.js
+worker/browser.js
+    ↓ requests /api/cutout
+worker/api.js
+    ↓ searches and downloads from IRSA
+NASA/IPAC SPHEREx archive
 ```
-
-`dist/server/index.js` is an ES module with a default export containing `fetch(request, env, ctx)`. Edit `worker/index.js`, not the generated file under `dist/`.
