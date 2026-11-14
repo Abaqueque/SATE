@@ -36,8 +36,13 @@ try {
   globalThis.fetch = async () => Response.json(data);
   const tile = { query: { ra: 80, dec: -5, wavelength: 3, size: .1 }, preview: { observation: 'A' } };
   let fail = false;
-  const timeline = installTimeline({ async show(target, item) {
-    if (fail) throw new Error('Archive unavailable');
+  const shown = [];
+  let failId = '', pauseOnShow = false;
+  const timeline = installTimeline({ async show(target, item, signal) {
+    shown.push(item.id);
+    if (pauseOnShow) element('timeline-play').listeners.click();
+    signal?.throwIfAborted();
+    if (fail || item.id === failId) throw new Error('Archive unavailable');
     target.preview = { observation: item.id, observedAt: item.date };
   } });
   timeline.select(tile);
@@ -49,16 +54,28 @@ try {
   fail = true;
   await element('timeline-previous').listeners.click();
   assert.equal(tile.preview.observation, 'B');
-  assert.match(element('timeline-message').textContent, /Current image retained/);
-  element('timeline-end').value = data.observations[0].date.slice(0, 10);
-  element('timeline-end').listeners.change();
-  assert.equal(element('timeline-exposure').children.length, 1);
+  assert.doesNotMatch(element('timeline-message').textContent, /unavailable|error/i);
+  fail = false;
+  // Starting from the last exposure replays the sequence from the beginning.
+  shown.length = 0;
+  failId = 'A';
+  await element('timeline-play').listeners.click();
+  assert.deepEqual(shown, ['A', 'B'], 'Playback must silently skip the failed first snapshot');
+  assert.equal(tile.preview.observation, 'B');
+  assert.equal(element('timeline-play').textContent, 'Play');
+  assert.doesNotMatch(element('timeline-message').textContent, /unavailable|error/i);
+  shown.length = 0; failId = ''; pauseOnShow = true;
+  await element('timeline-play').listeners.click();
+  assert.deepEqual(shown, ['A'], 'Pause must cancel playback before further frames');
+  assert.equal(element('timeline-play').textContent, 'Play');
+  pauseOnShow = false;
+  assert.equal(element('timeline-exposure').children.length, 2, 'All dated exposures remain available');
   timeline.busy(true);
   assert.equal(element('timeline-next').disabled, true);
   timeline.busy(false);
   timeline.select(null);
   assert.equal(element('timeline-load').disabled, true);
-  console.log('Timeline discovery, MJD dates, chronological ordering, date filters, switching, error retention and busy states passed.');
+  console.log('Timeline discovery, MJD dates, chronological ordering, playback, switching, error retention and busy states passed.');
 } finally {
   globalThis.fetch = nativeFetch;
   globalThis.document = nativeDocument;

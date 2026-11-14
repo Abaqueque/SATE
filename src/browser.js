@@ -1,9 +1,10 @@
 import * as geometry from './wcs.js';
 import { installMapPanning } from './pan.js';
 import { installTimeline } from './timeline.js';
+import { repairPreviewGaps } from './repair.js';
 
 // Share the tested coordinate calculation without adding a browser dependency.
-export const browserScript = [...Object.values(geometry), installMapPanning, installTimeline].map(fn => fn.toString()).join('\n') + '\n' + String.raw`
+export const browserScript = [...Object.values(geometry), installMapPanning, installTimeline, repairPreviewGaps].map(fn => fn.toString()).join('\n') + '\n' + String.raw`
 const form = document.getElementById('search-form');
 const submitButton = document.getElementById('submit-button');
 const cancelButton = document.getElementById('cancel-button');
@@ -31,13 +32,16 @@ let selectedTile = null;
 let tileCount = 0;
 let nextMapId = 1;
 const tileLimit = 64;
-const timeline = installTimeline({ show: async function (tile, item) {
+const timeline = installTimeline({ paused: function () {
+  if (selectedTile) setStatus('ready', 'Observation: ' + (selectedTile.preview.observedAt || selectedTile.preview.observation));
+}, show: async function (tile, item, playbackSignal) {
   if (activeController) throw new Error('Wait for the current request to finish.');
   const controller = startAction('Loading observation…');
   setStatus('loading', 'Loading exposure from ' + item.date);
   try {
-    const result = await getPreview(tile.query, controller.signal, item.id, true);
+    const result = await getPreview(tile.query, playbackSignal ? AbortSignal.any([controller.signal, playbackSignal]) : controller.signal, item.id, true);
     controller.signal.throwIfAborted();
+    playbackSignal?.throwIfAborted();
     const projected = reprojectImage(result.preview, tile.map.imageGrid, tile.x, tile.y);
     const thumbnail = document.createElement('canvas');
     drawFits(projected, thumbnail, tile.map.range);
@@ -191,6 +195,9 @@ function drawFits(fits, targetCanvas = canvas, range = null) {
   const low = range ? range.low : percentile(finite, .01);
   let high = range ? range.high : percentile(finite, .995);
   if (!(high > low)) high = low + 1;
+  const original = document.getElementById('original-pixels');
+  const display = original && original.checked ? fits : repairPreviewGaps(fits);
+  targetCanvas.repairedPixelCount = display.repairedCount || 0;
 
   targetCanvas.width = fits.width;
   targetCanvas.height = fits.height;
@@ -201,7 +208,7 @@ function drawFits(fits, targetCanvas = canvas, range = null) {
     for (let x = 0; x < fits.width; x += 1) {
       const source = y * fits.width + x;
       const target = ((fits.height - 1 - y) * fits.width + x) * 4;
-      const raw = fits.values[source];
+      const raw = display.values[source];
       let normalized = Number.isFinite(raw) ? (raw - low) / (high - low) : 0;
       normalized = Math.max(0, Math.min(1, normalized));
       normalized = Math.asinh(normalized * 10) / stretch;
@@ -275,6 +282,8 @@ function closeSkyMap(map) {
     canvas.setAttribute('aria-label', 'Selected image for PNG export');
     emptyState.hidden = false;
     pngButton.disabled = fitsButton.disabled = true;
+    const repairStatus = document.getElementById('repair-status');
+    if (repairStatus) repairStatus.textContent = 'Small enclosed gaps are interpolated for display. Estimates do not recover saturated measurements.';
     ['meta-observation', 'meta-band', 'meta-size'].forEach(function (id) { document.getElementById(id).textContent = '—'; });
     document.getElementById('selected-position').textContent = 'All sky maps closed. Choose coordinates to start a new map.';
     openIrsa.href = 'https://irsa.ipac.caltech.edu/applications/spherex/';
@@ -310,6 +319,10 @@ function selectTile(tile, cached) {
   document.getElementById('meta-observation').textContent = preview.observation;
   document.getElementById('meta-band').textContent = preview.bandpass;
   document.getElementById('meta-size').textContent = tile.thumbnail.width + ' × ' + tile.thumbnail.height + ' px';
+  const repairStatus = document.getElementById('repair-status');
+  if (repairStatus) repairStatus.textContent = tile.thumbnail.repairedPixelCount ?
+    tile.thumbnail.repairedPixelCount + ' missing pixels interpolated for display. FITS data unchanged.' :
+    'No pixels filled. FITS data unchanged.';
   document.getElementById('selected-position').textContent = coordinates(query);
   const preparedDate = preview.preparedAt ? new Date(preview.preparedAt).toLocaleDateString() : '';
   setStatus('ready', preview.prepared ? 'Prepared SPHEREx preview · ' + preparedDate : cached ? 'Saved sky tile selected — no new search' : 'Real SPHEREx preview added to sky map');
@@ -457,7 +470,17 @@ form.addEventListener('submit', function (event) {
   }
   loadTile(query, null, 0, 0);
 });
+document.getElementById('original-pixels')?.addEventListener('change', function () {
+  timeline.clearFrames?.();
+  for (const map of skyMaps) {
+    for (const tile of map.tiles.values()) {
+      drawFits(reprojectImage(tile.preview, map.imageGrid, tile.x, tile.y), tile.thumbnail, map.range);
+    }
+  }
+  if (selectedTile) selectTile(selectedTile, true);
+});
 cancelButton.addEventListener('click', function () {
+  timeline.clearFrames?.();
   if (!activeController) return;
   cancelButton.disabled = true;
   cancelButton.textContent = 'Stopping…';

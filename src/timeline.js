@@ -5,11 +5,13 @@ export function installTimeline(actions) {
   const el = id => document.getElementById(id);
   const message = el('timeline-message'), select = el('timeline-exposure');
   const slider = el('timeline-slider'), previous = el('timeline-previous'), next = el('timeline-next');
-  const start = el('timeline-start'), end = el('timeline-end'), load = el('timeline-load');
+  const load = el('timeline-load');
+  const play = el('timeline-play');
   let tile = null, items = [], filtered = [], controller = null, loading = false, busy = false;
+  let playing = false, playback = null;
   const cache = new Map();
   function refresh() {
-    filtered = items.filter(item => (!start.value || item.date.slice(0, 10) >= start.value) && (!end.value || item.date.slice(0, 10) <= end.value));
+    filtered = items;
     select.replaceChildren();
     filtered.forEach((item, index) => {
       const option = document.createElement('option');
@@ -22,12 +24,16 @@ export function installTimeline(actions) {
     slider.max = String(Math.max(0, filtered.length - 1));
     slider.value = String(Math.max(0, index));
     slider.setAttribute('aria-valuetext', index < 0 ? 'Choose an exposure' : filtered[index].date);
-    const disabled = busy || loading || !filtered.length;
+    const disabled = busy || loading || playing || !filtered.length;
     select.disabled = slider.disabled = disabled;
     previous.disabled = disabled || index <= 0;
     next.disabled = disabled || index >= filtered.length - 1;
-    load.disabled = busy || loading || !tile;
-    start.disabled = end.disabled = busy || loading;
+    load.disabled = busy || loading || playing || !tile;
+    if (play) {
+      play.disabled = !playing && (busy || loading || !tile);
+      play.textContent = playing ? 'Pause' : 'Play';
+      play.setAttribute('aria-pressed', String(playing));
+    }
   }
   function summary() {
     const observedAt = items.find(item => item.id === tile?.preview.observation)?.date || tile?.preview.observedAt;
@@ -60,30 +66,77 @@ export function installTimeline(actions) {
       if (!signal.aborted) message.textContent = error.message + ' Select Find observations to retry.';
     } finally { if (target === tile) { loading = false; refresh(); } }
   }
-  async function choose(index) {
-    if (busy || loading || !filtered[index] || !tile) return;
-    const target = tile, item = filtered[index];
-    if (item.id === tile.preview.observation) return;
-    try {
-      await actions.show(target, item);
-      refresh(); summary();
-    } catch (error) { refresh(); message.textContent = error.message + ' Current image retained.'; }
+  function pause() {
+    playing = false;
+    playback?.abort();
+    refresh();
+    actions.paused?.();
+  }
+  async function choose(index, direction = 1) {
+    if (busy || loading || playing || !tile) return;
+    const target = tile;
+    for (let cursor = index; cursor >= 0 && cursor < filtered.length; cursor += direction) {
+      if (target !== tile) return;
+      const item = filtered[cursor];
+      if (item.id === tile.preview.observation) { refresh(); summary(); return; }
+      try {
+        await actions.show(target, item);
+        refresh(); summary(); return;
+      } catch (_) { /* Skip failed snapshots without an error message. */ }
+    }
+    refresh(); summary(); actions.paused?.();
   }
   select.addEventListener('change', () => choose(Number(select.value)));
   slider.addEventListener('change', () => choose(Number(slider.value)));
-  previous.addEventListener('click', () => choose(Number(select.value) - 1));
+  previous.addEventListener('click', () => choose(Number(select.value) - 1, -1));
   next.addEventListener('click', () => choose(select.value === '' ? 0 : Number(select.value) + 1));
-  [start, end].forEach(input => input.addEventListener('change', () => {
-    refresh(); summary();
-    if (start.value && end.value && start.value > end.value) message.textContent = 'Start date must be on or before end date.';
-  }));
   load.addEventListener('click', discover);
+  play?.addEventListener('click', async () => {
+    if (playing) { pause(); return; }
+    if (!tile || busy || loading) return;
+    const target = tile;
+    if (!items.length) await discover();
+    if (target !== tile || !filtered.length || busy || loading) return;
+    const frames = [...filtered];
+    const current = frames.findIndex(item => item.id === tile.preview.observation);
+    // Resume from the current exposure; replay from the beginning after the last.
+    let index = current >= 0 && current < frames.length - 1 ? current + 1 : 0;
+    playback = new AbortController();
+    const signal = playback.signal;
+    playing = true; refresh();
+    try {
+      for (; index < frames.length; index++) {
+        if (signal.aborted || target !== tile) break;
+        try {
+          await actions.show(target, frames[index], signal);
+          if (signal.aborted || target !== tile) break;
+          refresh(); summary();
+          // Pause only after a frame is actually visible. Never overlap requests.
+          await new Promise(resolve => {
+            const done = () => { clearTimeout(timer); signal.removeEventListener('abort', done); resolve(); };
+            const timer = setTimeout(done, 1000);
+            signal.addEventListener('abort', done, { once: true });
+            if (signal.aborted) done();
+          });
+        } catch (_) {
+          if (signal.aborted) break;
+          // Unavailable frames are silently skipped.
+        }
+      }
+    } finally {
+      if (playback?.signal === signal) {
+        playing = false; refresh();
+        if (target === tile) { summary(); actions.paused?.(); }
+      }
+    }
+  });
   refresh();
   return {
+    clearFrames() { pause(); },
     busy(value) { busy = value; refresh(); },
     select(value) {
       if (tile === value) { refresh(); return; }
-      controller?.abort(); loading = false; tile = value; items = [];
+      pause(); controller?.abort(); loading = false; tile = value; items = [];
       const saved = value && cache.get(JSON.stringify(value.query));
       if (saved) items = saved.observations;
       refresh();

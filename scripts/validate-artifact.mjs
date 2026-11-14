@@ -8,7 +8,7 @@ import { queryKey } from "../src/presets.js";
 const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
 const browser = await readFile(new URL("../dist/app.js", import.meta.url), "utf8");
 assert.match(html, /<title>SPHEREx Coordinate Lab<\/title>/);
-assert.match(html, /src="\/app.js"/);
+assert.match(html, /src="\/app.js(?:\?[^" ]*)?"/);
 new Script(browser);
 assert.equal((await app.fetch(new Request("http://localhost/"))).status, 200);
 assert.equal((await app.fetch(new Request("http://localhost/app.js"))).status, 200);
