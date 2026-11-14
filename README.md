@@ -2,6 +2,12 @@
 
 SPHEREx Coordinate Lab — a NASA hackathon project.
 
+**[Open website →](https://spherex-coordinate-lab.hollowcarp8.chatgpt.site/)**
+
+The live app is currently hosted on ChatGPT Sites; visitor access follows the
+site's sharing settings. The Cloudflare deployment instructions below let you
+publish an independent version and replace this link with its `workers.dev` URL.
+
 A dependency-free Cloudflare Worker site that retrieves SPHEREx DR1 cutouts from NASA/IPAC IRSA and renders scientific FITS pixels in the browser.
 
 ## Team ownership
