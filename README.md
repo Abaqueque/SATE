@@ -102,3 +102,5 @@ Refresh snapshots explicitly with `node scripts/prepare-presets.mjs` (or append
 a preset ID to refresh just one), then commit the generated JSON and redeploy.
 Deployments themselves never depend on archive availability. Run
 `node scripts/test-preview.mjs` to check streaming, caching, retries and Stop.
+
+Observation timeline: load a sky tile, select Find observations, then use the UTC date filters, exposure list, slider or previous/next buttons. Switching replaces the selected tile using its existing sky grid and brightness scale; other tiles are retained. Discovery currently searches DR1, up to 1,000 results. Missing dates are omitted. This is visual comparison, not automatic motion measurement. No publication is needed for local use.

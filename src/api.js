@@ -127,7 +127,7 @@ export async function handleCutout(request) {
     const query = parseQuery(url);
     const { ra, dec, wavelength, size } = query;
     const format = url.searchParams.get("format") || "fits";
-    if (!["preview", "fits"].includes(format)) throw new ArchiveError("Unknown image format.", 400);
+    if (!["preview", "fits", "observations"].includes(format)) throw new ArchiveError("Unknown image format.", 400);
     const wanted = url.searchParams.get("observation") || "";
     const aligned = url.searchParams.get("geometry") === "1";
     const preferred = aligned ? (url.searchParams.get("preferred") || "").slice(0, 160) : "";
@@ -146,12 +146,22 @@ export async function handleCutout(request) {
       sia.searchParams.set("POS", `CIRCLE ${ra} ${dec} 0.000001`);
       sia.searchParams.set("BAND", `${Math.max(.75, wavelength - .025) * 1e-6} ${Math.min(5, wavelength + .025) * 1e-6}`);
       sia.searchParams.set("RESPONSEFORMAT", "CSV");
-      sia.searchParams.set("MAXREC", "80");
+      sia.searchParams.set("MAXREC", "1000");
       const searchResponse = await archiveFetch(sia, signal);
       if (!searchResponse.ok) throw new ArchiveError("The archive search is temporarily unavailable. Please try again.");
       observations = parseCsv(await searchResponse.text()).filter(isObservation)
         .sort((a, b) => distanceFrom(a, ra, dec) - distanceFrom(b, ra, dec));
       if (observations.length) remember(observationsCache, key, observations);
+    }
+    if (format === "observations") {
+      const items = observations.map(row => {
+        const mjd = row.t_min === "" || row.t_min == null ? NaN : Number(row.t_min);
+        const time = Number.isFinite(mjd) ? new Date((mjd - 40587) * 86400000) : null;
+        return { id: row.obs_id, date: time && Number.isFinite(time.getTime()) ? time.toISOString() : null,
+          bandpass: row.energy_bandpassname || "", release: "SPHEREx DR1" };
+      }).filter(row => row.date).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
+      return json({ observations: items, truncated: observations.length >= 1000,
+        undated: observations.length - items.length }, 200, cacheHeaders);
     }
     let observation = wanted ? observations.find((row) => row.obs_id === wanted) : observations[0];
     if (!observation) throw new ArchiveError(wanted ?
@@ -184,6 +194,7 @@ export async function handleCutout(request) {
       });
       const preview = {
         ...science, observation: observation.obs_id,
+        observedAt: observation.t_min ? new Date((Number(observation.t_min) - 40587) * 86400000).toISOString() : null,
         bandpass: observation.energy_bandpassname || `${wavelength.toFixed(2)} µm`,
         fitsUrl: "/api/cutout?" + parameters, release: "SPHEREx DR1",
         preparedAt: new Date().toISOString(), query,

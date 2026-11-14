@@ -1,8 +1,9 @@
 import * as geometry from './wcs.js';
 import { installMapPanning } from './pan.js';
+import { installTimeline } from './timeline.js';
 
 // Share the tested coordinate calculation without adding a browser dependency.
-export const browserScript = [...Object.values(geometry), installMapPanning].map(fn => fn.toString()).join('\n') + '\n' + String.raw`
+export const browserScript = [...Object.values(geometry), installMapPanning, installTimeline].map(fn => fn.toString()).join('\n') + '\n' + String.raw`
 const form = document.getElementById('search-form');
 const submitButton = document.getElementById('submit-button');
 const cancelButton = document.getElementById('cancel-button');
@@ -30,6 +31,26 @@ let selectedTile = null;
 let tileCount = 0;
 let nextMapId = 1;
 const tileLimit = 64;
+const timeline = installTimeline({ show: async function (tile, item) {
+  if (activeController) throw new Error('Wait for the current request to finish.');
+  const controller = startAction('Loading observation…');
+  setStatus('loading', 'Loading exposure from ' + item.date);
+  try {
+    const result = await getPreview(tile.query, controller.signal, item.id, true);
+    controller.signal.throwIfAborted();
+    const projected = reprojectImage(result.preview, tile.map.imageGrid, tile.x, tile.y);
+    const thumbnail = document.createElement('canvas');
+    drawFits(projected, thumbnail, tile.map.range);
+    tile.preview = result.preview;
+    tile.preview.observedAt = item.date;
+    tile.thumbnail.replaceWith(thumbnail);
+    tile.thumbnail = thumbnail;
+    tile.selectButton.title = coordinates(tile.query) + ' · ' + item.id;
+    selectTile(tile, result.cached);
+    currentName += '-' + item.date.replace(/[:.]/g, '-');
+    setStatus('ready', 'Observation: ' + item.date.replace('T', ' '));
+  } finally { finishAction(controller); }
+} });
 function key(query) {
   return [query.ra, query.dec, query.wavelength, query.size].map(Number).join(':');
 }
@@ -107,8 +128,8 @@ function cancellable(promise, signal) {
     promise.then(function (value) { cleanup(); resolve(value); }, function (error) { cleanup(); reject(error); });
   });
 }
-async function getPreview(query, signal, preferred = '') {
-  const cacheKey = key(query) + (preferred ? ':observation:' + preferred : '');
+async function getPreview(query, signal, preferred = '', exact = false) {
+  const cacheKey = key(query) + (preferred ? (exact ? ':exact:' : ':observation:') + preferred : '');
   if (previewCache.has(cacheKey)) return { preview: previewCache.get(cacheKey), cached: true };
   await cancellable(manifestReady, signal);
   signal.throwIfAborted();
@@ -128,7 +149,7 @@ async function getPreview(query, signal, preferred = '') {
     } catch (error) { if (signal.aborted) throw error; }
   }
   const parameters = new URLSearchParams({ ra: String(query.ra), dec: String(query.dec), wavelength: String(query.wavelength), size: String(query.size), format: 'preview', geometry: '1' });
-  if (preferred) parameters.set('preferred', preferred);
+  if (preferred) parameters.set(exact ? 'observation' : 'preferred', preferred);
   const response = await fetch('/api/cutout?' + parameters, { signal: signal });
   if (!response.ok) {
     let message = 'The SPHEREx request failed.';
@@ -207,6 +228,7 @@ function initialMapRange(preview) {
 }
 
 function updateMapControls() {
+  timeline.busy(Boolean(activeController));
   document.querySelectorAll('.close-map').forEach(function (button) {
     button.disabled = Boolean(activeController);
   });
@@ -244,6 +266,7 @@ function closeSkyMap(map) {
     if (remaining) selectTile(remaining.lastSelectedTile || remaining.tiles.values().next().value, true);
   }
   if (!skyMaps.length) {
+    timeline.select(null);
     selectedTile = null;
     currentFitsUrl = null;
     currentName = 'spherex-cutout';
@@ -269,6 +292,7 @@ function selectTile(tile, cached) {
     selectedTile.selectButton.setAttribute('aria-pressed', 'false');
   }
   selectedTile = tile;
+  timeline.select(tile);
   tile.map.lastSelectedTile = tile;
   tile.card.classList.add('selected');
   tile.selectButton.setAttribute('aria-pressed', 'true');
