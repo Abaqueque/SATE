@@ -1,5 +1,7 @@
 # SATE
 
+**[Open website →](https://sate-beta.vercel.app/)**
+
 SPHEREx Coordinate Lab — a NASA hackathon project. Explore NASA/IPAC IRSA
 SPHEREx DR1 FITS cutouts by sky coordinates, wavelength and field of view.
 
