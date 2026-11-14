@@ -24,6 +24,13 @@ available on touch). They extend the image in pixel space, rather than applying
 decimal increments to RA/Dec. The coordinate inputs remain the user's search.
 Clicking an existing image or navigating back to it reuses the retained preview.
 
+Maps scroll independently in both axes, with visible scrollbars and surrounding
+space even for a single image. Drag with a mouse, swipe on touch, use a two-axis
+trackpad, or Shift + wheel for horizontal scrolling. Arrow keys pan a focused
+map (Shift pans faster); Centre selected returns to that map's last selection.
+`src/pan.js` handles gestures without triggering tile selection or archive
+requests during a drag. Native touch scrolling and pinch zoom remain available.
+
 `src/wcs.js` reads TAN/SIP spatial WCS, including the constant/linear SIP terms
 present in SPHEREx. The first exposure defines a common tangent-plane pixel
 grid. Neighbours continue at the next pixel boundary; real source pixels are

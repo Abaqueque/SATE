@@ -1,7 +1,8 @@
 import * as geometry from './wcs.js';
+import { installMapPanning } from './pan.js';
 
 // Share the tested coordinate calculation without adding a browser dependency.
-export const browserScript = Object.values(geometry).map(fn => fn.toString()).join('\n') + '\n' + String.raw`
+export const browserScript = [...Object.values(geometry), installMapPanning].map(fn => fn.toString()).join('\n') + '\n' + String.raw`
 const form = document.getElementById('search-form');
 const submitButton = document.getElementById('submit-button');
 const cancelButton = document.getElementById('cancel-button');
@@ -215,12 +216,17 @@ function updateMapControls() {
 function coordinates(query) {
   return 'RA ' + query.ra.toFixed(5) + '° · Dec ' + query.dec.toFixed(5) + '°';
 }
+function centreMapTile(tile) {
+  const scroller = tile.map.scroller;
+  scroller.scrollTo({ left: Math.max(0, tile.map.grid.offsetLeft + tile.card.offsetLeft - (scroller.clientWidth - tile.card.offsetWidth) / 2), top: Math.max(0, tile.map.grid.offsetTop + tile.card.offsetTop - (scroller.clientHeight - tile.card.offsetHeight) / 2) });
+}
 function selectTile(tile, cached) {
   if (selectedTile) {
     selectedTile.card.classList.remove('selected');
     selectedTile.selectButton.setAttribute('aria-pressed', 'false');
   }
   selectedTile = tile;
+  tile.map.lastSelectedTile = tile;
   tile.card.classList.add('selected');
   tile.selectButton.setAttribute('aria-pressed', 'true');
   const query = tile.query;
@@ -245,8 +251,7 @@ function selectTile(tile, cached) {
   fitsButton.disabled = Boolean(activeController) || !currentFitsUrl;
   updateMapControls();
   // Pan the map viewport only, without jumping the page away from the viewer.
-  const scroller = tile.map.scroller;
-  scroller.scrollTo({ left: Math.max(0, tile.card.offsetLeft - (scroller.clientWidth - tile.card.offsetWidth) / 2), top: Math.max(0, tile.card.offsetTop - (scroller.clientHeight - tile.card.offsetHeight) / 2) });
+  centreMapTile(tile);
 }
 function createSkyMap(query, grid, range, observation) {
   const map = { origin: { ...query }, tiles: new Map(), imageGrid: grid, range: range, observation: observation };
@@ -254,12 +259,21 @@ function createSkyMap(query, grid, range, observation) {
   section.className = 'sky-map';
   const heading = document.createElement('h3');
   heading.textContent = 'Map ' + (skyMaps.length + 1) + ' · ' + query.wavelength + ' µm · connected image grid';
-  section.append(heading);
+  const toolbar = document.createElement('div');
+  toolbar.className = 'map-toolbar';
+  const centre = document.createElement('button');
+  centre.type = 'button';
+  centre.className = 'action';
+  centre.textContent = 'Centre selected';
+  centre.setAttribute('aria-label', 'Centre selected image in map ' + (skyMaps.length + 1));
+  centre.addEventListener('click', function () { if (map.lastSelectedTile) centreMapTile(map.lastSelectedTile); });
+  toolbar.append(heading, centre);
+  section.append(toolbar);
   const scroller = document.createElement('div');
   scroller.className = 'map-scroll';
   scroller.tabIndex = 0;
   scroller.setAttribute('role', 'region');
-  scroller.setAttribute('aria-label', heading.textContent + ', scroll to explore');
+  scroller.setAttribute('aria-label', heading.textContent + ', drag or scroll in any direction; arrow keys to pan');
   const imageBoard = document.createElement('div');
   imageBoard.className = 'map-grid';
   scroller.append(imageBoard);
@@ -267,6 +281,7 @@ function createSkyMap(query, grid, range, observation) {
   map.grid = imageBoard;
   map.scroller = scroller;
   mapList.prepend(section);
+  map.panning = installMapPanning(scroller, imageBoard);
   skyMaps.push(map);
   return map;
 }

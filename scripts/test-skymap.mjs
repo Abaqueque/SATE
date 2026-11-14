@@ -19,6 +19,7 @@ class Element {
     this.disabled = false;
     this.clientWidth = 720;
     this.clientHeight = 600;
+    this.scrollLeft = this.scrollTop = 0;
     this.offsetWidth = 240;
     this.offsetHeight = 240;
     this.offsetLeft = this.offsetTop = 0;
