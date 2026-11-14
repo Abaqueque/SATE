@@ -47,7 +47,12 @@ PNG exports the selected reprojected tile. FITS exports the original, padded
 scientific cutout pinned to its preview observation, not a resampled FITS file.
 
 New manual searches create separate retained maps. Failed or cancelled requests
-do not alter existing tiles or the selection. Up to 64 tiles are held in memory
+do not alter existing tiles or the selection. Each map has a Close control that
+removes only that map, frees its tile capacity and disconnects its resize observer.
+Closing the selected map switches to another open map; closing the last restores
+the empty viewer and disables exports. Map numbers stay unique after closing and
+reopening maps. Close is disabled during image/FITS requests to avoid races.
+Up to 64 tiles are held in memory
 per tab, including their full-resolution preview canvases. Reloading or closing
 the tab clears them. Run `npm test` for backend and sky-map regression checks.
 

@@ -28,6 +28,7 @@ const directions = [
 ];
 let selectedTile = null;
 let tileCount = 0;
+let nextMapId = 1;
 const tileLimit = 64;
 function key(query) {
   return [query.ra, query.dec, query.wavelength, query.size].map(Number).join(':');
@@ -206,6 +207,9 @@ function initialMapRange(preview) {
 }
 
 function updateMapControls() {
+  document.querySelectorAll('.close-map').forEach(function (button) {
+    button.disabled = Boolean(activeController);
+  });
   document.querySelectorAll('.sky-arrow').forEach(function (button) {
     button.disabled = Boolean(activeController) || !selectedTile;
   });
@@ -219,6 +223,45 @@ function coordinates(query) {
 function centreMapTile(tile) {
   const scroller = tile.map.scroller;
   scroller.scrollTo({ left: Math.max(0, tile.map.grid.offsetLeft + tile.card.offsetLeft - (scroller.clientWidth - tile.card.offsetWidth) / 2), top: Math.max(0, tile.map.grid.offsetTop + tile.card.offsetTop - (scroller.clientHeight - tile.card.offsetHeight) / 2) });
+}
+function closeSkyMap(map) {
+  // Do not remove the target of an in-flight image or FITS request.
+  if (activeController || map.closed) return;
+  const index = skyMaps.indexOf(map);
+  if (index === -1) return;
+  const wasSelected = selectedTile && selectedTile.map === map;
+  map.closed = true;
+  skyMaps.splice(index, 1);
+  tileCount -= map.tiles.size;
+  map.panning.observer?.disconnect();
+  map.section.remove();
+  map.tiles.clear();
+  map.lastSelectedTile = null;
+  mapCount.textContent = tileCount + ' / ' + tileLimit + ' tiles kept in this tab';
+  if (wasSelected) {
+    selectedTile = null;
+    const remaining = skyMaps[skyMaps.length - 1];
+    if (remaining) selectTile(remaining.lastSelectedTile || remaining.tiles.values().next().value, true);
+  }
+  if (!skyMaps.length) {
+    selectedTile = null;
+    currentFitsUrl = null;
+    currentName = 'spherex-cutout';
+    canvas.width = canvas.height = 1;
+    canvas.classList.remove('visible');
+    canvas.setAttribute('aria-label', 'Selected image for PNG export');
+    emptyState.hidden = false;
+    pngButton.disabled = fitsButton.disabled = true;
+    ['meta-observation', 'meta-band', 'meta-size'].forEach(function (id) { document.getElementById(id).textContent = '—'; });
+    document.getElementById('selected-position').textContent = 'All sky maps closed. Choose coordinates to start a new map.';
+    openIrsa.href = 'https://irsa.ipac.caltech.edu/applications/spherex/';
+    statusText.title = '';
+  }
+  updateMapControls();
+  setStatus(skyMaps.length ? 'ready' : 'idle', 'Sky map ' + map.id + ' closed — ' + (skyMaps.length ? 'other maps retained' : 'ready for a new map'));
+  // Keep keyboard focus useful after its close button leaves the document.
+  const remaining = skyMaps[skyMaps.length - 1];
+  (remaining ? remaining.closeButton : submitButton).focus({ preventScroll: true });
 }
 function selectTile(tile, cached) {
   if (selectedTile) {
@@ -254,20 +297,31 @@ function selectTile(tile, cached) {
   centreMapTile(tile);
 }
 function createSkyMap(query, grid, range, observation) {
-  const map = { origin: { ...query }, tiles: new Map(), imageGrid: grid, range: range, observation: observation };
+  const map = { id: nextMapId++, origin: { ...query }, tiles: new Map(), imageGrid: grid, range: range, observation: observation };
   const section = document.createElement('section');
   section.className = 'sky-map';
   const heading = document.createElement('h3');
-  heading.textContent = 'Map ' + (skyMaps.length + 1) + ' · ' + query.wavelength + ' µm · connected image grid';
+  heading.textContent = 'Map ' + map.id + ' · ' + query.wavelength + ' µm · connected image grid';
   const toolbar = document.createElement('div');
   toolbar.className = 'map-toolbar';
   const centre = document.createElement('button');
   centre.type = 'button';
   centre.className = 'action';
   centre.textContent = 'Centre selected';
-  centre.setAttribute('aria-label', 'Centre selected image in map ' + (skyMaps.length + 1));
+  centre.setAttribute('aria-label', 'Centre selected image in map ' + map.id);
   centre.addEventListener('click', function () { if (map.lastSelectedTile) centreMapTile(map.lastSelectedTile); });
-  toolbar.append(heading, centre);
+  const close = document.createElement('button');
+  close.type = 'button';
+  close.className = 'action close-map';
+  close.textContent = '× Close';
+  close.setAttribute('aria-label', 'Close sky map ' + map.id);
+  close.title = 'Close this map and its tiles. Other maps stay open.';
+  close.addEventListener('click', function () { closeSkyMap(map); });
+  map.closeButton = close;
+  const actions = document.createElement('div');
+  actions.className = 'map-toolbar-actions';
+  actions.append(centre, close);
+  toolbar.append(heading, actions);
   section.append(toolbar);
   const scroller = document.createElement('div');
   scroller.className = 'map-scroll';
@@ -280,6 +334,7 @@ function createSkyMap(query, grid, range, observation) {
   section.append(scroller);
   map.grid = imageBoard;
   map.scroller = scroller;
+  map.section = section;
   mapList.prepend(section);
   map.panning = installMapPanning(scroller, imageBoard);
   skyMaps.push(map);

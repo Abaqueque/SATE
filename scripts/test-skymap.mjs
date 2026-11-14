@@ -36,8 +36,10 @@ class Element {
   }
   addEventListener(name, handler) { this.listeners[name] = handler; }
   setAttribute(name, value) { this.attributes[name] = value; }
-  append(...children) { this.children.push(...children); }
-  prepend(child) { this.children.unshift(child); }
+  append(...children) { this.children.push(...children); children.forEach(child => { child.parent = this; }); }
+  prepend(child) { this.children.unshift(child); child.parent = this; }
+  remove() { this.removed = true; if (this.parent) this.parent.children.splice(this.parent.children.indexOf(this), 1); }
+  focus() { this.focused = true; }
   scrollTo(position) { this.scrollPosition = position; }
   getContext() { return this.context; }
   click() { if (!this.disabled) return this.listeners.click?.(); }
@@ -127,6 +129,9 @@ read('navigateTile(selectedTile, directions[3])');
 await new Promise(setImmediate);
 assert.equal(rootTile.card.children[1].disabled, true);
 assert.equal(savedNorth.selectButton.disabled, true);
+assert.equal(rootTile.map.closeButton.disabled, true, 'Closing is disabled during a request');
+read('closeSkyMap(skyMaps[0])');
+assert.equal(read('skyMaps.length'), 1, 'A pending request must not write into a removed map');
 ids.get('cancel-button').click();
 while (read('activeController')) await new Promise(setImmediate);
 assert.equal(read('tileCount'), 4);
@@ -158,4 +163,51 @@ assert.match(ids.get('status-text').textContent, /memory limit/);
 read('navigateTile(selectedTile, directions[0])');
 assert.equal(read('selectedTile'), savedNorth);
 assert.equal(read('skyMaps[0].tiles.size'), 4);
-console.log('Sky geometry, four-way navigation, retained maps, reuse, per-tile arrows, Stop, errors, selection and capacity passed.');
+
+// Restore the real count after the synthetic capacity check.
+read('tileCount = 5');
+const inactive = read('skyMaps[1]');
+let disconnected = false;
+inactive.panning.observer = { disconnect() { disconnected = true; } };
+inactive.closeButton.click();
+assert.equal(disconnected, true);
+assert.equal(inactive.section.removed, true);
+assert.equal(inactive.tiles.size, 0);
+assert.equal(read('skyMaps.length'), 1);
+assert.equal(read('tileCount'), 4, 'Closing frees only that map\'s tile capacity');
+assert.equal(read('selectedTile'), savedNorth, 'Closing an inactive map preserves the current selection');
+assert.equal(ids.get('map-list').children.length, 1);
+
+await read('loadTile({ra:3,dec:3,wavelength:1,size:.1},null,0,0)');
+const third = read('skyMaps[1]');
+assert.equal(third.id, 3, 'Map IDs are not reused after a map is closed');
+assert.equal(third.closeButton.attributes['aria-label'], 'Close sky map 3');
+assert.equal(read('selectedTile.map'), third);
+third.closeButton.click();
+assert.equal(read('selectedTile'), savedNorth, 'Closing the active map selects a remaining map');
+assert.equal(read('currentFitsUrl'), savedNorth.preview.fitsUrl);
+assert.equal(ids.get('meta-observation').textContent, savedNorth.preview.observation);
+assert.equal(ids.get('download-png').disabled, false);
+assert.equal(read('tileCount'), 4);
+third.closeButton.click();
+assert.equal(read('tileCount'), 4, 'Repeated close cannot subtract capacity twice');
+
+rootTile.map.closeButton.click();
+assert.equal(read('skyMaps.length'), 0);
+assert.equal(read('tileCount'), 0);
+assert.equal(read('selectedTile'), null);
+assert.equal(read('currentFitsUrl'), null);
+assert.equal(ids.get('empty-state').hidden, false);
+assert.equal(ids.get('download-png').disabled, true);
+assert.equal(ids.get('download-fits').disabled, true);
+assert.equal(ids.get('meta-observation').textContent, '—');
+assert.equal(ids.get('map-list').children.length, 0);
+assert.equal(ids.get('submit-button').focused, true);
+assert.match(ids.get('map-count').textContent, /^0 \/ 64/);
+
+await read('loadTile(' + root + ', null, 0, 0)');
+assert.equal(read('skyMaps[0].id'), 4);
+assert.equal(read('tileCount'), 1);
+assert.equal(ids.get('empty-state').hidden, true);
+assert.equal(ids.get('download-png').disabled, false);
+console.log('Sky-map navigation, retention, Stop, capacity, close selection fallback, observer cleanup, last-map reset and reopening passed.');
