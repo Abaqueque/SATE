@@ -56,3 +56,12 @@
 .cell-workspace .cell-rail :is(button,input,select,summary,a):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .cell-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 @media(max-width:850px){.cell-workspace .cell-rail{height:min(680px,85dvh);min-height:420px}.cell-rail-scroll{padding:20px}.cell-workspace .cell-rail-footer{padding:14px 20px 16px}}
+
+/* Full-height native hit areas, including Safari and touch. */
+.cell-workspace .cell-layer-hue input[type=range]{height:28px;margin:0;background:transparent;touch-action:none}
+.cell-workspace .cell-layer-hue input::-webkit-slider-runnable-track{height:7px;border-radius:8px;background:linear-gradient(to right,#e65b5b,#e6ce5b,#61c96c,#5bc9ce,#6379e6,#cf5bd7,#e65b5b)}
+.cell-workspace .cell-layer-hue input::-webkit-slider-thumb{margin-top:-5px;width:17px;height:17px}
+.cell-workspace .cell-layer-hue input::-moz-range-track{height:7px;border-radius:8px;background:linear-gradient(to right,#e65b5b,#e6ce5b,#61c96c,#5bc9ce,#6379e6,#cf5bd7,#e65b5b)}
+.cell-workspace .cell-rail input[type=range],.cell-workspace #cell-zoom,.cell-workspace #cell-compare-opacity{min-height:28px;touch-action:none}
+
+#cell-estimate-status{display:block;font-size:11px;line-height:1.5;color:var(--muted);margin:6px 0}#cell-estimate-status:empty{display:none}

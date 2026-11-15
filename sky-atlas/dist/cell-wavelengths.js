@@ -71,7 +71,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   layer.card.querySelector('.cell-layer-hue').hidden=!layer.colour;layer.card.querySelector('.cell-layer-hue output').textContent=layer.hue+'°';
   layer.card.querySelector('.cell-colour-swatch').style.background=layer.colour?'hsl('+layer.hue+' 85% 65%)':'#c3c3c3';
  }
- function update(){
+ function update(persist=true){
   let number=2;const hiddenNumbers=base.visible?[]:[1];
   for(const panel of panels.values()){
    panel.number=number;const name=`Layer ${number}`;
@@ -79,14 +79,15 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
    controls(panel,number);if(!panel.visible)hiddenNumbers.push(number);number++;
   }
   controls(base,1);button.disabled=panels.size>=4;root.querySelector('#cell-wavelength-limit').hidden=panels.size<4;
-  onChange([...panels.values()].map(p=>p.channel));
+  if(persist){onChange([...panels.values()].map(p=>p.channel));
   const u=new URL(location.href);if(hiddenNumbers.length)u.searchParams.set('hiddenLayers',hiddenNumbers.join(','));else u.searchParams.delete('hiddenLayers');
-  if(panels.size)u.searchParams.set('layerOpacity',[...panels.values()].map(p=>Math.round(p.opacity*100)).join(','));else u.searchParams.delete('layerOpacity');const colourLayers=[base,...panels.values()];if(colourLayers.some(l=>l.colour))u.searchParams.set('layerHue',colourLayers.map(l=>l.colour?l.hue:'gray').join(','));else u.searchParams.delete('layerHue');history.replaceState({},'',u.pathname+u.search);
+  if(panels.size)u.searchParams.set('layerOpacity',[...panels.values()].map(p=>Math.round(p.opacity*100)).join(','));else u.searchParams.delete('layerOpacity');const colourLayers=[base,...panels.values()];if(colourLayers.some(l=>l.colour))u.searchParams.set('layerHue',colourLayers.map(l=>l.colour?l.hue:'gray').join(','));else u.searchParams.delete('layerHue');history.replaceState({},'',u.pathname+u.search);}
   redraw();
  }
  function bindColour(layer){
   layer.card.querySelector('.cell-colour-toggle').onchange=e=>{layer.colour=e.target.checked;update();};
-  layer.card.querySelector('.cell-layer-hue input').oninput=e=>{layer.hue=Number(e.target.value);layer.colour=true;update();};
+  layer.card.querySelector('.cell-layer-hue input').onchange=()=>update();
+  layer.card.querySelector('.cell-layer-hue input').oninput=e=>{layer.hue=Number(e.target.value);layer.colour=true;update(false);};
  }
  const sideNames={left:'L',right:'R'};
  function details(panel){
@@ -134,7 +135,8 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   panels.set(id,panel);layerList.append(card);resetLayer(panel);const select=card.querySelector('select');select.value=String(channel);card.querySelector('.cell-layer-opacity input').value=panel.opacity*100;bindColour(panel);
   select.onchange=()=>{panel.channel=Number(select.value);resetLayer(panel);refresh();update();};
   card.querySelector('.cell-layer-visible').onclick=()=>{panel.visible=!panel.visible;update();};
-  card.querySelector('.cell-layer-opacity input').oninput=e=>{panel.opacity=Number(e.target.value)/100;update();};
+  card.querySelector('.cell-layer-opacity input').onchange=()=>update();
+  card.querySelector('.cell-layer-opacity input').oninput=e=>{panel.opacity=Number(e.target.value)/100;update(false);};
   card.querySelector('.cell-layer-remove').onclick=()=>{panel.controller?.abort();panels.delete(id);card.remove();refresh();update();button.focus();};
   card.querySelector('.cell-retry').onclick=refresh;update();refresh();if(focus){select.focus();card.scrollIntoView({block:'nearest'});}
  }

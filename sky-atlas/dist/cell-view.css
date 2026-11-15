@@ -116,6 +116,13 @@ html .cell-workspace .cell-stage canvas{background:#000}
 .cell-width-form button{min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:5px;font-size:11px;white-space:nowrap}
 @media(max-width:850px){.cell-width-form{grid-column:1/-1}}
 
+/* Dates stay attached to the handles during drag and keyboard selection. */
+.cell-timeline-handle .cell-timeline-date{display:none;position:absolute;bottom:38px;left:50%;transform:translateX(-50%);width:max-content;max-width:210px;padding:7px 9px;border:1px solid var(--border-control);border-radius:5px;background:var(--surface-raised);color:var(--ink);font:11px/1.4 var(--sans);box-shadow:0 3px 12px #0003;z-index:5;white-space:nowrap}
+.cell-timeline-handle.right .cell-timeline-date{bottom:auto;top:37px}
+.cell-timeline-handle.scrubbing .cell-timeline-date,.cell-scrub-track:has(#cell-scrub-left:focus-visible) .left .cell-timeline-date,.cell-scrub-track:has(#cell-scrub-right:focus-visible) .right .cell-timeline-date{display:block}
+.cell-timeline-handle.near-start .cell-timeline-date{left:0;transform:none}.cell-timeline-handle.near-end .cell-timeline-date{left:auto;right:0;transform:none}
+.cell-workspace input[type=range]{touch-action:pan-y}
+.cell-workspace .cell-scrub-track input[type=range]{touch-action:none}
 /* Reserve a stable viewport while dates, progress and retry controls change. */
 .cell-workspace{grid-template-rows:minmax(0,1fr) 250px}
 .cell-workspace .cell-timeline{height:250px;min-height:250px;overflow:auto;box-sizing:border-box}

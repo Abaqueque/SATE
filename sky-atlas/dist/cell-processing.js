@@ -36,8 +36,9 @@ export function groupVisits(observations){
  }return [...days.values()];
 }
 
-export function displayScale(frame){
+export function displayScale(frame,{stretch='sources'}={}){
  const sample=Array.from(frame.values).filter(Number.isFinite).sort((a,b)=>a-b);
+ if(stretch==='detail'&&sample.length){const low=sample[Math.floor(sample.length*.01)],high=sample[Math.floor((sample.length-1)*.998)],span=Math.max(1e-8,high-low);return {background:low,sigma:span*.015,high:span,gamma:1};}
  const background=sample.length?sample[Math.floor(sample.length*.5)]:0;
  const deviations=sample.map(v=>Math.abs(v-background)).sort((a,b)=>a-b);
  const errors=Array.from(frame.variance||[]).filter(v=>v>0&&Number.isFinite(v)).map(Math.sqrt).sort((a,b)=>a-b);
@@ -47,7 +48,7 @@ export function displayScale(frame){
 export function cleanLevel(value,scale,contrast=1){
  if(!Number.isFinite(value))return 0;
  const excess=Math.max(0,value-scale.background)*contrast;
- return Math.min(1,Math.asinh(excess/(3*scale.sigma))/Math.asinh(scale.high/(3*scale.sigma)))**1.6;
+ return Math.min(1,Math.asinh(excess/(3*scale.sigma))/Math.asinh(scale.high/(3*scale.sigma)))**(scale.gamma??1.6);
 }
 export function drawClean(canvas,frame,scale,contrast=1){
  canvas.width=frame.width;canvas.height=frame.height;
