@@ -111,12 +111,8 @@ export async function handleObservations(request) {
   try {
     const cacheKey=JSON.stringify(region),cached=cachedObservations(cacheKey);if(cached)return json(cached);
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(50000)]);
-    // Three cones at a time: measured as fast as nine at once, and gentler on the archive.
-    const circles = searchCircles(region), rows = [];
-    let next = 0;
-    await Promise.all(Array.from({ length: Math.min(3, circles.length) }, async () => {
-      while (next < circles.length) rows.push(...await searchCircle(region, circles[next++], signal));
-    }));
+    const circles = searchCircles(region);
+    const rows = (await Promise.all(circles.map(circle => searchCircle(region, circle, signal)))).flat();
     const observations = [], seen = new Set();
     for (const row of rows) {
       const url = new URL(row.access_url);
