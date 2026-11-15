@@ -1,0 +1,26 @@
+{
+  "queried": "2026-11-15T09:13:52.731Z",
+  "width": 0.2,
+  "channel": 32,
+  "qualification": "Header footprint coverage only; final finite-pixel coverage may exclude more frames",
+  "results": [
+    {
+      "name": "Orion",
+      "ra": 83.8221,
+      "dec": -5.3911,
+      "wavelength": 1.592,
+      "archiveCandidates": 59,
+      "rawRows": 59,
+      "checked": 59,
+      "failed": 0,
+      "centreCovered": 58,
+      "exactWavelength": 3,
+      "nearbyCoverage80": 57,
+      "exactCoverage80": 3,
+      "dates": [
+        "2025-09-09T19:59:56.947Z",
+        "2026-10-04T08:04:02.841Z"
+      ]
+    }
+  ]
+}

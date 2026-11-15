@@ -23,3 +23,7 @@ export function nearestExposure(observations,position){
  const list=[...observations].sort((a,b)=>a.mjd-b.mjd),target=list[0].mjd+Math.max(0,Math.min(1,position))*(list.at(-1).mjd-list[0].mjd);
  return list.reduce((closest,obs)=>Math.abs(obs.mjd-target)<Math.abs(closest.mjd-target)?obs:closest,list[0]);
 }
+
+export function exposureAvailability(items){
+ return {candidates:items.length,ready:items.filter(o=>o.match&&!o.unusable).length,pending:items.filter(o=>!o.checked).length,coverage:items.filter(o=>o.rejection==='coverage').length,wavelength:items.filter(o=>o.rejection==='wavelength').length,centre:items.filter(o=>o.rejection==='centre').length,failed:items.filter(o=>o.infoError).length};
+}

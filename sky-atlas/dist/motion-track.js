@@ -47,7 +47,7 @@ export function mountMotion(root,{panes,cell,project,unproject,toPixel,toSky,get
    const add=(name,attrs,text)=>{const el=document.createElementNS(svg.namespaceURI,name);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);if(text)el.textContent=text;svg.append(el);return el;};
    const ordered=[...points].sort((a,b)=>Date.parse(a.date)-Date.parse(b.date)).filter(p=>Date.parse(p.date)<=Date.parse(panel.current.obs.date)),xy=ordered.map(p=>project(panel,p.ra,p.dec));
    if(enabled){for(let i=1;i<xy.length;i++)if(xy[i-1]&&xy[i])add('line',{x1:xy[i-1][0],y1:xy[i-1][1],x2:xy[i][0],y2:xy[i][1],stroke:'#ffb55c','stroke-width':1.5});
-    xy.forEach((p,i)=>{if(!p||(i!==0&&i!==xy.length-1))return;add('circle',{cx:p[0],cy:p[1],r:ordered[i].path===panel.path?6:4,fill:'none',stroke:i===0?'#6dffc2':'#ffb55c','stroke-width':i===0?1.5:1.25,'stroke-opacity':.4});add('text',{x:p[0]+10,y:p[1]+(i===0?20:-10),fill:i===0?'#6dffc2':'#ffcf8b','font-size':11},i===0?'Start':'End');});}
+    xy.forEach((p,i)=>{if(!p||(i!==0&&i!==xy.length-1))return;add('circle',{cx:p[0],cy:p[1],r:ordered[i].path===panel.path?6:4,fill:'none',stroke:i===0?'#6dffc2':'#ffb55c','stroke-width':i===0?1.5:1.25,'stroke-opacity':.4});add('text',{x:p[0]+10,y:p[1]+(i===0?20:-10),fill:i===0?'#6dffc2':'#ffcf8b','font-size':11,stroke:'#080808','stroke-width':3,'stroke-linejoin':'round','paint-order':'stroke fill'},i===0?'Start':'End');});}
 
   }
  }

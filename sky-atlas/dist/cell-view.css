@@ -115,3 +115,12 @@ html .cell-workspace .cell-stage canvas{background:#000}
 .cell-width-form input{width:100%;min-height:38px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;background:var(--layer-control);color:var(--layer-text);font:13px var(--sans)}
 .cell-width-form button{min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:5px;font-size:11px;white-space:nowrap}
 @media(max-width:850px){.cell-width-form{grid-column:1/-1}}
+
+/* Reserve a stable viewport while dates, progress and retry controls change. */
+.cell-workspace{grid-template-rows:minmax(0,1fr) 250px}
+.cell-workspace .cell-timeline{height:250px;min-height:250px;overflow:auto;box-sizing:border-box}
+.cell-workspace .cell-visit-times{height:34px;min-height:34px;flex-shrink:0}
+.cell-workspace .cell-visit-times:empty{display:flex}
+@media(max-width:850px){.cell-workspace{grid-template-rows:65vh 250px auto}}
+
+.cell-availability{font-size:11px;margin:14px 0}.cell-availability summary{cursor:pointer}.cell-availability output{display:block;white-space:pre-line;font:11px/1.8 var(--sans);margin-top:8px;color:var(--muted)}
