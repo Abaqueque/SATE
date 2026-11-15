@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findWavelengthObservation,wavelengthParameters,composeLayers} from '../sky-atlas/dist/cell-wavelengths.js';
+import {findWavelengthObservation,wavelengthParameters,composeLayers,createLayerTimeline} from '../sky-atlas/dist/cell-wavelengths.js';
 
 const wavelengths=[1,1.1,1.2],observations=Array.from({length:9},(_,i)=>({id:String(i),path:'/image'+i,band:'D1',mjd:60000+i}));
 test('additional wavelengths keep the same sky region and request their own band',()=>{
@@ -33,4 +33,30 @@ test('overlay compositor paints bottom to top, skips hidden layers and restores 
  composeLayers(ctx,[{canvas:'base',visible:true,opacity:1},{canvas:'hidden',visible:false,opacity:1},{canvas:'middle',visible:true,opacity:.5},{canvas:'transparent',visible:true,opacity:0},{canvas:'top',visible:true,opacity:1}]);
  assert.deepEqual(calls,[['base',1,'source-over',0,0],['middle',.5,'source-over',0,0],['top',1,'source-over',0,0]]);
  assert.equal(ctx.globalAlpha,.3);assert.equal(ctx.globalCompositeOperation,'multiply');
+});
+
+const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
+test('timeline commits every layer together and keeps left and right independent',async()=>{
+ const layers=[{id:1},{id:2}],requests=[],commits=[];
+ const timeline=createLayerTimeline({layers:()=>layers,load:(layer,target)=>{const job=deferred();requests.push({layer,target,job});return job.promise;},onCommit:(side,result)=>commits.push({side,result})});
+ const left=timeline.sync('left',{mjd:60000}),right=timeline.sync('right',{mjd:60300});
+ requests[0].job.resolve('early-one');await Promise.resolve();assert.equal(commits.length,0);assert(timeline.pending('left'));
+ requests[2].job.resolve('late-one');requests[3].job.resolve('late-two');await right;
+ assert.equal(commits.length,1);assert.equal(commits[0].side,'right');assert(timeline.pending('left'));
+ requests[1].job.resolve('early-two');await left;assert.deepEqual(commits[1].result.map(r=>r.value),['early-one','early-two']);assert(!timeline.pending('left'));
+});
+test('rapid timeline seeks cancel obsolete stacks even when the old request resolves last',async()=>{
+ const requests=[],commits=[],timeline=createLayerTimeline({layers:()=>[1],load:(layer,target,signal)=>{const job=deferred();requests.push({job,signal});return job.promise;},onCommit:(side,result,target)=>commits.push(target.mjd)});
+ const old=timeline.sync('left',{mjd:1}),latest=timeline.sync('left',{mjd:2});assert(requests[0].signal.aborted);
+ requests[1].job.resolve('new');await latest;requests[0].job.resolve('old');await old;assert.deepEqual(commits,[2]);
+ const closed=timeline.sync('left',{mjd:3});timeline.close();requests[2].job.resolve('closed');await closed;assert.deepEqual(commits,[2]);
+});
+test('an unavailable layer resolves the stack with an error rather than leaving old data',async()=>{
+ let committed;const timeline=createLayerTimeline({layers:()=>[1,2],load:async layer=>{if(layer===2)throw Error('Unavailable');return 'new-frame';},onCommit:(side,result)=>committed=result});
+ await timeline.sync('left',{mjd:60000});assert.equal(committed[0].value,'new-frame');assert.equal(committed[1].error.message,'Unavailable');assert(!timeline.pending('left'));
+});
+test('wavelength observations follow both ends of the timeline',async()=>{
+ const args={observations,wavelengths,channel:1,signal:new AbortController().signal,inspect:async()=>({covered:true,wavelength:1.1})};
+ const early=await findWavelengthObservation({...args,anchorMjd:60000}),late=await findWavelengthObservation({...args,anchorMjd:60008});
+ assert.equal(early.obs.id,'0');assert.equal(late.obs.id,'8');
 });

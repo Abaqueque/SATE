@@ -29,6 +29,22 @@ export function composeLayers(context,layers){
  context.restore();
 }
 
+// One generation per viewport. Commit a complete stack only after every layer
+// has resolved; superseded requests can never replace a newer timeline position.
+export function createLayerTimeline({layers,load,onPending=()=>{},onCommit=()=>{}}){
+ const jobs=new Map();let closed=false;
+ async function sync(side,target){
+  jobs.get(side)?.controller.abort();
+  const job={controller:new AbortController(),pending:!!target};jobs.set(side,job);
+  const selected=[...layers()];onPending(side,target,selected);
+  if(!target){job.pending=false;onCommit(side,[],target);return;}
+  const results=await Promise.all(selected.map(async layer=>{try{return {layer,value:await load(layer,target,job.controller.signal)};}catch(error){return {layer,error};}}));
+  if(closed||job.controller.signal.aborted||jobs.get(side)!==job)return;
+  job.pending=false;onCommit(side,results,target);
+ }
+ return {sync,pending:side=>jobs.get(side)?.pending??false,clear(){for(const job of jobs.values())job.controller.abort();jobs.clear();},close(){closed=true;this.clear();}};
+}
+
 export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,anchor,onChange}){
  const panels=new Map(),button=root.querySelector('#cell-add-wavelength'),layerList=root.querySelector('#cell-layer-list');
  let nextId=0,dead=false;
@@ -53,36 +69,56 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   if(panels.size)u.searchParams.set('layerOpacity',[...panels.values()].map(p=>Math.round(p.opacity*100)).join(','));else u.searchParams.delete('layerOpacity');history.replaceState({},'',u.pathname+u.search);
   redraw();
  }
- const message=(panel,text)=>{panel.card.querySelector('.cell-layer-status').textContent=text;};
- async function load(panel){
-  panel.controller?.abort();const controller=new AbortController();panel.controller=controller;const {signal}=controller;
-  panel.current=null;panel.card.querySelector('time').textContent='';panel.card.querySelector('.cell-layer-source').textContent='';panel.card.querySelector('.cell-retry').hidden=true;redraw();
-  const params=wavelengthParameters(position,metadata.wavelengths,panel.channel),target=anchor();message(panel,'Finding this wavelength…');
-  const read=async url=>{const r=await fetch(url,{signal}),data=await r.json();if(!r.ok)throw Error(data.error||'Archive unavailable.');return data;};
-  try{
-   const data=await read('/api/observations?'+params);
-   const {obs,failures}=await findWavelengthObservation({observations:data.observations,wavelengths:metadata.wavelengths,channel:panel.channel,anchorMjd:target?.mjd,signal,inspect:o=>{const query=new URLSearchParams(params);query.set('image',o.path);return read('/api/frame-info?'+query);}});
-   if(dead||signal.aborted)return;
-   if(!obs){message(panel,failures?'Some observations unavailable. Retry or choose another wavelength.':'No observations at this wavelength. Choose another band.');panel.card.querySelector('.cell-retry').hidden=!failures;return;}
-   message(panel,'Loading image…');const frame=await loadFrame(obs,signal,params,panel.channel);if(dead||signal.aborted)return;
-   panel.current={...frame,individual:frame,obs};message(panel,failures?'Some dates unavailable':'');
-   panel.card.querySelector('time').textContent=new Date(obs.date).toLocaleString('en-AU',{timeZone:'UTC'})+' UTC';
-   panel.card.querySelector('.cell-layer-source').textContent=`${obs.wavelength.toFixed(3)} µm · ${target?'Closest to '+new Date(target.date).toLocaleDateString('en-AU',{timeZone:'UTC'}):'Earliest available observation'}`;redraw();
-  }catch(error){if(dead||signal.aborted)return;message(panel,'Could not load: '+error.message);panel.card.querySelector('.cell-retry').hidden=false;}
+ const sideNames={left:'L',right:'R'};
+ function details(panel){
+  const messages=[];
+  for(const side of ['left','right']){
+   const current=panel.current[side],time=panel.card.querySelector(`[data-layer-date="${side}"]`),band=panel.card.querySelector(`[data-layer-band="${side}"]`);
+   time.textContent=current?new Date(current.obs.date).toLocaleString('en-AU',{timeZone:'UTC'})+' UTC':'—';
+   band.textContent=current?current.obs.wavelength.toFixed(3)+' µm':'';
+   if(panel.status[side])messages.push(sideNames[side]+': '+panel.status[side]);
+  }
+  panel.card.querySelector('.cell-layer-status').textContent=messages.join(' · ');
+  panel.card.querySelector('.cell-retry').hidden=!Object.values(panel.errors).some(Boolean);
  }
+ function resetLayer(panel){
+  panel.controller?.abort();panel.controller=new AbortController();panel.catalog=null;panel.infos=new Map();panel.current={};panel.status={};panel.errors={};details(panel);
+ }
+ async function read(url,signal){const r=await fetch(url,{signal}),data=await r.json();if(!r.ok)throw Error(data.error||'Archive unavailable.');return data;}
+ async function loadAt(panel,target,seekSignal){
+  const signal=AbortSignal.any([seekSignal,panel.controller.signal]),params=wavelengthParameters(position,metadata.wavelengths,panel.channel),channel=panel.channel;
+  // Share catalogue/header work between dates, while cancelling obsolete frames.
+  if(!panel.catalog){const request=read('/api/observations?'+params,panel.controller.signal);panel.catalog=request;request.catch(()=>{if(panel.catalog===request)panel.catalog=null;});}
+  const data=await panel.catalog;signal.throwIfAborted();
+  const {obs,failures}=await findWavelengthObservation({observations:data.observations,wavelengths:metadata.wavelengths,channel,anchorMjd:target.mjd,signal,inspect:o=>{
+   if(!panel.infos.has(o.path)){const query=new URLSearchParams(params);query.set('image',o.path);const request=read('/api/frame-info?'+query,panel.controller.signal);panel.infos.set(o.path,request);request.catch(()=>{if(panel.infos.get(o.path)===request)panel.infos.delete(o.path);});}
+   return panel.infos.get(o.path);
+  }});
+  signal.throwIfAborted();if(!obs)return {current:null,error:failures>0,status:failures?'Some observations unavailable. Retry.':'No observations at this wavelength.'};
+  const frame=await loadFrame(obs,signal,params,channel);signal.throwIfAborted();
+  return {current:{...frame,individual:frame,obs},error:failures>0,status:failures?'Some dates unavailable':''};
+ }
+ const timeline=createLayerTimeline({layers:()=>panels.values(),load:loadAt,
+  onPending(side,target,selected){for(const panel of selected){panel.status[side]=target?'Updating layers…':'Choose a timeline date';panel.errors[side]=false;details(panel);}redraw();},
+  onCommit(side,results,target){
+   for(const panel of panels.values()){const result=results.find(r=>r.layer===panel);panel.current[side]=result?.value?.current||null;panel.errors[side]=!!(result?.error||result?.value?.error);panel.status[side]=result?.error?'Could not load: '+result.error.message:result?.value?.status||(!target?'Choose a timeline date':'');details(panel);}
+   redraw();
+  }
+ });
+ const refresh=()=>{for(const side of ['left','right'])void timeline.sync(side,anchor(side));};
  function add(channel,{focus=true}={}){
   if(dead||panels.size>=4)return;
   const id=++nextId,index=panels.size,card=document.createElement('section');card.className='cell-layer-card';
-  card.innerHTML=`<div class="cell-layer-title"><h2></h2><button type="button" class="cell-layer-visible" aria-pressed="true">Visible</button><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field">Wavelength<select>${options}</select></label><label class="cell-field cell-layer-opacity"><span>Opacity <output>100%</output></span><input type="range" min="0" max="100" step="1" value="100"></label><time></time><p class="cell-layer-source"></p><p class="cell-layer-status" role="status"></p><button type="button" class="cell-retry" hidden>Retry</button>`;
-  const restoredOpacity=Number(opacities[index]),panel={channel,card,current:null,visible:focus||!hidden.includes(String(index+2)),opacity:!focus&&opacities[index]?.trim()&&Number.isFinite(restoredOpacity)?Math.max(0,Math.min(100,restoredOpacity))/100:1};
-  panels.set(id,panel);layerList.append(card);const select=card.querySelector('select');select.value=String(channel);card.querySelector('[type=range]').value=panel.opacity*100;
-  select.onchange=()=>{panel.channel=Number(select.value);void load(panel);update();};
+  card.innerHTML=`<div class="cell-layer-title"><h2></h2><button type="button" class="cell-layer-visible" aria-pressed="true">Visible</button><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field">Wavelength<select>${options}</select></label><label class="cell-field cell-layer-opacity"><span>Opacity <output>100%</output></span><input type="range" min="0" max="100" step="1" value="100"></label><div class="cell-layer-dates"><div><b>L</b> <time data-layer-date="left">—</time><span data-layer-band="left"></span></div><div><b>R</b> <time data-layer-date="right">—</time><span data-layer-band="right"></span></div></div><p class="cell-layer-status" role="status"></p><button type="button" class="cell-retry" hidden>Retry</button>`;
+  const restoredOpacity=Number(opacities[index]),panel={channel,card,current:{},status:{},errors:{},visible:focus||!hidden.includes(String(index+2)),opacity:!focus&&opacities[index]?.trim()&&Number.isFinite(restoredOpacity)?Math.max(0,Math.min(100,restoredOpacity))/100:1};
+  panels.set(id,panel);layerList.append(card);resetLayer(panel);const select=card.querySelector('select');select.value=String(channel);card.querySelector('[type=range]').value=panel.opacity*100;
+  select.onchange=()=>{panel.channel=Number(select.value);resetLayer(panel);refresh();update();};
   card.querySelector('.cell-layer-visible').onclick=()=>{panel.visible=!panel.visible;update();};
   card.querySelector('[type=range]').oninput=e=>{panel.opacity=Number(e.target.value)/100;update();};
-  card.querySelector('.cell-layer-remove').onclick=()=>{panel.controller?.abort();panels.delete(id);card.remove();update();button.focus();};
-  card.querySelector('.cell-retry').onclick=()=>void load(panel);update();void load(panel);if(focus){select.focus();card.scrollIntoView({block:'nearest'});}
+  card.querySelector('.cell-layer-remove').onclick=()=>{panel.controller?.abort();panels.delete(id);card.remove();refresh();update();button.focus();};
+  card.querySelector('.cell-retry').onclick=refresh;update();refresh();if(focus){select.focus();card.scrollIntoView({block:'nearest'});}
  }
  base.card=root.querySelector('.cell-base-layer');controls(base,1);base.card.querySelector('.cell-layer-visible').onclick=()=>{base.visible=!base.visible;update();};
  button.disabled=false;button.onclick=()=>{const used=new Set([Number(root.querySelector('#cell-wave').value),...[...panels.values()].map(p=>p.channel)]),baseChannel=Number(root.querySelector('#cell-wave').value),start=Number.isInteger(baseChannel)?baseChannel:62;let chosen=(start+1)%metadata.wavelengths.length;while(used.has(chosen))chosen=(chosen+1)%metadata.wavelengths.length;add(chosen);};
- return {panels,base,add,close(){dead=true;for(const p of panels.values())p.controller?.abort();panels.clear();}};
+ return {panels,base,add,sync:timeline.sync,pending:timeline.pending,clear(){timeline.clear();for(const panel of panels.values()){panel.current={};panel.status={};details(panel);}},close(){dead=true;timeline.close();for(const p of panels.values())p.controller?.abort();panels.clear();}};
 }
