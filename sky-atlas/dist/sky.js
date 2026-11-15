@@ -30,8 +30,9 @@ export async function mountSky(){
   const initial=selected?center(selected.id,selected.order):{ra:266.4,dec:-29};
   viewer=A.aladin('#aladin-sky',{survey,target:`${initial.ra} ${initial.dec}`,fov:selected?Math.min(360,Math.max(.48,CELL_ARCMIN/60*2**(ORDER-selected.order)*1.4)):360,projection:'AIT',cooFrame:'ICRSd',showZoomControl:false,showLayersControl:false,showFullscreenControl:false,showFrame:false,showProjectionControl:false,showStatusBar:false,showGotoControl:false,showReticle:false,showCooGrid:false,showFov:false,showCooLocation:false,log:false,inertia:false,backgroundColor:'#0c1a20'});
   // Aladin 3.8.1 destructures an absent inverse-projection result outside the
-  // sky ellipse. Return the undefined coordinate its own event handlers expect.
-  const projectPixel=viewer.pix2world.bind(viewer);viewer.pix2world=(...args)=>{try{return projectPixel(...args);}catch(error){if(error instanceof TypeError&&/not iterable/.test(error.message))return undefined;throw error;}};
+  // sky ellipse. Normalize that TypeError across browser engines; their error
+  // messages differ. Return the absent coordinate its own event handlers expect.
+  const projectPixel=viewer.pix2world.bind(viewer);viewer.pix2world=(...args)=>{try{return projectPixel(...args);}catch(error){if(error instanceof TypeError)return undefined;throw error;}};
   viewer.addColormap('sate-milky-way',MILKY_WAY_COLOURS);paletteReady=true;survey.setColormap('sate-milky-way');
   q('#sky-object-query').disabled=false;q('#sky-object-submit').disabled=false;objectMarker=A.catalog({name:'Search result',shape:'circle',sourceSize:18,color:'#d9ed98',displayLabel:true,labelColumn:'name',labelColor:'#e7efda',labelFont:'12px sans-serif'});viewer.addCatalog(objectMarker);
   overlay=A.graphicOverlay({color:'#9bb3a0',lineWidth:1});viewer.addOverlay(overlay);
