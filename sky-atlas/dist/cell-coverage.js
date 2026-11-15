@@ -12,3 +12,10 @@ export function requireFrameCoverage(frame){
  if(coverage<MIN_FIELD_COVERAGE)throw new InsufficientCoverageError(coverage);
  return frame;
 }
+
+// The cutout already carries its own WCS wavelength table and aligned coverage.
+// Native-band views can validate these pixels without a separate header request.
+export function frameCoverageInfo(frame){
+ const raw=frame.raw,values=raw.values;let finite=0;for(const value of values)if(Number.isFinite(value))finite++;
+ return {wavelength:raw.wavelength,covered:Number.isFinite(raw.wavelength),coverage:values.length?finite/values.length:0};
+}

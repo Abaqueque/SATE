@@ -27,7 +27,7 @@ export function demoTargetUrl(id,metadata){
  const target=demoTarget(id);if(!target)return null;
  const channel=metadata.wavelengths.reduce((best,w,i)=>!metadata.blankFrames.includes(i)&&(best<0||Math.abs(w-target.wave)<Math.abs(metadata.wavelengths[best]-target.wave))?i:best,-1);
  if(channel<0)return null;
- const params=new URLSearchParams({hpx:cellAt(target.ra,target.dec),order:9,view:'cell',example:target.id,channel,mode:'single',sourceRa:target.ra,sourceDec:target.dec,size:target.size,framing:'full',stretch:target.kind==='extended'?'detail':'sources',zoom:target.kind==='motion'?2:1});
+ const params=new URLSearchParams({hpx:cellAt(target.ra,target.dec),order:9,view:'cell',example:target.id,channel,mode:'single',nearby:'1',sourceRa:target.ra,sourceDec:target.dec,size:target.size,framing:'full',stretch:target.kind==='extended'?'detail':'sources',zoom:target.kind==='motion'?2:1});
  if(target.kind!=='extended'){params.set('dual','1');params.set('dates','ends');params.set('known','1');}
  if(target.kind==='motion')params.set('tracking','1');
  if(target.kind==='extended'){params.set('nearby','1');params.set('dual','1');params.set('waves',target.comparison.channel);params.set('layerTarget','left,right');params.set('layerNearby','2');params.set('exposure',target.comparison.exposure);params.set('compare',target.comparison.exposure);}

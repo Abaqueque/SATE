@@ -2,7 +2,7 @@ import {exampleSequenceUrl,compatibleExampleSequence,mergeExposureLists} from '.
 import {wavelengthOptions} from './wavelength-options.js';
 import {visibilityIcon} from './cell-sidebar.js';
 import {fieldWidth} from './cell-field.js';
-import {hasFieldCoverage} from './cell-coverage.js';
+import {hasFieldCoverage,frameCoverageInfo} from './cell-coverage.js';
 import {parseLayerHue} from './cell-colour.js';
 import {channelRange,inRanges,uniqueExposures} from './cell-selection.js';
 
@@ -88,7 +88,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   controls(base,1);button.disabled=panels.size>=4;root.querySelector('#cell-wavelength-limit').hidden=panels.size<4;
   if(persist){onChange([...panels.values()].map(p=>p.channel));
   const u=new URL(location.href),targets=[base,...panels.values()].map(p=>p.target);if(targets.some(t=>t!=='both'))u.searchParams.set('layerTarget',targets.join(','));else u.searchParams.delete('layerTarget');if(hiddenNumbers.length)u.searchParams.set('hiddenLayers',hiddenNumbers.join(','));else u.searchParams.delete('hiddenLayers');
-  const native=[...panels.values()].filter(p=>p.nearby).map(p=>p.number);if(native.length)u.searchParams.set('layerNearby',native.join(','));else u.searchParams.delete('layerNearby');
+  const native=[...panels.values()].filter(p=>p.nearby).map(p=>p.number);u.searchParams.set('layerNearby',native.join(','));
   if(panels.size)u.searchParams.set('layerOpacity',[...panels.values()].map(p=>Math.round(p.opacity*100)).join(','));else u.searchParams.delete('layerOpacity');const colourLayers=[base,...panels.values()];if(colourLayers.some(l=>l.colour))u.searchParams.set('layerHue',colourLayers.map(l=>l.colour?l.hue:'gray').join(','));else u.searchParams.delete('layerHue');history.replaceState({},'',u.pathname+u.search);}
   redraw();
  }
@@ -135,6 +135,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   if(!panel.catalog){const request=catalogue(panel,params);panel.catalog=request;request.catch(()=>{if(panel.catalog===request)panel.catalog=null;});}
   const data=await panel.catalog;signal.throwIfAborted();
   const {obs,frame,failures}=await findWavelengthObservation({observations:data.observations,wavelengths:metadata.wavelengths,channel,nearby:panel.nearby,anchorMjd:target.mjd,signal,load:o=>loadFrame(o,signal,params,channel),inspect:o=>{
+   if(!panel.infos.has(o.path)&&panel.nearby&&o.verifiedCoverage>=.8){const request=loadFrame(o,panel.controller.signal,params,channel).then(frameCoverageInfo);panel.infos.set(o.path,request);request.catch(()=>{if(panel.infos.get(o.path)===request)panel.infos.delete(o.path);});}
    if(!panel.infos.has(o.path)){const query=new URLSearchParams(params);query.set('image',o.path);query.set('coverage','field-v1');const request=read('/api/frame-info?'+query,panel.controller.signal);panel.infos.set(o.path,request);request.catch(()=>{if(panel.infos.get(o.path)===request)panel.infos.delete(o.path);});}
    return panel.infos.get(o.path);
   }});
@@ -154,7 +155,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   if(dead||panels.size>=4)return;
   const id=++nextId,index=panels.size,card=document.createElement('section');card.className='cell-layer-card';
   card.innerHTML=`<div class="cell-layer-title"><h3></h3><button type="button" class="cell-layer-visible" aria-pressed="true">Visible</button><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field"><span class="cell-sr-only">Wavelength</span><select>${options}</select></label>${targetMarkup}${colourMarkup}<details class="cell-layer-options"><summary>Options</summary><label class="cell-toggle"><input type="checkbox" class="cell-layer-nearby">Show nearby wavelengths</label><label class="cell-field cell-layer-opacity"><span>Opacity <output>100%</output></span><input type="range" min="0" max="100" step="1" value="100"></label><div class="cell-layer-dates"><div><b>Left</b> <time data-layer-date="left">—</time><span data-layer-band="left"></span></div><div><b>Right</b> <time data-layer-date="right">—</time><span data-layer-band="right"></span></div></div></details><p class="cell-layer-status" role="status"></p><button type="button" class="cell-retry" hidden>Retry</button>`;
-  const restoredOpacity=Number(opacities[index]),savedHue=focus?null:savedHues[index+1],panel={nearby:!focus&&nearbyLayers.includes(String(index+2)),target:focus?'both':layerTarget(savedTargets[index+1]),hue:savedHue??210,colour:savedHue!=null,channel,card,current:{},status:{},errors:{},visible:focus||!hidden.includes(String(index+2)),opacity:!focus&&opacities[index]?.trim()&&Number.isFinite(restoredOpacity)?Math.max(0,Math.min(100,restoredOpacity))/100:1};
+  const restoredOpacity=Number(opacities[index]),savedHue=focus?null:savedHues[index+1],panel={nearby:focus||(!saved.has('layerNearby')?!saved.has('viewSettings'):nearbyLayers.includes(String(index+2))),target:focus?'both':layerTarget(savedTargets[index+1]),hue:savedHue??210,colour:savedHue!=null,channel,card,current:{},status:{},errors:{},visible:focus||!hidden.includes(String(index+2)),opacity:!focus&&opacities[index]?.trim()&&Number.isFinite(restoredOpacity)?Math.max(0,Math.min(100,restoredOpacity))/100:1};
   panels.set(id,panel);layerList.append(card);resetLayer(panel);const select=card.querySelector('select');select.value=String(channel);card.querySelector('.cell-layer-opacity input').value=panel.opacity*100;bindColour(panel);const native=card.querySelector('.cell-layer-nearby');native.checked=panel.nearby;native.setAttribute('aria-label','Layer '+(index+2)+' nearby wavelengths');native.onchange=()=>{panel.nearby=native.checked;resetLayer(panel);refresh();update();};
   select.onchange=()=>{panel.channel=Number(select.value);resetLayer(panel);refresh();update();};
   card.querySelector('.cell-layer-visible').onclick=()=>{panel.visible=!panel.visible;update();};
