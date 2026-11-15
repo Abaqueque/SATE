@@ -15,6 +15,9 @@
     },
     "api/frame-info.js": {
       "maxDuration": 60
+    },
+    "api/object-search.js": {
+      "maxDuration": 20
     }
   },
   "headers": [
