@@ -50,6 +50,7 @@ body.explorer-page{background:var(--night)}.explorer-page .site-header{max-width
 
 /* Helvetica-led interface, Source Sans Pro prose and Merriweather headings. */
 p,.legal-content,.science-details,.sky-details,.tiny{font-family:var(--body)}
+.hero h1,#comparison-heading{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
 .hero h1{font-size:clamp(40px,4.5vw,66px);font-weight:700;line-height:1.16;letter-spacing:-.035em}
 .hero h1 em{font-style:normal;font-weight:inherit}
 .section-title{font-size:clamp(30px,3.3vw,46px);font-weight:700;line-height:1.22;letter-spacing:-.025em}
