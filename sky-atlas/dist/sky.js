@@ -1,3 +1,4 @@
+import {wavelengthOptions} from './wavelength-options.js';
 import {motionExamples,motionExampleUrl} from './motion-examples.js';
 import {demoTargets} from './demo-targets.js';
 import {mountSearchSuggestions} from './sky-search.js';
@@ -27,7 +28,7 @@ export async function mountSky(){
  try{
   const result=await Promise.all([import('./vendor/aladin-3.8.1.js'),fetch('/assets/spherex-survey.json').then(r=>{if(!r.ok)throw Error('Metadata unavailable');return r.json();})]);if(dead)return clean;A=result[0].default;metadata=result[1];await A.init;if(dead)return clean;
   const requested=Number(new URLSearchParams(location.search).get('channel'));if(new URLSearchParams(location.search).has('channel')&&Number.isInteger(requested)&&requested>=0&&requested<102&&!metadata.blankFrames.includes(requested))channel=requested;
-  q('#sky-wave').innerHTML=metadata.wavelengths.map((w,i)=>`<option value="${i}" ${i===channel?'selected':''} ${metadata.blankFrames.includes(i)?'disabled':''}>${w.toFixed(3)} µm${metadata.blankFrames.includes(i)?' — no data':''}</option>`).join('');q('#sky-wave').disabled=false;updatePanel();
+  q('#sky-wave').innerHTML=wavelengthOptions(metadata.wavelengths,{selected:channel,disabled:metadata.blankFrames});q('#sky-wave').disabled=false;updatePanel();
   survey=A.imageHiPS(metadata.url,{imgFormat:'png',successCallback:h=>{if(dead)return;survey=h;h.setFrequency({unit:'Hz',value:channelTransportHz(channel)});if(paletteReady)h.setColormap(milkyWay?'sate-milky-way':'native');loading.hidden=true;},errorCallback:()=>{loading.hidden=false;loading.textContent='SPHEREx imagery unavailable. Reload to retry.';}});
   const initial=selected?center(selected.id,selected.order):{ra:266.4,dec:-29};
   viewer=A.aladin('#aladin-sky',{survey,target:`${initial.ra} ${initial.dec}`,fov:selected?Math.min(360,Math.max(.48,CELL_ARCMIN/60*2**(ORDER-selected.order)*1.4)):360,projection:'AIT',cooFrame:'ICRSd',showZoomControl:false,showLayersControl:false,showFullscreenControl:false,showFrame:false,showProjectionControl:false,showStatusBar:false,showGotoControl:false,showReticle:false,showCooGrid:false,showFov:false,showCooLocation:false,log:false,inertia:false,backgroundColor:'#000000'});
