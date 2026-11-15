@@ -140,7 +140,23 @@ p,.legal-content,.science-details,.sky-details,.tiny{font-family:var(--body)}
 
 .participation .section-title{font-family:var(--sans)}
 
-/* Object search is part of the atlas chrome; it does not cover the sky image. */
-.sky-search-bar{position:absolute;z-index:5;inset:0 0 auto;background:var(--paper);color:var(--ink);border-bottom:1px solid var(--line);height:62px;display:flex;align-items:center;gap:18px;padding:10px 22px}.sky-search-bar form{display:flex;align-items:center;gap:12px;flex:0 1 440px;min-width:0}.sky-search-bar label{font-size:12px;color:var(--muted)}.sky-search-bar input{min-width:0;flex:1;width:100%;height:37px;padding:8px 11px;background:transparent;border:1px solid var(--line);border-radius:5px;color:var(--ink);font:12px var(--sans)}.sky-search-bar input::placeholder{color:var(--muted);opacity:.9}.sky-search-bar button{height:37px;padding:7px 13px;border:1px solid var(--line);border-radius:5px;font-size:12px;color:var(--ink)}.sky-search-bar button:hover{background:var(--line)}.sky-search-bar button:disabled,.sky-search-bar input:disabled{opacity:.45}.sky-search-result{font:11px/1.4 var(--sans);color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sky-search-result[data-error=true]{color:#a44338}.sky-search-result[hidden]{display:none}.sky-area #aladin-sky{top:62px;height:calc(100% - 62px)}.sky-loading{top:78px}@media(max-width:1100px){.sky-search-bar{gap:10px;padding:10px 14px}.sky-search-bar form{flex:1}.sky-search-result{max-width:35%}}@media(max-width:600px){.sky-search-bar{height:86px;display:block;padding:9px 14px}.sky-search-bar form{gap:8px}.sky-search-bar label{font-size:11px}.sky-search-bar input{font-size:11px}.sky-search-result{max-width:none;margin-top:6px;font-size:10px}.sky-area #aladin-sky{top:86px;height:calc(100% - 86px)}.sky-loading{top:102px}}html[data-theme=dark] .sky-search-result[data-error=true]{color:#efa28a}
+/* Object search sits beside the expanded coordinates in the sidebar. */
+.sky-search-bar{position:relative;margin-top:28px;color:var(--ink)}
+#sky-object-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.sky-object-field{position:relative;min-width:0}
+.sky-object-field>label{display:block;margin-bottom:8px;font-size:12px;font-weight:500}
+.sky-object-field>input{display:block;width:100%;min-width:0;height:40px;padding:9px 10px;border:1px solid var(--border-control);border-radius:4px;background:var(--surface-field);color:var(--ink);font:13px var(--sans)}
+#sky-object-submit{height:40px;min-width:42px;padding:8px 10px;border:1px solid var(--border-control);border-radius:4px;font:12px var(--sans)}
+.sky-search-result{margin-top:10px;font:12px/1.5 var(--sans);color:var(--muted);overflow-wrap:anywhere}
+.sky-search-result[data-error=true]{color:#a44338}.sky-search-result[hidden]{display:none}
+html[data-theme=dark] .sky-search-result[data-error=true]{color:#efa28a}
+#sky-object-suggestions{position:absolute;z-index:20;top:calc(100% + 5px);left:0;right:0;max-height:240px;overflow:auto;overscroll-behavior:contain;background:var(--surface-raised);color:var(--ink);border:1px solid var(--border-control);border-radius:5px;box-shadow:0 8px 20px #0004;padding:4px}
+#sky-object-suggestions[hidden]{display:none}
+#sky-object-suggestions [role=option]{padding:10px 8px;border-radius:3px;cursor:pointer;font:12px/1.4 var(--sans);overflow-wrap:anywhere}
+#sky-object-suggestions [role=option]:hover{background:var(--surface-hover)}
+#sky-object-suggestions [aria-selected=true]{background:var(--accent-selected);color:var(--accent-text)}
+.sky-coordinate-search h2{font:500 12px var(--sans);margin:0 0 10px;color:var(--ink)}
+.sky-coordinate-search .coord-inputs{margin-top:0}
+.sky-area #aladin-sky{inset:0;height:100%}.sky-loading{top:16px}
 
 .motion-tools{border-block:1px solid var(--line);padding:16px 0;margin:14px 0}.motion-tools h2{font-size:16px;margin-bottom:12px}.motion-help{font-size:11px;line-height:1.5;color:var(--muted);margin:8px 0}.motion-tools output{display:block;font-size:12px;margin:12px 0}.motion-tools details{font-size:11px}.motion-tools pre{white-space:pre-wrap;font:10px/1.7 var(--mono)}.motion-actions{display:flex;gap:12px;margin-top:12px;font-size:11px}.motion-actions button{border:1px solid var(--line);padding:8px}.motion-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4;overflow:hidden}.tracking-motion .cell-stage{cursor:crosshair}.tracking-motion .inventory-marker{pointer-events:none;opacity:.2}
