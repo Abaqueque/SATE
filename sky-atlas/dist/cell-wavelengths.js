@@ -1,3 +1,5 @@
+import {wavelengthOptions} from './wavelength-options.js';
+import {visibilityIcon} from './cell-sidebar.js';
 import {fieldWidth} from './cell-field.js';
 import {hasFieldCoverage} from './cell-coverage.js';
 import {parseLayerHue} from './cell-colour.js';
@@ -58,22 +60,22 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
  const savedHues=(saved.get('layerHue')||'').split(',').map(parseLayerHue);
  const base={visible:!hidden.includes('1'),opacity:1,hue:savedHues[0]??210,colour:savedHues[0]!==null};
  const colourMarkup='<div class="cell-layer-colour"><label class="cell-layer-colour-toggle"><span>Colour</span><input type="checkbox" class="cell-colour-toggle"></label><label class="cell-layer-hue"><span>Hue <output>Grayscale</output><i class="cell-colour-swatch" aria-hidden="true"></i></span><input type="range" min="0" max="359" step="1" value="210" title="Adjust hue while preserving brightness"></label></div>';
- const options=metadata.wavelengths.map((w,i)=>`<option value="${i}">${w.toFixed(3)} µm</option>`).join('');
+ const options=wavelengthOptions(metadata.wavelengths);
  function controls(layer,number){
-  const toggle=layer.card.querySelector('.cell-layer-visible');toggle.textContent=layer.visible?'Visible':'Hidden';toggle.setAttribute('aria-pressed',String(layer.visible));toggle.setAttribute('aria-label',`Layer ${number} visibility`);
+  const toggle=layer.card.querySelector('.cell-layer-visible');toggle.innerHTML=visibilityIcon;toggle.title=(layer.visible?'Hide':'Show')+' layer '+number;toggle.setAttribute('aria-pressed',String(layer.visible));toggle.setAttribute('aria-label',`Layer ${number} visibility`);
   layer.card.classList.toggle('layer-hidden',!layer.visible);
   const opacity=layer.card.querySelector('.cell-layer-opacity input');if(opacity){opacity.setAttribute('aria-label',`Layer ${number} opacity`);layer.card.querySelector('.cell-layer-opacity output').textContent=Math.round(layer.opacity*100)+'%';}
   const colour=layer.card.querySelector('.cell-colour-toggle'),hue=layer.card.querySelector('.cell-layer-hue input');
   colour.checked=layer.colour;colour.setAttribute('aria-label',`Layer ${number} colour`);
   hue.value=layer.hue;hue.setAttribute('aria-label',`Layer ${number} hue`);hue.setAttribute('aria-valuetext',layer.colour?layer.hue+' degrees':'Grayscale; adjust to add colour');
-  layer.card.querySelector('.cell-layer-hue output').textContent=layer.colour?layer.hue+'°':'Grayscale';
+  layer.card.querySelector('.cell-layer-hue').hidden=!layer.colour;layer.card.querySelector('.cell-layer-hue output').textContent=layer.hue+'°';
   layer.card.querySelector('.cell-colour-swatch').style.background=layer.colour?'hsl('+layer.hue+' 85% 65%)':'#c3c3c3';
  }
  function update(){
   let number=2;const hiddenNumbers=base.visible?[]:[1];
   for(const panel of panels.values()){
    panel.number=number;const name=`Layer ${number}`;
-   panel.card.setAttribute('aria-label',name);panel.card.querySelector('h2').textContent=name;panel.card.querySelector('select').setAttribute('aria-label',`${name} wavelength`);panel.card.querySelector('.cell-layer-remove').setAttribute('aria-label',`Remove ${name.toLowerCase()}`);
+   panel.card.setAttribute('aria-label',name);panel.card.querySelector('h3').textContent=name;panel.card.querySelector('select').setAttribute('aria-label',`${name} wavelength`);panel.card.querySelector('.cell-layer-remove').setAttribute('aria-label',`Remove ${name.toLowerCase()}`);
    controls(panel,number);if(!panel.visible)hiddenNumbers.push(number);number++;
   }
   controls(base,1);button.disabled=panels.size>=4;root.querySelector('#cell-wavelength-limit').hidden=panels.size<4;
@@ -91,7 +93,8 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   const messages=[];
   for(const side of sides()){
    const current=panel.current[side],time=panel.card.querySelector(`[data-layer-date="${side}"]`),band=panel.card.querySelector(`[data-layer-band="${side}"]`);
-   time.textContent=current?new Date(current.obs.date).toLocaleString('en-AU',{timeZone:'UTC'})+' UTC':'—';
+   time.textContent=current?new Date(current.obs.date).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'})+' · '+current.obs.date.slice(11,19)+' UTC':'—';
+   const target=anchor(side);time.closest('div').hidden=!!current&&!!target&&Date.parse(current.obs.date)===Date.parse(target.date);
    band.textContent=current?current.obs.wavelength.toFixed(3)+' µm':'';
    if(panel.status[side])messages.push(sideNames[side]+': '+panel.status[side]);
   }
@@ -126,7 +129,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
  function add(channel,{focus=true}={}){
   if(dead||panels.size>=4)return;
   const id=++nextId,index=panels.size,card=document.createElement('section');card.className='cell-layer-card';
-  card.innerHTML=`<div class="cell-layer-title"><h2></h2><button type="button" class="cell-layer-visible" aria-pressed="true">Visible</button><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field">Wavelength<select>${options}</select></label>${colourMarkup}<label class="cell-field cell-layer-opacity"><span>Opacity <output>100%</output></span><input type="range" min="0" max="100" step="1" value="100"></label><div class="cell-layer-dates"><div><b>L</b> <time data-layer-date="left">—</time><span data-layer-band="left"></span></div><div><b>R</b> <time data-layer-date="right">—</time><span data-layer-band="right"></span></div></div><p class="cell-layer-status" role="status"></p><button type="button" class="cell-retry" hidden>Retry</button>`;
+  card.innerHTML=`<div class="cell-layer-title"><h3></h3><button type="button" class="cell-layer-visible" aria-pressed="true">Visible</button><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field"><span class="cell-sr-only">Wavelength</span><select>${options}</select></label>${colourMarkup}<details class="cell-layer-options"><summary>Options</summary><label class="cell-field cell-layer-opacity"><span>Opacity <output>100%</output></span><input type="range" min="0" max="100" step="1" value="100"></label><div class="cell-layer-dates"><div><b>L</b> <time data-layer-date="left">—</time><span data-layer-band="left"></span></div><div><b>R</b> <time data-layer-date="right">—</time><span data-layer-band="right"></span></div></div></details><p class="cell-layer-status" role="status"></p><button type="button" class="cell-retry" hidden>Retry</button>`;
   const restoredOpacity=Number(opacities[index]),savedHue=focus?null:savedHues[index+1],panel={hue:savedHue??210,colour:savedHue!=null,channel,card,current:{},status:{},errors:{},visible:focus||!hidden.includes(String(index+2)),opacity:!focus&&opacities[index]?.trim()&&Number.isFinite(restoredOpacity)?Math.max(0,Math.min(100,restoredOpacity))/100:1};
   panels.set(id,panel);layerList.append(card);resetLayer(panel);const select=card.querySelector('select');select.value=String(channel);card.querySelector('.cell-layer-opacity input').value=panel.opacity*100;bindColour(panel);
   select.onchange=()=>{panel.channel=Number(select.value);resetLayer(panel);refresh();update();};
@@ -135,7 +138,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   card.querySelector('.cell-layer-remove').onclick=()=>{panel.controller?.abort();panels.delete(id);card.remove();refresh();update();button.focus();};
   card.querySelector('.cell-retry').onclick=refresh;update();refresh();if(focus){select.focus();card.scrollIntoView({block:'nearest'});}
  }
- base.card=root.querySelector('.cell-base-layer');base.card.insertAdjacentHTML('beforeend',colourMarkup);bindColour(base);controls(base,1);base.card.querySelector('.cell-layer-visible').onclick=()=>{base.visible=!base.visible;update();};
+ base.card=root.querySelector('.cell-base-layer');base.card.querySelector('.cell-base-options').insertAdjacentHTML('beforebegin',colourMarkup);bindColour(base);controls(base,1);base.card.querySelector('.cell-layer-visible').onclick=()=>{base.visible=!base.visible;update();};
  button.disabled=false;button.onclick=()=>{const used=new Set([Number(root.querySelector('#cell-wave').value),...[...panels.values()].map(p=>p.channel)]),baseChannel=Number(root.querySelector('#cell-wave').value),start=Number.isInteger(baseChannel)?baseChannel:62;let chosen=(start+1)%metadata.wavelengths.length;while(used.has(chosen))chosen=(chosen+1)%metadata.wavelengths.length;add(chosen);};
  return {panels,base,add,sync:timeline.sync,pending:timeline.pending,clear(){timeline.clear();for(const panel of panels.values()){panel.current={};panel.status={};details(panel);}},close(){dead=true;timeline.close();for(const p of panels.values())p.controller?.abort();panels.clear();}};
 }
