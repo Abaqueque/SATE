@@ -27,3 +27,14 @@ export function nearestExposure(observations,position){
 export function exposureAvailability(items){
  return {candidates:items.length,ready:items.filter(o=>o.match&&!o.unusable).length,pending:items.filter(o=>!o.checked).length,coverage:items.filter(o=>o.rejection==='coverage').length,wavelength:items.filter(o=>o.rejection==='wavelength').length,centre:items.filter(o=>o.rejection==='centre').length,failed:items.filter(o=>o.infoError).length};
 }
+
+// A comparison preset waits for the first/last qualifying observation, never an
+// unchecked endpoint or a transient pair made from the same first response.
+export function initialExposure(items,{preferred,oldest=false,endpoints=false}={}){
+ const wanted=items.find(o=>o.id===preferred);
+ if(wanted&&!wanted.checked)return null;
+ if(wanted?.match&&!wanted.unusable)return wanted;
+ const ordered=[...items].sort((a,b)=>a.mjd-b.mjd||a.path.localeCompare(b.path));if(!oldest)ordered.reverse();
+ for(const obs of ordered){if(endpoints&&!obs.checked)return null;if(obs.match&&!obs.unusable)return obs;}
+ return null;
+}

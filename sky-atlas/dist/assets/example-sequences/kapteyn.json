@@ -1,0 +1,65 @@
+{
+  "name": "Kapteyn’s Star",
+  "verifiedAt": "2026-11-15T13:43:44.239Z",
+  "source": "https://irsa.ipac.caltech.edu/spherex-archive-documentation/spherex-data-access/",
+  "region": {
+    "ra": 77.98544549624796,
+    "dec": -45.059662694132214,
+    "size": 0.2,
+    "channel": 32,
+    "nearby": true
+  },
+  "observations": [
+    {
+      "id": "2025W34_1B_0044_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0044_2D2_spx_l2b-v27-2026-228.fits",
+      "mjd": 60905.204481,
+      "date": "2025-08-18T04:54:27.158Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "wavelength": 1.5828583668142464,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2025W34_1B_0044_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0044_3D2_spx_l2b-v27-2026-228.fits",
+      "mjd": 60905.205973,
+      "date": "2025-08-18T04:56:36.067Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "wavelength": 1.6209753467481713,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2025W34_1B_0134_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0134_1D2_spx_l2b-v27-2026-228.fits",
+      "mjd": 60905.681328,
+      "date": "2025-08-18T16:21:06.739Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "wavelength": 1.629167768005877,
+      "verifiedCoverage": 0.9999269486448974
+    },
+    {
+      "id": "2026W34_2A_0143_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W34_2A/l2b-v27-2026-243/2/level2_2026W34_2A_0143_1D2_spx_l2b-v27-2026-243.fits",
+      "mjd": 61273.207078,
+      "date": "2026-08-21T04:58:11.539Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3",
+      "wavelength": 1.5613384561241566,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2026W34_2A_0143_2",
+      "path": "/ibe/data/spherex/qr3/level2/2026W34_2A/l2b-v27-2026-243/2/level2_2026W34_2A_0143_2D2_spx_l2b-v27-2026-243.fits",
+      "mjd": 61273.20857,
+      "date": "2026-08-21T05:00:20.448Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3",
+      "wavelength": 1.5989926571091413,
+      "verifiedCoverage": 1
+    }
+  ],
+  "note": "Verified starting observations, not a complete archive search. Additional archive observations load separately."
+}

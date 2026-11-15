@@ -27,3 +27,5 @@ Unit tests cover spectral interpolation, immutable measured pixels, flagged/dist
 Chromium and WebKit fixtures check a visible first image while the last header remains blocked, newest default, 320 slider inputs without history-rate failure, frozen drag dates, date labels, exact target coordinates, preserved source gaps with estimates off, nearby-band fills with estimates on, and save/reopen. All five routes share header geometry at 1366, 390 and 320 pixels. These browser fixtures do not establish live IRSA availability or validate a particular astronomical detection.
 
 The controlled `scripts/qa-cell-loading.mjs` browser regression releases headers out of order and checks stable displayed dates, no canvas hiding with an extra layer, all five timeline entries, single/dual viewers, saved-date restoration, Play/Pause and 320/390-pixel layouts in Chromium and WebKit. Run with `SATE_BASE` and an optional `PLAYWRIGHT_MODULE` path.
+
+Test regions now open task-specific viewer presets with verified starting observations and a concurrent full archive search. See [example presets](example-presets.md) for defaults, source validation and outage behavior.
