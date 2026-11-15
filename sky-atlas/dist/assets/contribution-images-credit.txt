@@ -1,0 +1,15 @@
+Homepage contribution card images
+
+spherex-orbit-card.jpg
+SPHEREx in Orbit (Artist's Concept), PIA26531
+Credit: NASA/JPL-Caltech
+Source: https://science.nasa.gov/photojournal/spherex-in-orbit-artists-concept/
+Asset: https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia26/pia26531/PIA26531.jpg
+
+spherex-observation-card.jpg
+SPHEREx infrared star-and-dust field, 3.29 microns, PIA26352
+Credit: NASA/JPL-Caltech
+Source: https://www.nasa.gov/missions/spherex/nasas-spherex-space-telescope-begins-capturing-entire-sky/
+Asset: https://www.nasa.gov/wp-content/uploads/2025/05/1-pia26352-spherexs-dust-cloud-reveal.jpg?w=1024
+
+Images are cropped with CSS and darkened by a CSS overlay for text legibility. The star-and-dust field is illustrative background, not the Mira comparison target.
