@@ -101,3 +101,5 @@ body .site-header .header-end{display:flex}
 .sky-review-legend{position:absolute;z-index:4;top:14px;left:14px;display:flex;flex-wrap:wrap;gap:10px 16px;padding:8px 10px;background:#111111cf;border-radius:4px;color:#e4e7eb;font-size:11px;line-height:1.4;pointer-events:none;max-width:calc(100% - 28px)}
 .sky-review-legend span{display:flex;gap:6px;align-items:center;white-space:nowrap}.sky-review-legend i{width:7px;height:7px;border-radius:2px;flex:none}
 @media(max-width:520px){.sky-review-legend{font-size:10px;gap:6px 12px;top:10px;left:10px;padding:7px 9px}}
+
+.sky-review-legend[hidden]{display:none}
