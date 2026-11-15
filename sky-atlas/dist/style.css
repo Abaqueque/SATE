@@ -162,3 +162,5 @@ html[data-theme=dark] .sky-search-result[data-error=true]{color:#efa28a}
 .sky-area #aladin-sky{inset:0;height:100%}.sky-loading{top:16px}
 
 .motion-tools{border-block:1px solid var(--line);padding:16px 0;margin:14px 0}.motion-tools h2{font-size:16px;margin-bottom:12px}.motion-help{font-size:11px;line-height:1.5;color:var(--muted);margin:8px 0}.motion-tools output{display:block;font-size:12px;margin:12px 0}.motion-tools details{font-size:11px}.motion-tools pre{white-space:pre-wrap;font:10px/1.7 var(--mono)}.motion-actions{display:flex;gap:12px;margin-top:12px;font-size:11px}.motion-actions button{border:1px solid var(--line);padding:8px}.motion-overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4;overflow:hidden}.tracking-motion .cell-stage{cursor:crosshair}
+
+.sky-rail .sky-zoom-hint{margin:10px 0 22px;font-size:12px;line-height:1.65;color:var(--muted)}
