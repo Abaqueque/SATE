@@ -17,3 +17,56 @@
 .cell-layer-title h2{margin-right:auto}.cell-layer-visible{border:1px solid var(--line,#c9d0c2);border-radius:4px;background:transparent;color:inherit;padding:5px 8px;font-size:11px;cursor:pointer}.cell-layer-visible[aria-pressed=true]{background:#d9ed98;color:#172c2e;border-color:#d9ed98}.cell-layer-card.layer-hidden{border-style:dashed}.cell-layer-opacity>span{display:flex;justify-content:space-between}.cell-layer-card time,.cell-layer-source,.cell-layer-status{display:block;font-size:10px;line-height:1.5;color:var(--muted,#63716a);margin:8px 0 0}.cell-layer-source:empty,.cell-layer-status:empty{display:none}.cell-layer-card .cell-retry{padding:5px 9px;border:1px solid var(--line);border-radius:4px;margin-top:8px}
 
 .cell-layer-dates{display:grid;gap:8px;margin-top:10px;font-size:10px;line-height:1.5}.cell-layer-dates b{color:var(--ink);margin-right:5px}.cell-layer-dates time{display:inline;margin:0}.cell-layer-dates span{display:block;margin-left:15px;color:var(--muted)}
+
+/* Separate layer cards and controls from the surrounding rail. */
+.cell-workspace {
+  --layer-surface: #ffffff;
+  --layer-control: #edf1f5;
+  --layer-border: #84929e;
+  --layer-text: #192d3a;
+  --layer-muted: #526473;
+  --layer-active: #dce9f4;
+  --cell-focus: #647888;
+}
+html[data-theme=dark] .cell-workspace {
+  --layer-surface: #2a3944;
+  --layer-control: #14212a;
+  --layer-border: #7b8d9b;
+  --layer-text: #f1f5f8;
+  --layer-muted: #c0ced8;
+  --layer-active: #c4dced;
+  --cell-focus: #b4c4d0;
+}
+.cell-workspace .cell-layer-card {
+  background: var(--layer-surface);
+  border-color: var(--layer-border);
+  color: var(--layer-text);
+  box-shadow: 0 3px 10px #00000018;
+}
+html .cell-workspace .cell-layer-card :is(h2, .cell-layer-dates b) {color: var(--layer-text)}
+html .cell-workspace .cell-layer-card :is(time, .cell-layer-dates span, .cell-layer-source, .cell-layer-status) {color: var(--layer-muted)}
+html .cell-workspace .cell-rail .cell-field select,
+html .cell-workspace .cell-rail .cell-layer-card :is(select, .cell-layer-visible, .cell-layer-remove, .cell-retry) {
+  background: var(--layer-control);
+  border-color: var(--layer-border);
+  color: var(--layer-text);
+}
+html .cell-workspace .cell-rail .cell-layer-card .cell-layer-visible[aria-pressed=true] {
+  background: var(--layer-active);
+  border-color: var(--layer-active);
+  color: #192d3a;
+}
+html .cell-workspace .cell-rail #cell-add-wavelength {
+  background: var(--layer-surface);
+  border-color: var(--layer-border);
+  color: var(--layer-text);
+  font-weight: 600;
+}
+html .cell-workspace .cell-rail :is(button:not(:disabled), select):hover {border-color: var(--cell-focus)}
+html .cell-workspace :is(button, a, input, select):focus-visible {
+  outline: 2px solid var(--cell-focus);
+  outline-offset: 2px;
+}
+html .cell-workspace .cell-pane-heading:focus-visible {outline-offset: -4px}
+html .cell-workspace .cell-rail .cell-field input[type=range] {accent-color: var(--cell-focus)}
+html .cell-workspace .cell-rail select:focus-visible {outline-offset: -2px}
