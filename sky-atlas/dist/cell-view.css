@@ -91,21 +91,25 @@ html .cell-workspace .cell-rail select:focus-visible {outline-offset: -2px}
 .cell-layer-hue input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:15px;height:15px;border:0;border-radius:50%;background:var(--layer-text);box-shadow:0 0 0 2px var(--layer-surface)}
 .cell-layer-hue input::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--layer-text);box-shadow:0 0 0 2px var(--layer-surface)}
 
-/* One observation and one timeline by default; comparison is optional. */
+/* One observation by default; two views are enabled from the settings rail. */
 .cell-workspace.single-view .cell-viewers{grid-template-columns:minmax(0,1fr)}
 .cell-workspace.single-view .cell-pane.right,
+.cell-workspace.single-view #cell-handle-right,
+.cell-workspace.single-view #cell-scrub-right,
+.cell-workspace.single-view .cell-compare-controls,
+.cell-workspace.single-view .cell-layer-dates>div:nth-child(2),
 .cell-workspace.single-view .cell-pane-heading b{display:none}
-.cell-workspace.single-view .cell-scrub-track input#cell-scrub-left{top:18px}
-.cell-workspace.single-view .cell-timeline-handle.left{top:20px}
+.cell-workspace.single-view .cell-scrub-track{height:42px}
+.cell-workspace.single-view .cell-time-axis{height:72px}
+.cell-dual-toggle{margin:0 0 16px;min-height:30px}
+.cell-dual-toggle input{appearance:none;-webkit-appearance:none;position:relative;flex-shrink:0;width:32px;height:19px;margin:0;border:1px solid var(--border-control);border-radius:12px;background:var(--surface-raised);cursor:pointer}
+.cell-dual-toggle input::before{content:'';position:absolute;top:3px;left:3px;width:11px;height:11px;border-radius:50%;background:var(--muted);transition:transform .15s}
+.cell-dual-toggle input:checked{background:var(--accent);border-color:var(--accent)}
+.cell-dual-toggle input:checked::before{transform:translateX(13px);background:#fff}
+
 html .cell-workspace .cell-image-message,
 html .cell-workspace .cell-stage,
 html .cell-workspace .cell-stage canvas{background:#000}
-.cell-workspace.single-view #cell-scrub-right,
-.cell-workspace.single-view #cell-handle-right,
-.cell-workspace.single-view .cell-layer-dates>div:last-child,
-.cell-workspace.single-view .cell-layer-dates b{display:none}
-.cell-workspace.single-view .cell-layer-dates span{margin-left:0}
-
 .cell-width-form{display:flex;align-items:flex-end;gap:8px;margin:13px 0}
 .cell-width-form .cell-field{flex:1;min-width:0;margin:0}
 .cell-width-form input{width:100%;min-height:38px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;background:var(--layer-control);color:var(--layer-text);font:13px var(--sans)}

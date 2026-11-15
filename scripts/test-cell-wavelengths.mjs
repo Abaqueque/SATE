@@ -12,20 +12,20 @@ test('closest date wins independent of response order and only covered matching 
  let active=0,peak=0;
  const result=await findWavelengthObservation({observations,wavelengths,channel:1,anchorMjd:60004,signal:new AbortController().signal,inspect:async o=>{
   peak=Math.max(peak,++active);await new Promise(r=>setTimeout(r,o.id==='3'?10:0));active--;
-  return {covered:o.id!=='4',wavelength:o.id==='5'?1.2:1.1};
+  return {coverage:1,covered:o.id!=='4',wavelength:o.id==='5'?1.2:1.1};
  }});
  assert.equal(result.obs.id,'3');assert(peak<=4);
 });
 test('no coverage differs from an unavailable archive',async()=>{
  const args={observations,wavelengths,channel:1,signal:new AbortController().signal};
- const empty=await findWavelengthObservation({...args,inspect:async()=>({covered:false,wavelength:1.1})});
+ const empty=await findWavelengthObservation({...args,inspect:async()=>({coverage:1,covered:false,wavelength:1.1})});
  assert.equal(empty.obs,null);assert.equal(empty.failures,0);
  const failed=await findWavelengthObservation({...args,inspect:async()=>{throw Error('Offline');}});
  assert.equal(failed.obs,null);assert.equal(failed.failures,9);
 });
 test('changing or removing a wavelength cancels pending results',async()=>{
  const controller=new AbortController();
- await assert.rejects(findWavelengthObservation({observations,wavelengths,channel:1,signal:controller.signal,inspect:async()=>{controller.abort();return {covered:true,wavelength:1.1};}}),{name:'AbortError'});
+ await assert.rejects(findWavelengthObservation({observations,wavelengths,channel:1,signal:controller.signal,inspect:async()=>{controller.abort();return {coverage:1,covered:true,wavelength:1.1};}}),{name:'AbortError'});
 });
 
 test('overlay compositor paints bottom to top, skips hidden layers and restores canvas state',()=>{
@@ -56,7 +56,7 @@ test('an unavailable layer resolves the stack with an error rather than leaving 
  await timeline.sync('left',{mjd:60000});assert.equal(committed[0].value,'new-frame');assert.equal(committed[1].error.message,'Unavailable');assert(!timeline.pending('left'));
 });
 test('wavelength observations follow both ends of the timeline',async()=>{
- const args={observations,wavelengths,channel:1,signal:new AbortController().signal,inspect:async()=>({covered:true,wavelength:1.1})};
+ const args={observations,wavelengths,channel:1,signal:new AbortController().signal,inspect:async()=>({coverage:1,covered:true,wavelength:1.1})};
  const early=await findWavelengthObservation({...args,anchorMjd:60000}),late=await findWavelengthObservation({...args,anchorMjd:60008});
  assert.equal(early.obs.id,'0');assert.equal(late.obs.id,'8');
 });

@@ -1,4 +1,4 @@
-import { readHdus, readHeader, wavelengthRange, wavelengthAtSky } from './spectral.js';
+import { readHdus, readHeader, wavelengthRange, wavelengthAtSky, createSkyGrid, fieldCoverage } from './spectral.js';
 
 const IRSA = 'https://irsa.ipac.caltech.edu';
 const COLLECTIONS = ['spherex_dr1', 'spherex_qr3', 'spherex_dr1_deep', 'spherex_qr3_deep'];
@@ -275,14 +275,19 @@ async function imageHeader(file,signal){
 export async function handleFrameInfo(request){
   const url=new URL(request.url);let region,path;
   try{region=parseRegion(url);path=validatedImagePath(url.searchParams.get('image')||'');}catch(e){return json({error:e.message},400);}
-  const key=JSON.stringify([path,region.ra,region.dec]);
+  let sampleRa=region.ra,sampleDec=region.dec;
+  if(url.searchParams.has('sampleRa')||url.searchParams.has('sampleDec')){
+    sampleRa=Number(url.searchParams.get('sampleRa'));sampleDec=Number(url.searchParams.get('sampleDec'));
+    if(!url.searchParams.get('sampleRa')?.trim()||!url.searchParams.get('sampleDec')?.trim()||!Number.isFinite(sampleRa)||!Number.isFinite(sampleDec)||sampleRa<0||sampleRa>=360||Math.abs(sampleDec)>90)return json({error:'Invalid wavelength sample position.'},400);
+  }
+  const key=JSON.stringify([path,region.ra,region.dec,region.size,sampleRa,sampleDec]);
   if(exposureInfoCache.has(key))return Response.json(exposureInfoCache.get(key),{headers:{'cache-control':'public, max-age=86400'}});
   try{
     const signal=AbortSignal.any([request.signal,AbortSignal.timeout(35000)]),file=new URL(path,IRSA);
     const [header,table]=await Promise.all([imageHeader(file,signal),waveTableTail(file,signal)]);
     if(!table)throw new Error('Wavelength calibration unavailable.');
-    const calibrated=wavelengthAtSky(header,table,region.ra,region.dec);
-    const info={path,wavelength:calibrated?.wavelength??null,covered:!!calibrated};
+    const calibrated=wavelengthAtSky(header,table,sampleRa,sampleDec);
+    const info={path,wavelength:calibrated?.wavelength??null,covered:!!calibrated,coverage:fieldCoverage(header,createSkyGrid(region.ra,region.dec,region.size))};
     exposureInfoCache.set(key,info);while(exposureInfoCache.size>1024)exposureInfoCache.delete(exposureInfoCache.keys().next().value);
     return Response.json(info,{headers:{'cache-control':'public, max-age=86400'}});
   }catch(e){return json({error:request.signal.aborted?'Cancelled.':e.message},request.signal.aborted?499:502);}

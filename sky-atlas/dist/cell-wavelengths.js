@@ -1,4 +1,5 @@
 import {fieldWidth} from './cell-field.js';
+import {hasFieldCoverage} from './cell-coverage.js';
 import {parseLayerHue} from './cell-colour.js';
 import {channelRange,inRanges,uniqueExposures} from './cell-selection.js';
 
@@ -9,18 +10,21 @@ export function wavelengthParameters(position,wavelengths,channel){
 
 // Check the actual wavelength at the cell centre, not just detector coverage.
 // Try closest dates first, with bounded requests and deterministic selection.
-export async function findWavelengthObservation({observations,wavelengths,channel,anchorMjd,inspect,signal}){
+export async function findWavelengthObservation({observations,wavelengths,channel,anchorMjd,inspect,load,signal}){
  const range=channelRange(wavelengths,channel),rows=uniqueExposures(observations);
  if(Number.isFinite(anchorMjd))rows.sort((a,b)=>Math.abs(a.mjd-anchorMjd)-Math.abs(b.mjd-anchorMjd)||a.mjd-b.mjd||a.path.localeCompare(b.path));
  let failures=0;
  for(let i=0;i<rows.length;i+=4){
   signal.throwIfAborted();
   const checked=await Promise.all(rows.slice(i,i+4).map(async obs=>{
-   try{const info=await inspect(obs);return info.covered&&inRanges(info.wavelength,[range])?{...obs,wavelength:info.wavelength}:null;}
+   try{const info=await inspect(obs);return info.covered&&hasFieldCoverage(info)&&inRanges(info.wavelength,[range])?{...obs,wavelength:info.wavelength}:null;}
    catch(error){if(signal.aborted)throw error;failures++;return null;}
   }));
   signal.throwIfAborted();
-  const obs=checked.find(Boolean);if(obs)return {obs,failures};
+  for(const obs of checked.filter(Boolean)){
+   try{const frame=load?await load(obs):undefined;signal.throwIfAborted();return {obs,frame,failures};}
+   catch(error){if(signal.aborted)throw error;if(error.name!=='InsufficientCoverageError')failures++;}
+  }
  }
  return {obs:null,failures};
 }
@@ -47,7 +51,7 @@ export function createLayerTimeline({layers,load,onPending=()=>{},onCommit=()=>{
  return {sync,pending:side=>jobs.get(side)?.pending??false,clear(){for(const job of jobs.values())job.controller.abort();jobs.clear();},close(){closed=true;this.clear();}};
 }
 
-export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,anchor,onChange}){
+export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,anchor,sides=()=>['left','right'],onChange}){
  const panels=new Map(),button=root.querySelector('#cell-add-wavelength'),layerList=root.querySelector('#cell-layer-list');
  let nextId=0,dead=false;
  const saved=new URLSearchParams(location.search),hidden=(saved.get('hiddenLayers')||'').split(','),opacities=(saved.get('layerOpacity')||'').split(',');
@@ -85,7 +89,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
  const sideNames={left:'L',right:'R'};
  function details(panel){
   const messages=[];
-  for(const side of ['left','right']){
+  for(const side of sides()){
    const current=panel.current[side],time=panel.card.querySelector(`[data-layer-date="${side}"]`),band=panel.card.querySelector(`[data-layer-band="${side}"]`);
    time.textContent=current?new Date(current.obs.date).toLocaleString('en-AU',{timeZone:'UTC'})+' UTC':'—';
    band.textContent=current?current.obs.wavelength.toFixed(3)+' µm':'';
@@ -103,12 +107,12 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   // Share catalogue/header work between dates, while cancelling obsolete frames.
   if(!panel.catalog){const request=read('/api/observations?'+params,panel.controller.signal);panel.catalog=request;request.catch(()=>{if(panel.catalog===request)panel.catalog=null;});}
   const data=await panel.catalog;signal.throwIfAborted();
-  const {obs,failures}=await findWavelengthObservation({observations:data.observations,wavelengths:metadata.wavelengths,channel,anchorMjd:target.mjd,signal,inspect:o=>{
-   if(!panel.infos.has(o.path)){const query=new URLSearchParams(params);query.set('image',o.path);const request=read('/api/frame-info?'+query,panel.controller.signal);panel.infos.set(o.path,request);request.catch(()=>{if(panel.infos.get(o.path)===request)panel.infos.delete(o.path);});}
+  const {obs,frame,failures}=await findWavelengthObservation({observations:data.observations,wavelengths:metadata.wavelengths,channel,anchorMjd:target.mjd,signal,load:o=>loadFrame(o,signal,params,channel),inspect:o=>{
+   if(!panel.infos.has(o.path)){const query=new URLSearchParams(params);query.set('image',o.path);query.set('coverage','field-v1');const request=read('/api/frame-info?'+query,panel.controller.signal);panel.infos.set(o.path,request);request.catch(()=>{if(panel.infos.get(o.path)===request)panel.infos.delete(o.path);});}
    return panel.infos.get(o.path);
   }});
-  signal.throwIfAborted();if(!obs)return {current:null,error:failures>0,status:failures?'Some observations unavailable. Retry.':'No observations at this wavelength.'};
-  const frame=await loadFrame(obs,signal,params,channel);signal.throwIfAborted();
+  signal.throwIfAborted();if(!obs)return {current:null,error:failures>0,status:failures?'Some observations unavailable. Retry.':'No exposures with at least 80% field coverage at this wavelength.'};
+  signal.throwIfAborted();
   return {current:{...frame,individual:frame,obs},error:failures>0,status:failures?'Some dates unavailable':''};
  }
  const timeline=createLayerTimeline({layers:()=>panels.values(),load:loadAt,
