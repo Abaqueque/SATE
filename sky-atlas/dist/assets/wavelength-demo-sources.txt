@@ -1,0 +1,5 @@
+Wavelength demonstration images, NASA/JPL-Caltech (PIA26352), April 2025.
+Source and scientific explanation: https://science.nasa.gov/photojournal/spherexs-dust-cloud-reveal/
+wavelength-098.jpg (0.98 micrometres, Figure A): https://www.nasa.gov/wp-content/uploads/2025/05/2-pia26352-fig-a-spherexs-dust-cloud-reveal.jpg
+wavelength-329.jpg (3.29 micrometres): https://assets.science.nasa.gov/content/dam/science/psd/photojournal/pia/pia26/pia26352/PIA26352.jpg
+Images are unmodified downloads. The interactive viewer applies opacity and an optional CSS grayscale filter. Visible colours are assigned; published display images are not used for quantitative photometry. These images are separate from the D3-Celestial assets covered by assets/LICENSE.
