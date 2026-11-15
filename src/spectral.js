@@ -257,27 +257,13 @@ export function sharedStretch(frames, {quality=false,wavelength=NaN,tolerance=0}
   return { low, high: high > low ? high : low + 1, samples: sample.length };
 }
 
-// Sequential intensity palette. This does not combine spectral bands into RGB.
-export const COLOUR_PALETTES={
- 'milky-way':[[3,9,24],[12,29,63],[34,63,108],[81,99,145],[142,140,169],[193,169,174],[231,206,190],[255,245,221]],
- 'blue-violet':[[3,8,25],[23,25,67],[57,45,116],[71,88,166],[92,155,211],[167,215,240],[243,248,255]]
-};
-export function brightnessColour(level,palette='milky-way'){
-  const t=Math.max(0,Math.min(1,level));
-  if(palette==='grayscale'){const v=Math.round(t*255);return [v,v,v];}
-  const colourStops=COLOUR_PALETTES[palette]||COLOUR_PALETTES['milky-way'];
-  const p=t*(colourStops.length-1),i=Math.min(colourStops.length-2,Math.floor(p)),f=p-i;
-  return colourStops[i].map((v,c)=>Math.round(v+(colourStops[i+1][c]-v)*f));
-}
-const colourLuts=Object.fromEntries(Object.keys(COLOUR_PALETTES).map(palette=>[palette,Array.from({length:256},(_,i)=>brightnessColour(i/255,palette))]));
-export function drawAligned(canvas, frame, stretch, palette='grayscale') {
+export function drawAligned(canvas, frame, stretch) {
   canvas.width = frame.width; canvas.height = frame.height;
   const context = canvas.getContext('2d'), rgba = context.createImageData(frame.width, frame.height);
   for (let i = 0; i < frame.values.length; i++) {
     const value = frame.values[i];
     const grey = Math.round(255 * Math.asinh(10 * Math.max(0, Math.min(1, (value - stretch.low) / (stretch.high - stretch.low)))) / Math.asinh(10));
-    const colour=palette==='grayscale'?[grey,grey,grey]:(colourLuts[palette]||colourLuts['milky-way'])[grey]??[0,0,0];
-    rgba.data[i * 4] = colour[0];rgba.data[i * 4+1] = colour[1];rgba.data[i * 4+2] = colour[2];
+    rgba.data[i * 4] = grey;rgba.data[i * 4+1] = grey;rgba.data[i * 4+2] = grey;
     rgba.data[i * 4 + 3] = Number.isFinite(value) ? 255 : 0;
   }
   context.putImageData(rgba, 0, 0);

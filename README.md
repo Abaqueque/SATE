@@ -32,4 +32,5 @@ The original coordinate-lab code and `/api/cutout` remain in the repository. Its
 
 ## Cell observation workspace
 
-Choose a cell in the atlas and select **Open region fully** for dated Level 2 images, wavelength controls, false colour, reversible noise reduction and a UTC observation timeline. [Data processing and verification](docs/cell-workspace.md).
+Choose a cell in the atlas and select **Open region fully** for dated Level 2 images, wavelength controls, grayscale data, reversible noise reduction and a UTC observation timeline. [Data processing and verification](docs/cell-workspace.md).
+The Milky Way false-colour palette applies only to the sky-search map.
