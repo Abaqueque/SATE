@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {selectionRanges,inRanges,uniqueExposures,matchingExposures,stackCandidates,timelineLayout} from '../sky-atlas/dist/cell-selection.js';
+import {selectionRanges,inRanges,uniqueExposures,matchingExposures,stackCandidates,timelineLayout,nearestExposure} from '../sky-atlas/dist/cell-selection.js';
 import {processDisplay,displayScale,cleanLevel} from '../sky-atlas/dist/cell-processing.js';
 import {parseRegion,handleObservations,handleFrameInfo} from '../src/sequence-api.js';
 import {wavelengthAtSky} from '../src/spectral.js';
@@ -57,4 +57,10 @@ test('timeline spacing reflects elapsed time and retains individual same-day obs
  assert.deepEqual(timelineLayout(rows).points.map(p=>p.position),[0,.1,1]);assert.equal(timelineLayout(rows).sameDay,false);
  const visits=[0,1,3].map(minutes=>({mjd:60000+minutes/1440,date:'2023-02-25T00:00:00Z'})),layout=timelineLayout(visits);
  assert.equal(layout.sameDay,true);assert(Math.abs(layout.points[1].position-1/3)<1e-6);assert.equal(timelineLayout([rows[0]]).points[0].position,.5);assert.deepEqual(timelineLayout([]).points,[]);
+});
+
+test('scrubbing chooses the nearest real observation across unequal time gaps',()=>{
+ const rows=[0,1,10].map((day,i)=>({id:i,mjd:60000+day}));
+ assert.equal(nearestExposure(rows,.1).id,1);assert.equal(nearestExposure(rows,.4).id,1);assert.equal(nearestExposure(rows,.8).id,2);
+ assert.equal(nearestExposure(rows,-1).id,0);assert.equal(nearestExposure(rows,2).id,2);assert.equal(nearestExposure([rows[1]],.7).id,1);assert.equal(nearestExposure([],0),null);
 });

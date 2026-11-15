@@ -8,9 +8,11 @@ The wavelength menu offers a single channel, All wavelengths, or a custom mix. A
 
 The archive's detector-wide bandpass is only a preliminary search filter. Before an exposure appears, `/api/frame-info` evaluates the selected sky coordinate against that exposure's own full-image WCS and wavelength table, retrieved using byte ranges. Failed metadata checks are counted and retryable. The list fills progressively while checks run.
 
-Every matching exposure is selectable, including multiple observations on one UTC date and exposures with fully masked pixels. Re-releases of the same exposure ID and detector are deduplicated. Timeline marks are positioned by elapsed observation time. Previous/next, playback, keyboard arrows and same-day time buttons navigate individual exposures. Dates, UTC time and actual centre wavelength remain visible.
+Every matching exposure is selectable, including multiple observations on one UTC date and exposures with fully masked pixels. Re-releases of the same exposure ID and detector are deduplicated. Timeline marks are positioned by elapsed observation time. The draggable time bar snaps to the nearest available exposure while preserving elapsed-time spacing. Mouse, touch, keyboard arrows, Home/End, previous/next, playback and same-day time buttons navigate individual exposures. Rapid scrubbing cancels stale requests and briefly debounces downloads. Dates, UTC time and actual centre wavelength remain visible.
 
 The selected channel, mode, mix and exposure ID are retained in the URL. DR1, QR3 and their deep collections are queried. Search results are cached for ten minutes, calibration metadata uses bounded warm-instance caches, and the browser keeps up to 48 aligned image pairs. Changed selections cancel pending requests.
+
+The header contains a persistent dark-mode switch, initially following the system preference. The theme affects the interface only; image values and palettes are unchanged. The atlas and observation view each keep their single wavelength picker in the right-hand panel.
 
 ## Display processing
 
