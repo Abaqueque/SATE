@@ -1,0 +1,34 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+import * as motion from '../src/motion.js';
+import {skyPage} from '../src/sky-ui.js';
+
+test('motion page loads, switches UTC nights and wavelength modes, plays and snaps over gaps',async()=>{
+  const ids=[...skyPage.matchAll(/id="([^"]+)"/g)].map(m=>m[1]),nodes=Object.fromEntries(ids.map(id=>[id,{value:'',textContent:'',hidden:false,disabled:false,attributes:{},setAttribute(k,v){this.attributes[k]=v;},removeAttribute(k){delete this.attributes[k];}}]));
+  let painted=0,tick=null,rafId=0;const rafs=new Map();
+  const flush=()=>{const callbacks=[...rafs.values()];rafs.clear();for(const fn of callbacks)fn();};
+  nodes.image.getContext=()=>({createImageData:(w,h)=>({data:new Uint8ClampedArray(w*h*4)}),putImageData(){painted++;}});
+  const observations=[60000.99,60001.01,60200.2,60200.3].map((mjd,i)=>({id:String(i),band:'D2',path:'/frame/'+i,mjd,date:new Date((mjd-40587)*864e5).toISOString()}));
+  const frames=observations.map((o,k)=>{const width=120,values=new Float32Array(width*width),wave=k===3?1.6:1.25;
+    for(let y=0;y<width;y++)for(let x=0;x<width;x++)values[y*width+x]=(k===2?200:100)*Math.exp(-((x-60)**2+(y-(60-k*.3))**2)/8);
+    return {values,quality:new Uint8Array(values.length).fill(1),wavelengths:new Float64Array(values.length).fill(wave),wavelength:wave,aligned:true,gridKey:'test',unit:'MJy/sr',backgroundRemoved:true};
+  });
+  const sandbox={...motion,requestAnimationFrame:fn=>{rafs.set(++rafId,fn);return rafId;},cancelAnimationFrame:id=>rafs.delete(id),URLSearchParams,Float32Array,Uint8Array,Number,Date,Map,Math,Promise,AbortSignal,location:{search:'?wavelength=1.25'},document:{getElementById:id=>nodes[id],addEventListener(){}},localStorage:{getItem(){return null;},setItem(){}},setTimeout:fn=>fn(),setInterval:fn=>{tick=fn;return 1;},clearInterval(){tick=null;},createSkyGrid:()=>null,frameCacheKey:(r,p)=>p,cachedFrame:async key=>frames[Number(key.split('/').at(-1))],cacheFrame:async()=>{},fetch:async()=>({ok:true,json:async()=>({complete:true,observations})})};
+  const source=(await readFile(new URL('../src/sky-browser.js',import.meta.url),'utf8')).replace(/^import .+;\n/gm,'').replace(/load\(\);\s*$/,'globalThis.ready=load();');
+  const context=vm.createContext(sandbox);new vm.Script(source).runInContext(context);await context.ready;
+  assert.ok(painted>0);assert.match(nodes.status.textContent,/3 UTC nights/);assert.match(nodes.status.textContent,/3 matching exposures/);assert.match(nodes.result.textContent,/apparent motion/);
+  const result=nodes.result.textContent;
+  const ratio=vm.runInContext('Math.max(...unit(images.at(-1)))/Math.max(...unit(images[0]))',context);assert.ok(ratio>1.8,'matched images must keep a shared brightness scale');
+  nodes.nights.onclick();assert.match(nodes.status.textContent,/2 visits/);assert.equal(nodes.result.textContent,result,'display grouping must not change the fit');
+  nodes.play.onclick();assert.equal(nodes.play.textContent,'Pause');const previous=nodes.date.textContent;tick();assert.notEqual(nodes.date.textContent,previous);
+  nodes.diff.onclick();assert.equal(nodes.play.textContent,'Play');assert.equal(nodes.diff.attributes['aria-pressed'],'true');
+  nodes.mode.value='overview';nodes.mode.onchange();assert.ok(nodes.diff.disabled);assert.ok(nodes.wavelength.disabled);assert.match(nodes.result.textContent,/no motion measurement/);assert.match(nodes.status.textContent,/4 exposures/);
+  nodes.mode.value='matched';nodes.mode.onchange();nodes.wavelength.value='4.8';nodes.wavelength.onchange();flush();assert.equal(nodes.image.hidden,false);assert.equal(nodes.play.disabled,true);assert.equal(Number(nodes.wavelength.value),1.6,'empty wavelength gaps snap to real data');
+  nodes.wavelength.value='1.25';nodes.wavelength.onchange();flush();assert.equal(nodes.image.hidden,false);assert.match(nodes.status.textContent,/3 matching exposures/);
+  const keptDate=nodes.date.textContent;
+  nodes['wave-next'].onclick();flush();assert.equal(Number(nodes.wavelength.value),1.6);
+  nodes['wave-prev'].onclick();flush();assert.equal(nodes.date.textContent,keptDate,'returning to a wavelength restores the chosen UTC date');
+  nodes['wave-range'].value=999;nodes['wave-range'].oninput();nodes['wave-range'].value=270;nodes['wave-range'].oninput();assert.equal(rafs.size,1,'drag updates are coalesced');flush();assert.equal(Number(nodes.wavelength.value),1.25);
+});

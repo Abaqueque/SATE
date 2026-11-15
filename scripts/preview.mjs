@@ -5,7 +5,10 @@ const port = Number(process.argv[2] || process.env.SPHEREX_PREVIEW_PORT || 4173)
 const server = http.createServer(async (request, response) => {
   try {
     const origin = `http://${request.headers.host || `127.0.0.1:${port}`}`;
+    const controller = new AbortController();
+    response.on('close',()=>{if(!response.writableEnded)controller.abort();});
     const webRequest = new Request(new URL(request.url || "/", origin), {
+      signal: controller.signal,
       method: request.method,
       headers: request.headers,
     });
