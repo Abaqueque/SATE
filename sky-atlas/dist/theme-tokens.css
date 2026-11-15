@@ -1,0 +1,57 @@
+/* SATE interface colours. The dark interface matches the user's #1a1a1a sample.
+   Blue fills follow NASA's published palette; surface/state roles follow Radix.
+   Image data, scientific palettes and the two timeline identities are separate. */
+:root {
+  --surface-base: #f5f3ec;
+  --surface-panel: #f5f3ec;
+  --surface-raised: #ffffff;
+  --surface-field: #edf1f5;
+  --surface-hover: #e1e7ee;
+  --surface-pressed: #d5dde7;
+  --text-primary: #172c2e;
+  --text-secondary: #52606e;
+  --text-disabled: #7a818a;
+  --border-subtle: #d4d9dd;
+  --border-control: #7c8794;
+  --border-hover: #52606e;
+  --accent: #105bd8;
+  --accent-hover: #2469d4;
+  --accent-pressed: #0b3d91;
+  --accent-ink: #ffffff;
+  --accent-selected: #e3edff;
+  --accent-selected-hover: #d1e2ff;
+  --accent-text: #174ea6;
+  --accent-border: #427acb;
+  --focus-ring: #1765c1;
+  --overlay-surface: #181818ed;
+  --image-background: #000000;
+  --paper: var(--surface-panel);
+  --white: var(--surface-raised);
+  --ink: var(--text-primary);
+  --muted: var(--text-secondary);
+  --line: var(--border-subtle);
+  --lime: var(--accent-text);
+}
+:root[data-theme=dark] {
+  --surface-base: #1a1a1a;
+  --surface-panel: #1a1a1a;
+  --surface-raised: #242424;
+  --surface-field: #2b2b2b;
+  --surface-hover: #333333;
+  --surface-pressed: #3b3b3b;
+  --text-primary: #edeef0;
+  --text-secondary: #b0b4ba;
+  --text-disabled: #777b82;
+  --border-subtle: #363636;
+  --border-control: #777777;
+  --border-hover: #96999f;
+  --accent-selected: #182b49;
+  --accent-selected-hover: #1e3558;
+  --accent-text: #8bb8ff;
+  --accent-border: #5988ca;
+  --focus-ring: #8bb8ff;
+  --dark-surface: var(--surface-raised);
+  --dark-input: var(--surface-field);
+  --dark-muted: var(--text-secondary);
+  color-scheme: dark;
+}

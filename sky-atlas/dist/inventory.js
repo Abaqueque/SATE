@@ -22,7 +22,7 @@ export function mountInventory(root,getViewer,{areas,project,field,onInvestigate
   }
   function draw(){
     for(const {area,markers} of layers){
-      markers.replaceChildren();const viewer=getViewer?.();if(!active||!shown||!snapshot||(!project&&!viewer))continue;
+      markers.replaceChildren();if(!area.clientWidth||!area.clientHeight)continue;const viewer=getViewer?.();if(!active||!shown||!snapshot||(!project&&!viewer))continue;
       for(const source of visible()){
         let xy;try{xy=project?project(area,source.ra,source.dec):viewer.world2pix(source.ra,source.dec);}catch{continue;}
         if(!xy||!xy.every(Number.isFinite))continue;const[x,y]=xy;

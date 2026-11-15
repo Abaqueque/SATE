@@ -43,7 +43,7 @@ export function mountMotion(root,{panes,cell,project,unproject,toPixel,toSky,get
   q('#motion-progress').textContent=progress+(points.some(p=>p.flagged)?' · includes flagged pixels':'');q('#motion-stop').hidden=!busy;
   q('#motion-export').disabled=!points.length;
   q('#motion-points').textContent=[...points].sort((a,b)=>Date.parse(a.date)-Date.parse(b.date)).map(p=>`${p.date.slice(0,10)} · RA ${p.ra.toFixed(6)}° · Dec ${p.dec.toFixed(6)}°`).join('\n');
-  for(const {panel,area,svg} of layers){svg.replaceChildren();if(!panel.current||panel.canvas.hidden)continue;svg.setAttribute('viewBox',`0 0 ${area.clientWidth} ${area.clientHeight}`);
+  for(const {panel,area,svg} of layers){svg.replaceChildren();if(!area.clientWidth||!area.clientHeight||!panel.current||panel.canvas.hidden)continue;svg.setAttribute('viewBox',`0 0 ${area.clientWidth} ${area.clientHeight}`);
    const add=(name,attrs,text)=>{const el=document.createElementNS(svg.namespaceURI,name);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);if(text)el.textContent=text;svg.append(el);return el;};
    const ordered=[...points].sort((a,b)=>Date.parse(a.date)-Date.parse(b.date)).filter(p=>Date.parse(p.date)<=Date.parse(panel.current.obs.date)),xy=ordered.map(p=>project(panel,p.ra,p.dec));
    if(enabled){for(let i=1;i<xy.length;i++)if(xy[i-1]&&xy[i])add('line',{x1:xy[i-1][0],y1:xy[i-1][1],x2:xy[i][0],y2:xy[i][1],stroke:'#ffb55c','stroke-width':1.5});

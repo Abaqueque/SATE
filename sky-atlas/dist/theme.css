@@ -1,24 +1,72 @@
-.theme-switch{display:inline-flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:transparent;min-height:40px;flex-shrink:0}.theme-switch-track{width:29px;height:17px;border:1px solid #9ca79d;background:#dce1d8;border-radius:12px;position:relative}.theme-switch-track i{position:absolute;width:11px;height:11px;top:2px;left:2px;border-radius:50%;background:#526459;transition:transform .15s}.theme-switch[aria-checked=true] .theme-switch-track{background:#79937e;border-color:#79937e}.theme-switch[aria-checked=true] .theme-switch-track i{transform:translateX(12px);background:#f1f5ee}
-:root[data-theme=dark]{--paper:#121b20;--ink:#e1e9e3;--muted:#a0b0a6;--line:#35433d;--white:#18242a;--lime:#d9ed98;--dark-surface:#172329;--dark-input:#1c2b30;--dark-muted:#a4b6aa;color-scheme:dark}
+@import url("./theme-tokens.css");
+.theme-switch{display:inline-flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;color:var(--ink);background:transparent;min-height:40px;flex-shrink:0}.theme-switch-track{width:29px;height:17px;border:1px solid #9ca2a7;background:#d8dde1;border-radius:12px;position:relative}.theme-switch-track i{position:absolute;width:11px;height:11px;top:2px;left:2px;border-radius:50%;background:#525b64;transition:transform .15s}.theme-switch[aria-checked=true] .theme-switch-track{background:#798693;border-color:#798693}.theme-switch[aria-checked=true] .theme-switch-track i{transform:translateX(12px);background:#eef2f5}
 html[data-theme=dark] body{background:var(--paper);color:var(--ink)}
 html[data-theme=dark] :is(.site-header,.site-footer,.rail,.cell-rail,.cell-timeline,.contribute-summary,.proof-section,.options-detail,.science-aside,.science-controls,.sky-details,.sky-coordinate-search){background:var(--paper);color:var(--ink);border-color:var(--line)}
 html[data-theme=dark] :is(.cell-coordinate,.cell-observation-info,.cell-timeline-label,.cell-timeline-heading>span,.cell-axis-labels,.cell-visit-times button,.cell-index-status,.sky-size,.rail-intro,.back-button,.sky-cell-scale span,.sky-neighbours>span,.status-line,.tiny,.hero p,.section-copy,.page-heading p,.contribution-line p,.contribute-option p,.measure-label,.fact-row dt,.legal-content p,.science-aside p,.details-content,.sky-details p,.atlas-note,.hero-bottom,.science-under,.proof-caption){color:var(--dark-muted)}
 html[data-theme=dark] :is(h1,h2,h3,.cell-observation-info strong,.cell-visit-times button.selected,.cell-timeline-controls button,.cell-download,.share-button,.sky-example,.sky-details summary,.sky-coordinate-search summary,.fact-row dd,.text-link,.saved-preferences){color:var(--ink)}
-html[data-theme=dark] :is(input:not([type=range]):not([type=checkbox]),select,textarea,.cell-field select,.cell-add-wave select,.coord-inputs input){color:var(--ink);background:var(--dark-input);border-color:#4a5d50}
+html[data-theme=dark] :is(input:not([type=range]):not([type=checkbox]),select,textarea,.cell-field select,.cell-add-wave select,.coord-inputs input){color:var(--ink);background:var(--dark-input);border-color:#4a545d}
 html[data-theme=dark] :is(.cell-tools,.cell-timeline-controls button,.cell-combine,.coord-inputs,.rail-actions,.sky-neighbours button,.contribution-line,.summary-divider,.science-details,.fact-row,.button.outline,.label-tag){border-color:var(--line)}
 html[data-theme=dark] :is(.cell-combine,#cell-mix-chips button,.sky-neighbours button,.label-tag,.options-detail){background:var(--dark-surface);color:var(--ink)}
-html[data-theme=dark] .cell-visit-times button.selected{border-bottom-color:#d9ed98}
-html[data-theme=dark] .button:not(.outline){background:#d9ed98;color:#172c2e}
+html[data-theme=dark] .cell-visit-times button.selected{border-bottom-color:#98c3ed}
+html[data-theme=dark] .button:not(.outline){background:var(--accent);color:var(--accent-ink)}
 html[data-theme=dark] .button.outline{background:transparent;color:var(--ink)}
-html[data-theme=dark] .hero h1 em{color:#a7c3a2}
-html[data-theme=dark] :is(.cell-field input[type=range],.cell-toggle input){accent-color:#a9c7a0}
-html[data-theme=dark] .cell-axis-track:before{background:#4b6051}
-html[data-theme=dark] .cell-time-tick:after{background:#849c8b}
-html[data-theme=dark] .cell-time-tick.selected:after{background:#d9ed98}
+html[data-theme=dark] .hero h1 em{color:#a2b3c3}
+html[data-theme=dark] :is(.cell-field input[type=range],.cell-toggle input){accent-color:var(--accent-text)}
+html[data-theme=dark] .cell-axis-track:before{background:#4b5660}
+html[data-theme=dark] .cell-time-tick:after{background:#84909c}
+html[data-theme=dark] .cell-time-tick.selected:after{background:#98c3ed}
 @media(max-width:600px){.site-header .header-end{display:flex;gap:0}.site-header{gap:12px}.header-nav{gap:15px}.theme-switch{padding:7px;gap:6px}.theme-moon{width:15px}.explorer-page .site-header{padding:0 14px}.brand{font-size:22px;gap:9px}}
 @media(prefers-reduced-motion:reduce){.theme-switch-track i{transition:none}}
-.sky-wavelength{display:flex;flex-direction:column;gap:9px;font-size:12px;padding-bottom:23px;margin-bottom:20px;border-bottom:1px solid var(--line)}.sky-wavelength select{width:100%;min-height:39px;border:1px solid #c9d0c2;border-radius:5px;padding:9px 10px;background:#fbfaf4;color:#1b3436;font-size:13px}
+.sky-wavelength{display:flex;flex-direction:column;gap:9px;font-size:12px;padding-bottom:23px;margin-bottom:20px;border-bottom:1px solid var(--line)}.sky-wavelength select{width:100%;min-height:39px;border:1px solid #c2c9d0;border-radius:5px;padding:9px 10px;background:#fbfaf4;color:#1b3436;font-size:13px}
 @media(max-width:380px){.site-header .brand-mark{display:none}.site-header .header-nav{gap:10px}.site-header .brand{font-size:20px}}
 
 html[data-theme=dark] :is(.hero-photo p,.contribute-hero p,.contribution-photo p){color:#fff}
 html[data-theme=dark] .contribute-explanation .contribute-availability{color:var(--dark-muted)}
+
+/* Typography and quiet grouping, shared by both modes. */
+.sky-rail{padding:24px}
+.sky-rail :is(.rail-actions,.sky-coordinate-search,.sky-details,.coord-inputs,.sky-wavelength){border:0}
+.sky-rail .rail-actions{margin-top:24px;padding-top:0}
+.sky-rail :is(.sky-coordinate-search,.sky-details){margin-top:24px;padding-top:0}
+.sky-rail .sky-wavelength{margin:24px 0 0;padding:0;gap:8px}
+.sky-rail .sky-example{margin-top:20px;padding-inline:0}
+.sky-rail h1,.cell-rail h1{font-family:var(--sans);font-size:30px;font-weight:600;letter-spacing:-.025em;line-height:1.2;margin:16px 0 24px}
+.sky-rail .button{min-height:40px;border-radius:4px}
+.sky-neighbours button{font-family:var(--sans);font-variant-numeric:tabular-nums}
+.sky-wavelength select,.cell-coordinate,.sky-coordinates{font-variant-numeric:tabular-nums}
+
+/* Actions, selected states and keyboard focus have separate colour roles. */
+.button:not(.outline),.skip-link,.cell-workspace #cell-document,.doc-button:not(.secondary){background:var(--accent);color:var(--accent-ink)}
+.button:not(.outline):hover,html[data-theme=dark] .button:not(.outline):hover,.cell-workspace #cell-document:not(:disabled):hover,.doc-button:not(.secondary):not(:disabled):hover{background:var(--accent-hover);filter:none}
+.button:not(.outline):active,html[data-theme=dark] .button:not(.outline):active,.cell-workspace #cell-document:not(:disabled):active,.doc-button:not(.secondary):not(:disabled):active{background:var(--accent-pressed)}
+::selection{background:var(--accent-selected);color:var(--ink)}
+:is(button,a,input,select,textarea):focus-visible,html .cell-workspace :is(button,a,input,select):focus-visible{outline:2px solid var(--focus-ring);outline-offset:3px}
+html .cell-workspace .cell-pane-heading:focus-visible{outline-offset:-4px}
+.header-nav a.active:after{background:var(--accent-text)}
+.theme-switch[aria-checked=true] .theme-switch-track{background:var(--accent);border-color:var(--accent-text)}
+
+/* Layer and notebook components use the same surface and state tokens. */
+.cell-workspace,html[data-theme=dark] .cell-workspace{--layer-surface:var(--surface-raised);--layer-control:var(--surface-field);--layer-text:var(--text-primary);--layer-muted:var(--text-secondary);--layer-active:var(--accent-selected);--cell-focus:var(--focus-ring)}
+.documents-page,html[data-theme=dark] .documents-page{--doc-surface:var(--surface-raised);--doc-input:var(--surface-field);--doc-text:var(--text-primary);--doc-muted:var(--text-secondary);--doc-accent:var(--accent)}
+html .cell-workspace .cell-rail .cell-layer-card .cell-layer-visible[aria-pressed=true],.cell-workspace #cell-compare[aria-pressed=true]{background:var(--accent-selected);color:var(--accent-text);box-shadow:inset 0 0 0 1px var(--accent-border)}
+html .cell-workspace .cell-rail .cell-layer-card .cell-layer-visible[aria-pressed=true]:hover,.cell-workspace #cell-compare[aria-pressed=true]:hover{background:var(--accent-selected-hover)}
+html .cell-workspace .cell-rail :is(button:not(:disabled),select):hover,.doc-button:hover{filter:none}
+.cell-compare-opacity input,.cell-layer-colour-toggle input{accent-color:var(--accent-text)}
+
+/* Neutral charcoal surrounds the imagery; the actual atlas backdrop is black. */
+html[data-theme=dark] body{background:var(--surface-base)}
+.sky-area,#aladin-sky,#aladin-sky .aladin-container,#aladin-sky .aladin-view{background:#000!important}
+html[data-theme=dark] :is(.cell-workspace,.cell-image-area,.cell-image-bar,.cell-image-footer){background:var(--surface-panel)}
+.cell-stage{background:var(--image-background)}
+html[data-theme=dark] .cell-pane-heading{background:var(--surface-panel)!important}
+html[data-theme=dark] :is(.sky-bottom output,.sky-zoom button,.sky-loading){background:var(--overlay-surface);border-color:var(--border-subtle);color:var(--text-primary)}
+html[data-theme=dark] :is(input:not([type=range]):not([type=checkbox]),select,textarea,.cell-field select,.cell-add-wave select,.coord-inputs input){color:var(--text-primary);background:var(--surface-field);border-color:var(--border-control)}
+html[data-theme=dark] :is(.sky-search-bar button,.sky-neighbours button,.button.outline,.cell-timeline-controls button,.cell-combine,.theme-switch,.doc-button.secondary){background:var(--surface-raised);color:var(--text-primary);border-color:var(--border-control)}
+html[data-theme=dark] :is(.sky-search-bar button,.sky-neighbours button,.button.outline,.cell-timeline-controls button,.cell-combine,.theme-switch,.doc-button.secondary):not(:disabled):hover{background:var(--surface-hover);border-color:var(--border-hover)}
+html[data-theme=dark] :is(input:not([type=range]):not([type=checkbox]),select,textarea):not(:disabled):hover{border-color:var(--border-hover)}
+html[data-theme=dark] :is(.cell-layer-card,.doc-panel,.doc-storage-note){box-shadow:none}
+html .cell-workspace .cell-rail .cell-layer-card :is(.cell-layer-remove,.cell-retry):hover{background:var(--surface-hover)}
+html .cell-workspace .cell-rail #cell-add-wavelength:hover{background:var(--surface-hover)}
+html[data-theme=dark] .cell-visit-times button.selected{color:var(--accent-text);border-bottom-color:var(--accent-text)}
+html[data-theme=dark] :is(button,select,input:not([type=range])):disabled{opacity:1;background:var(--surface-panel);color:var(--text-disabled);border-color:var(--border-subtle);cursor:not-allowed}
+@media(max-width:600px){.sky-rail{padding:24px 20px}}

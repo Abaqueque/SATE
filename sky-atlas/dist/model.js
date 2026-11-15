@@ -1,7 +1,7 @@
 export const STATUS = {
   waiting: { label: 'Not reviewed', icon: '·', color: '#899594' },
   working: { label: 'In progress', icon: '↻', color: '#7ea8df' },
-  reviewed: { label: 'Reviewed', icon: '✓', color: '#80bda4' },
+  reviewed: { label: 'Reviewed', icon: '✓', color: '#809fbd' },
   flagged: { label: 'Needs a look', icon: '!', color: '#e8b56c' }
 };
 export const MIRA = { region: 16, cell: 1 };
