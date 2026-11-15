@@ -24,10 +24,23 @@ export async function findWavelengthObservation({observations,wavelengths,channe
 }
 
 export function mountWavelengthViews({root,metadata,position,loadFrame,draw,transform,bindStage,anchor,onChange}){
- const panels=new Map(),button=root.querySelector('#cell-add-wavelength'),container=root.querySelector('.cell-viewers');
+ const panels=new Map(),button=root.querySelector('#cell-add-wavelength'),container=root.querySelector('.cell-viewers'),layerList=root.querySelector('#cell-layer-list');
  let nextId=0,dead=false;
  const options=metadata.wavelengths.map((w,i)=>`<option value="${i}">${w.toFixed(3)} µm</option>`).join('');
- const update=()=>{container.classList.toggle('has-wavelengths',panels.size>0);button.disabled=panels.size>=4;root.querySelector('#cell-wavelength-limit').hidden=panels.size<4;onChange([...panels.values()].map(p=>p.channel));transform();};
+ const update=()=>{
+  let number=2;
+  for(const panel of panels.values()){
+   const name=`Layer ${number++}`;
+   panel.card.setAttribute('aria-label',name);panel.card.querySelector('h2').textContent=name;
+   panel.card.querySelector('select').setAttribute('aria-label',`${name} wavelength`);
+   panel.card.querySelector('button').setAttribute('aria-label',`Remove ${name.toLowerCase()}`);
+   panel.el.setAttribute('aria-label',`${name} image`);panel.canvas.setAttribute('aria-label',`${name} SPHEREx exposure`);
+   panel.el.querySelector('.cell-layer-name').textContent=name;
+   panel.el.querySelector('.cell-layer-band').textContent=metadata.wavelengths[panel.channel].toFixed(3)+' µm';
+   panel.el.querySelector('.cell-remove-wavelength').setAttribute('aria-label',`Remove ${name.toLowerCase()} image`);
+  }
+  container.classList.toggle('has-wavelengths',panels.size>0);button.disabled=panels.size>=4;root.querySelector('#cell-wavelength-limit').hidden=panels.size<4;onChange([...panels.values()].map(p=>p.channel));transform();
+ };
  const message=(panel,title,busy=false)=>{panel.message.hidden=false;panel.message.querySelector('strong').textContent=title;panel.message.querySelector('p').textContent='';panel.message.querySelector('.cell-spinner').hidden=!busy;};
  async function load(panel){
   panel.controller?.abort();const controller=new AbortController();panel.controller=controller;const {signal}=controller;
@@ -47,15 +60,17 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,draw,tran
    panel.el.querySelector('.cell-image-caption').textContent=`${obs.wavelength.toFixed(3)} µm · ${failures?'Some dates unavailable':target?'Closest to '+new Date(target.date).toLocaleDateString('en-AU',{timeZone:'UTC'}):'Earliest available observation'}`;
   }catch(error){if(dead||signal.aborted)return;message(panel,'Could not load wavelength');panel.message.querySelector('p').textContent=error.message;panel.el.querySelector('.cell-retry').hidden=false;}
  }
- function add(channel){
+ function add(channel,{focus=true}={}){
   if(dead||panels.size>=4)return;
   const id=++nextId,el=document.createElement('section');el.className='cell-pane cell-wavelength-pane';el.setAttribute('aria-label',`Additional wavelength ${id}`);
-  el.innerHTML=`<div class="cell-wavelength-heading"><label>Wavelength <select aria-label="Wavelength for image ${id}">${options}</select></label><button class="cell-remove-wavelength" aria-label="Remove wavelength image ${id}">×</button><time></time></div><div class="cell-stage"><canvas aria-label="Additional wavelength image ${id}" hidden></canvas><div class="cell-image-message" role="status"><span class="cell-spinner"></span><strong></strong><p></p><button class="cell-retry" hidden>Retry</button></div><div class="cell-compass" hidden>N ↑<br>E ←</div><div class="cell-image-caption"></div></div>`;
-  const panel={side:`wave-${id}`,channel,el,canvas:el.querySelector('canvas'),message:el.querySelector('.cell-image-message'),current:null,combined:false};
-  panels.set(id,panel);container.append(el);const select=el.querySelector('select');select.value=String(channel);
+  el.innerHTML=`<div class="cell-wavelength-heading"><strong class="cell-layer-name"></strong><span class="cell-layer-band"></span><button class="cell-remove-wavelength">×</button><time></time></div><div class="cell-stage"><canvas hidden></canvas><div class="cell-image-message" role="status"><span class="cell-spinner"></span><strong></strong><p></p><button class="cell-retry" hidden>Retry</button></div><div class="cell-compass" hidden>N ↑<br>E ←</div><div class="cell-image-caption"></div></div>`;
+  const card=document.createElement('section');card.className='cell-layer-card';card.innerHTML=`<div class="cell-layer-title"><h2></h2><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field">Wavelength<select>${options}</select></label>`;
+  const panel={side:`wave-${id}`,channel,el,card,canvas:el.querySelector('canvas'),message:el.querySelector('.cell-image-message'),current:null,combined:false};
+  panels.set(id,panel);container.append(el);layerList.append(card);const select=card.querySelector('select');select.value=String(channel);
   select.onchange=()=>{panel.channel=Number(select.value);update();void load(panel);};
-  el.querySelector('.cell-remove-wavelength').onclick=()=>{panel.controller?.abort();panels.delete(id);el.remove();update();button.focus();};
-  el.querySelector('.cell-retry').onclick=()=>void load(panel);bindStage(panel);update();void load(panel);select.focus();el.scrollIntoView({block:'nearest'});
+  const remove=()=>{panel.controller?.abort();panels.delete(id);el.remove();card.remove();update();button.focus();};
+  el.querySelector('.cell-remove-wavelength').onclick=remove;card.querySelector('button').onclick=remove;
+  el.querySelector('.cell-retry').onclick=()=>void load(panel);bindStage(panel);update();void load(panel);if(focus){select.focus();card.scrollIntoView({block:'nearest'});}
  }
  button.disabled=false;button.onclick=()=>{const used=new Set([Number(root.querySelector('#cell-wave').value),...[...panels.values()].map(p=>p.channel)]),base=Number(root.querySelector('#cell-wave').value),start=Number.isInteger(base)?base:62;let chosen=(start+1)%metadata.wavelengths.length;while(used.has(chosen))chosen=(chosen+1)%metadata.wavelengths.length;add(chosen);};
  return {panels,add,close(){dead=true;for(const p of panels.values())p.controller?.abort();panels.clear();}};
