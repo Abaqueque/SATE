@@ -29,7 +29,7 @@ html[data-theme=dark] .contribute-explanation .contribute-availability{color:var
 .sky-rail .rail-actions{margin-top:24px;padding-top:0}
 .sky-rail :is(.sky-coordinate-search,.sky-details){margin-top:24px;padding-top:0}
 .sky-rail .sky-wavelength{margin:24px 0 0;padding:0;gap:8px}
-.sky-rail .sky-example{margin-top:20px}
+.sky-rail .sky-example{margin-top:20px;padding-inline:0}
 .sky-rail h1,.cell-rail h1{font-family:var(--sans);font-size:30px;font-weight:600;letter-spacing:-.025em;line-height:1.2;margin:16px 0 24px}
 .sky-rail .button{min-height:40px;border-radius:4px}
 .sky-neighbours button{font-family:var(--sans);font-variant-numeric:tabular-nums}
