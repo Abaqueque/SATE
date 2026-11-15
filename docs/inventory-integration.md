@@ -1,3 +1,5 @@
+> The Regional inventory panel has been removed from the atlas and observation workspace. The notes below describe the earlier integration; its catalogue utilities and API remain in the repository.
+
 # Regional inventory integration
 
 Baseline: fresh clone of `Abaqueque/SATE`, `main` at `af17159`, 15 November 2026.
