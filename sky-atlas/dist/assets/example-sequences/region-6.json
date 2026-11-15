@@ -1,0 +1,45 @@
+{
+  "name": "Galactic Centre",
+  "verifiedAt": "2026-11-15T13:52:25.131Z",
+  "source": "https://irsa.ipac.caltech.edu/spherex-archive-documentation/spherex-data-access/",
+  "region": {
+    "ra": 266.4168,
+    "dec": -29.0078,
+    "size": 0.3,
+    "channel": 92,
+    "nearby": true
+  },
+  "observations": [
+    {
+      "id": "2025W34_2B_0104_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W34_2B/l2b_retry-v27-2026-229/6/level2_2025W34_2B_0104_2D6_spx_l2b_retry-v27-2026-229.fits",
+      "mjd": 60909.05481816,
+      "date": "2025-08-22T01:18:56.289Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_dr1",
+      "wavelength": 4.644236341069435,
+      "verifiedCoverage": 0.9999346938775511
+    },
+    {
+      "id": "2025W34_2B_0104_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W34_2B/l2b_retry-v27-2026-229/6/level2_2025W34_2B_0104_3D6_spx_l2b_retry-v27-2026-229.fits",
+      "mjd": 60909.056310405,
+      "date": "2025-08-22T01:21:05.218Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_dr1",
+      "wavelength": 4.678071630831634,
+      "verifiedCoverage": 0.9999346938775511
+    },
+    {
+      "id": "2025W34_2B_0104_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W34_2B/l2b_retry-v27-2026-229/6/level2_2025W34_2B_0104_4D6_spx_l2b_retry-v27-2026-229.fits",
+      "mjd": 60909.057802674,
+      "date": "2025-08-22T01:23:14.151Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_dr1",
+      "wavelength": 4.71228885289043,
+      "verifiedCoverage": 0.9999346938775511
+    }
+  ],
+  "note": "Verified starting observations, not a complete archive search. Additional archive observations load separately."
+}

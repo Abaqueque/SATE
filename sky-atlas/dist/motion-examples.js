@@ -12,5 +12,5 @@ export const motionExamples=[
 export const motionExample=id=>motionExamples.find(e=>e.id===id);
 export function motionExampleUrl(id){
  const e=motionExample(id);if(!e)return null;const p=e.centre||predictPosition(e.target,'2026-01-01T00:00:00Z');
- return '/explore/?'+new URLSearchParams({hpx:cellAt(p.ra,p.dec),order:9,channel:e.channel,view:'cell',mode:'single',nearby:1,tracking:1,target:e.id,framing:'full',quality:'off',exposure:e.first,compare:e.last,sourceRa:p.ra,sourceDec:p.dec,zoom:e.zoom??(e.curated?1:3)});
+ return '/explore/?'+new URLSearchParams({hpx:cellAt(p.ra,p.dec),order:9,channel:e.channel,view:'cell',dual:1,known:1,dates:'ends',mode:'single',nearby:1,tracking:1,target:e.id,framing:'full',quality:'off',exposure:e.first,compare:e.last,sourceRa:p.ra,sourceDec:p.dec,zoom:e.zoom??(e.curated?1:3)});
 }

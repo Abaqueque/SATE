@@ -1,0 +1,21 @@
+// Read-only live audit of every Test regions entry; no archive responses are mocked.
+const {chromium,webkit}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');
+import {writeFile,mkdir} from 'node:fs/promises';
+const base=process.env.SATE_BASE||'https://sate-beta.vercel.app',dir=process.env.AUDIT_DIR||'/tmp/sate-example-audit',out=dir+'/results.json',filter=process.env.AUDIT_FILTER;await mkdir(dir,{recursive:true});
+const browser=await(process.env.AUDIT_BROWSER==='webkit'?webkit:chromium).launch({headless:true,...(process.env.AUDIT_BROWSER==='webkit'?{}:{channel:'chrome'})}),results=[];
+try{
+ const index=await browser.newPage();await index.goto(base+'/explore/');await index.locator('#sky-wave:not([disabled])').waitFor({timeout:60000});
+ const targets=await index.evaluate(async()=>{const {demoTargets}=await import('/demo-targets.js'),{motionExamples}=await import('/motion-examples.js');return [...demoTargets.map(t=>({key:t.id,name:t.name})),...motionExamples.filter(t=>t.id!=='barnard').map(t=>({key:'motion:'+t.id,name:t.name}))];});await index.close();let cursor=0;
+ async function worker(){while(cursor<targets.length){const target=targets[cursor++];if(filter&&!target.key.split(':').some(s=>filter.split(',').includes(s)))continue;const start=Date.now(),page=await browser.newPage({viewport:{width:1366,height:900}}),r={...target,errors:[],atlasErrors:[],failures:[],firstImageSeconds:null};
+  page.on('pageerror',e=>(r.url?r.errors:r.atlasErrors).push(e.message));page.on('response',async response=>{if(response.status()>=400&&response.url().includes('/api/'))r.failures.push({url:response.url(),status:response.status(),body:(await response.text().catch(()=>'' )).slice(0,300)});});
+  try{await page.goto(base+'/explore/');await page.locator('#sky-wave:not([disabled])').waitFor({timeout:60000});await page.locator('#sky-test-region:not([disabled])').waitFor();await page.selectOption('#sky-test-region',target.key);await page.waitForURL(url=>url.searchParams.get('view')==='cell');await page.locator('[data-cell]').waitFor();r.url=page.url();
+   await page.waitForFunction(()=>!document.querySelector('#cell-canvas-left').hidden||/unavailable|No matching|Could not/.test(document.querySelector('[data-pane=left] .cell-image-message strong').textContent),null,{timeout:90000});r.firstImageSeconds=Number(((Date.now()-start)/1000).toFixed(1));
+   r.visible=await page.locator('#cell-canvas-left').evaluate(c=>!c.hidden);if(r.visible){await page.waitForFunction(()=>Number.parseInt(document.querySelector('#cell-count').textContent)>=2||!document.querySelector('#cell-count').textContent.includes('loading'),null,{timeout:25000}).catch(()=>{});r.playEnabled=await page.locator('#cell-play').isEnabled();r.dual=await page.locator('#cell-dual').isChecked();r.tracking=await page.locator('#motion-mark').isChecked();r.known=await page.locator('#cell-known').isChecked();if(r.dual){await page.locator('#cell-canvas-right:not([hidden])').waitFor({timeout:90000});r.rightDate=await page.locator('#cell-date-right').textContent();r.leftDate=await page.locator('#cell-date-left').textContent();if(r.leftDate===r.rightDate)throw Error('Comparison opened on identical dates');}}
+   r.status=await page.locator('#cell-count').textContent();r.availability=await page.locator('#cell-availability').textContent();r.message=await page.locator('[data-pane=left] .cell-image-message').innerText();r.date=await page.locator('#cell-date-left').textContent();r.motion=await page.locator('#motion-summary').textContent();await page.screenshot({path:dir+'/'+target.key.replace(':','-')+'.png',fullPage:true});
+  }catch(error){r.error=error.message;r.status=await page.locator('#cell-count').textContent().catch(()=>null);r.message=await page.locator('[data-pane=left] .cell-image-message').innerText().catch(()=>null);}
+  r.totalSeconds=Number(((Date.now()-start)/1000).toFixed(1));results.push(r);await writeFile(out,JSON.stringify({base,at:new Date().toISOString(),results},null,2));console.log(JSON.stringify(r));await page.close();
+ }}
+ await Promise.all([worker(),worker()]);
+}finally{await browser.close();}
+if(results.some(r=>r.error||r.visible!==true||r.errors.length))process.exitCode=1;
+

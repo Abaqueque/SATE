@@ -1,0 +1,65 @@
+{
+  "name": "Epsilon Indi B",
+  "verifiedAt": "2026-11-15T13:39:54.082Z",
+  "source": "https://irsa.ipac.caltech.edu/spherex-archive-documentation/spherex-data-access/",
+  "region": {
+    "ra": 331.096643852268,
+    "dec": -56.80066020400499,
+    "size": 0.12,
+    "channel": 87,
+    "nearby": false
+  },
+  "observations": [
+    {
+      "id": "2025W18_1B_0081_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W18_1B/l2b-v27-2026-196/6/level2_2025W18_1B_0081_4D6_spx_l2b-v27-2026-196.fits",
+      "mjd": 60794.067797,
+      "date": "2025-04-29T01:37:37.660Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_dr1",
+      "wavelength": 4.494997176816515,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2025W18_2B_0011_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W18_2B/l2b-v27-2026-197/6/level2_2025W18_2B_0011_4D6_spx_l2b-v27-2026-197.fits",
+      "mjd": 60796.583346,
+      "date": "2025-05-01T14:00:01.094Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_dr1",
+      "wavelength": 4.495114409529512,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2025W19_1B_0344_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_1B/l2b-v27-2026-197/6/level2_2025W19_1B_0344_4D6_spx_l2b-v27-2026-197.fits",
+      "mjd": 60802.219728,
+      "date": "2025-05-07T05:16:24.499Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_dr1",
+      "wavelength": 4.495023067302425,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2026W39_2A_0647_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W39_2A/l2b-v27-2026-271/6/level2_2026W39_2A_0647_1D6_spx_l2b-v27-2026-271.fits",
+      "mjd": 61310.58872,
+      "date": "2026-09-27T14:07:45.408Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_qr3",
+      "wavelength": 4.495198164944776,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2026W39_2A_0682_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W39_2A/l2b-v27-2026-271/6/level2_2026W39_2A_0682_1D6_spx_l2b-v27-2026-271.fits",
+      "mjd": 61310.792377,
+      "date": "2026-09-27T19:01:01.372Z",
+      "band": "SPHEREx-D6",
+      "collection": "spherex_qr3",
+      "wavelength": 4.495189007717511,
+      "verifiedCoverage": 1
+    }
+  ],
+  "note": "Verified starting observations, not a complete archive search. Additional archive observations load separately."
+}

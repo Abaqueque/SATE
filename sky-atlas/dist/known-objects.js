@@ -3,7 +3,7 @@ import {insideImageField} from './inventory-field.js';
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function mountKnownObjects(root,{panes,field,project,visibleSides,isComparing,isLayered=()=>false}){
  const toggle=root.querySelector('#cell-known'),box=root.querySelector('#known-objects-info'),summary=root.querySelector('#known-objects-status'),detail=root.querySelector('#known-object-detail');
- const states=new Map(),cache=new Map();let enabled=false,dead=false,catalogue,catError='',catController,selected;
+ const states=new Map(),cache=new Map();let enabled=new URLSearchParams(location.search).get('known')==='1',dead=false,catalogue,catError='',catController,selected;
  for(const [side,panel] of Object.entries(panes)){const layer=document.createElement('div');layer.className='known-markers';panel.el.querySelector('.cell-stage').append(layer);states.set(side,{layer,key:null,data:null,error:'',timer:null,controller:null});}
  const params=kind=>new URLSearchParams({kind,...field});
  async function read(query,signal){const r=await fetch('/api/known-objects?'+query,{signal});const data=await r.json();if(!r.ok)throw Error(data.error||'Known objects unavailable');return data;}
@@ -34,7 +34,7 @@ export function mountKnownObjects(root,{panes,field,project,visibleSides,isCompa
   }
   if(enabled)summary.textContent=[catError||(!catalogue?'Loading SIMBAD…':catalogue.truncated?'SIMBAD result limit reached · partial list':''),...messages].filter(Boolean).join('\n')||'Choose an exposure.';
  }
- toggle.onchange=()=>{enabled=toggle.checked;box.hidden=!enabled;if(enabled&&!catalogue)void loadCatalogue();if(!enabled)catController?.abort();draw();};
+ toggle.onchange=()=>{enabled=toggle.checked;const url=new URL(location.href);if(enabled)url.searchParams.set('known','1');else url.searchParams.delete('known');history.replaceState({},'',url.pathname+url.search);box.hidden=!enabled;if(enabled&&!catalogue)void loadCatalogue();if(!enabled)catController?.abort();draw();};
  root.querySelector('#known-objects-retry').onclick=()=>{if(!enabled)return;catalogue=null;void loadCatalogue();cache.clear();for(const state of states.values()){state.key=null;state.controller?.abort();}draw();};
- renderDetail();return {draw,destroy(){dead=true;catController?.abort();for(const s of states.values()){clearTimeout(s.timer);s.controller?.abort();s.layer.remove();}}};
+ toggle.checked=enabled;box.hidden=!enabled;if(enabled)void loadCatalogue();renderDetail();return {draw,destroy(){dead=true;catController?.abort();for(const s of states.values()){clearTimeout(s.timer);s.controller?.abort();s.layer.remove();}}};
 }

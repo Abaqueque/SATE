@@ -1,0 +1,55 @@
+{
+  "name": "Orion Nebula",
+  "verifiedAt": "2026-11-15T13:43:35.775Z",
+  "source": "https://irsa.ipac.caltech.edu/spherex-archive-documentation/spherex-data-access/",
+  "region": {
+    "ra": 83.8221,
+    "dec": -5.3911,
+    "size": 0.3,
+    "channel": 62,
+    "nearby": true
+  },
+  "observations": [
+    {
+      "id": "2025W36_2B_0728_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W36_2B/l2b-v27-2026-234/4/level2_2025W36_2B_0728_2D4_spx_l2b-v27-2026-234.fits",
+      "mjd": 60926.001787,
+      "date": "2025-09-08T00:02:34.396Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_dr1",
+      "wavelength": 3.2191879962698047,
+      "verifiedCoverage": 0.9993795918367347
+    },
+    {
+      "id": "2025W37_1A_0017_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W37_1A/l2b-v27-2026-235/4/level2_2025W37_1A_0017_1D4_spx_l2b-v27-2026-235.fits",
+      "mjd": 60926.0694,
+      "date": "2025-09-08T01:39:56.160Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_dr1",
+      "wavelength": 3.306814169378045,
+      "verifiedCoverage": 0.9978448979591836
+    },
+    {
+      "id": "2026W37_1A_0330_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W37_1A/l2b-v27-2026-255/4/level2_2026W37_1A_0330_1D4_spx_l2b-v27-2026-255.fits",
+      "mjd": 61291.812157,
+      "date": "2026-09-08T19:29:30.364Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_qr3",
+      "wavelength": 3.26757771994429,
+      "verifiedCoverage": 0.9978448979591836
+    },
+    {
+      "id": "2026W37_1A_0330_2",
+      "path": "/ibe/data/spherex/qr3/level2/2026W37_1A/l2b-v27-2026-255/4/level2_2026W37_1A_0330_2D4_spx_l2b-v27-2026-255.fits",
+      "mjd": 61291.813649,
+      "date": "2026-09-08T19:31:39.273Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_qr3",
+      "wavelength": 3.3562811634602046,
+      "verifiedCoverage": 0.9986285714285714
+    }
+  ],
+  "note": "Verified starting observations, not a complete archive search. Additional archive observations load separately."
+}

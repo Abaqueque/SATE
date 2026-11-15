@@ -1,0 +1,55 @@
+{
+  "name": "Groombridge 1830",
+  "verifiedAt": "2026-11-15T13:43:51.878Z",
+  "source": "https://irsa.ipac.caltech.edu/spherex-archive-documentation/spherex-data-access/",
+  "region": {
+    "ra": 178.28140902309326,
+    "dec": 37.676664253645846,
+    "size": 0.2,
+    "channel": 32,
+    "nearby": true
+  },
+  "observations": [
+    {
+      "id": "2025W20_2D_0458_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_2D/l2b-v27-2026-198/2/level2_2025W20_2D_0458_1D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60813.257323,
+      "date": "2025-05-18T06:10:32.707Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "wavelength": 1.5840021901930699,
+      "verifiedCoverage": 1
+    },
+    {
+      "id": "2025W20_2D_0458_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_2D/l2b-v27-2026-198/2/level2_2025W20_2D_0458_2D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60813.258833,
+      "date": "2025-05-18T06:12:43.171Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "wavelength": 1.6222766206966308,
+      "verifiedCoverage": 0.9999269486448974
+    },
+    {
+      "id": "2026W21_2A_0589_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0589_1D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.997221,
+      "date": "2026-05-24T23:55:59.894Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3",
+      "wavelength": 1.5644820794920518,
+      "verifiedCoverage": 0.9999269486448974
+    },
+    {
+      "id": "2026W21_2A_0589_2",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0589_2D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.998713,
+      "date": "2026-05-24T23:58:08.803Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3",
+      "wavelength": 1.602275709447969,
+      "verifiedCoverage": 1
+    }
+  ],
+  "note": "Verified starting observations, not a complete archive search. Additional archive observations load separately."
+}
