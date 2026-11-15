@@ -12,6 +12,9 @@
     },
     "api/observations.js": {
       "maxDuration": 60
+    },
+    "api/frame-info.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

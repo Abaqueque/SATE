@@ -1,25 +1,30 @@
 # SPHEREx cell observation workspace
 
-Open a native HEALPix search cell in the atlas, then choose **Open region fully**. A direct link uses `/explore/?hpx=<cell>&order=9&channel=<0–101>&view=cell`.
+Open a HEALPix search cell and choose **Open region fully**. Direct links use `/explore/?hpx=<cell>&order=9&channel=<0–101>&view=cell`. The image remains grayscale. The sky-search palette is separate.
 
-The left image is a dated SPHEREx Level 2 FITS exposure. The right rail contains the cell centre, wavelength target/window, grayscale image cleanup controls. The bottom timeline groups archive exposures by UTC observing date. Each date searches its candidate detector exposures until a usable centre-wavelength match is found. A date with no match remains explicitly unavailable; a nearby wavelength can be shown by an explicit action. One representative matching exposure is displayed per date, not an epoch coadd.
+## Wavelength and time
 
-Data comes from NASA/IPAC IRSA's DR1, QR3 and corresponding deep collections. Re-released exposure IDs in the same detector band are deduplicated. Search metadata is cached for ten minutes in a bounded warm-instance cache; observation cutouts are fetched on demand and up to 36 aligned pairs are kept in the browser. Navigation and changed searches cancel pending requests. Archive transient errors are retried and remain visible if the request fails.
+The wavelength menu offers a single channel, All wavelengths, or a custom mix. A channel spans the midpoints to its adjacent channel centres. Single and mixed selections filter both the exposure list and individual pixels; there is no automatic substitution of another wavelength. All wavelengths shows every calibrated exposure covering the selected centre. These modes select a union of exposures, not a simultaneous broadband measurement.
+
+The archive's detector-wide bandpass is only a preliminary search filter. Before an exposure appears, `/api/frame-info` evaluates the selected sky coordinate against that exposure's own full-image WCS and wavelength table, retrieved using byte ranges. Failed metadata checks are counted and retryable. The list fills progressively while checks run.
+
+Every matching exposure is selectable, including multiple observations on one UTC date and exposures with fully masked pixels. Re-releases of the same exposure ID and detector are deduplicated. Timeline marks are positioned by elapsed observation time. Previous/next, playback, keyboard arrows and same-day time buttons navigate individual exposures. Dates, UTC time and actual centre wavelength remain visible.
+
+The selected channel, mode, mix and exposure ID are retained in the URL. DR1, QR3 and their deep collections are queried. Search results are cached for ten minutes, calibration metadata uses bounded warm-instance caches, and the browser keeps up to 48 aligned image pairs. Changed selections cancel pending requests.
 
 ## Display processing
 
-- FITS `IMAGE`, `FLAGS`, `VARIANCE`, `ZODI` and `WCS-WAVE` extensions are retained.
-- TAN/SIP coordinates align the 12-arcminute context to north up, east left. Wavelengths are evaluated per pixel using the FITS lookup table.
-- The default quality mask permits only nominal pixels and the source-mask bit. Zodiacal-model subtraction, two-pass bilateral denoising, asinh contrast and display interpolation are enabled initially.
-- The opened data is always grayscale. The separate sky-search map uses the Milky Way presentation palette (deep blue, blue-violet, soft rose and warm cream), with a grayscale toggle.
-- Wavelength varies across an exposure. The centre must match the requested window; the optional **Isolate target band** control additionally masks pixels outside that window. The normal display preserves the wider spatial context.
-- Optional gap repair estimates only enclosed single pixels with at least seven valid neighbours. It does not fill edges, large holes or spectral gaps. Estimated pixels are counted in the caption.
-- **View original** shows the sky-aligned science values without quality masking, background subtraction, denoising or gap repair. Alignment and a display stretch are still applied. The complete original FITS is linked in Observation details.
-- Pixel inspection reports the original aligned science intensity and wavelength, not cleaned display values. Rendering never overwrites the raw arrays.
-- Contrast is recalculated per exposure. This viewer is for visual exploration; it does not claim calibrated brightness-change measurements or completed scientific reviews.
+- FITS IMAGE, FLAGS, VARIANCE, ZODI and WCS-WAVE extensions are retained. TAN/SIP coordinates align a 12-arcminute context north up, east left.
+- Quality masking permits nominal pixels and the source-mask bit. Zodiacal-model subtraction, two-pass bilateral denoising, asinh contrast and pixel smoothing start enabled.
+- Spectral selection is always respected, including in Original view. Optional gap repair only estimates enclosed pixels with at least seven valid neighbours; it cannot fill spectral gaps or large missing regions.
+- Original displays aligned science values without quality masking, zodiacal subtraction, denoising or gap repair. A display stretch and alignment still apply. FITS download preserves the archive source.
+- Pixel inspection reports original aligned intensity and wavelength. Display processing never overwrites the raw arrays.
+- The display stretch stays fixed within a selected channel during a search. All/mix views maintain a separate reference scale per channel. This is a visual comparison, not calibrated variability photometry.
 
-Reference: [IRSA SPHEREx spectral image tutorial](https://caltech-ipac.github.io/irsa-tutorials/spherex-intro/) and [quality flags](https://irsa.ipac.caltech.edu/onlinehelp/spherex/spherex/sp.html).
+**Combine exposures** performs an optional inverse-variance display coadd within ±3 hours and ±0.5% centre wavelength. Each contributing pixel must also match the selected wavelength bins and the local anchor wavelength, have good quality and positive variance, and share grid, units and background-removal state. Repeat reductions are excluded. Robust clipping is applied with at least three samples. Pixels without two compatible contributions retain the anchor image. The selected exposure remains individually accessible. Reprojection introduces pixel covariance; these per-pixel uncertainties are not aperture-photometry errors.
 
 ## Verification
 
-`npm test` includes signal-preservation, noise suppression, masking, gap repair, palette, chronological deduplication and proxy input tests. `npm run build` also runs the atlas/HEALPix checks. `npm run dev` serves both atlas assets and the same observation/frame handlers used on Vercel.
+`npm test` covers filtering, same-day exposure retention, actual-time timeline spacing, metadata calibration, proxy input handling, weighted coadds, noise suppression and preservation of original values. `npm run build` includes atlas checks and 590 independent Astropy coordinate reference cases. Automated Chromium checks exercise same-day navigation, single/all/mix selection, coadds, masked exposures, playback and mobile controls with deterministic FITS fixtures. A live archive check loaded four matching exposures for cell 734163 at channel 30 and switched between individual dated images.
+
+Reference: [IRSA spectral image tutorial](https://caltech-ipac.github.io/irsa-tutorials/spherex-intro/) and [quality flags](https://irsa.ipac.caltech.edu/onlinehelp/spherex/spherex/sp.html).

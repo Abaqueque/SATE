@@ -187,6 +187,15 @@ export function wavelengthAt(image, x, y) {
   return at(ix, iy) * (1 - fx) * (1 - fy) + at(ix + 1, iy) * fx * (1 - fy) + at(ix, iy + 1) * (1 - fx) * fy + at(ix + 1, iy + 1) * fx * fy;
 }
 
+// Calibrate the selected position from an exposure header and its own WCS table.
+export function wavelengthAtSky(header, tableBytes, ra, dec) {
+  const [x,y]=makeWorldToPixel(header)(ra,dec);
+  if(!Number.isFinite(x)||!Number.isFinite(y)||x<0||y<0||x>=header.NAXIS1||y>=header.NAXIS2)return null;
+  const hdu=readHeader(tableBytes),waveTable=readWaveTable(new DataView(tableBytes.buffer,tableBytes.byteOffset,tableBytes.byteLength),hdu);
+  const wavelength=wavelengthAt({header,waveTable},x,y);
+  return Number.isFinite(wavelength)?{wavelength,x,y}:null;
+}
+
 export function createSkyGrid(ra, dec, size, pixels = Math.max(32, Math.min(210, Math.ceil(size * 3600 / 6.2)))) {
   const coordinates = new Float64Array(pixels * pixels * 2);
   const a = ra * D2R, d = dec * D2R;
