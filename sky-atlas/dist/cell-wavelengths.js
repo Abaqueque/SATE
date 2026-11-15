@@ -1,3 +1,4 @@
+import {parseLayerHue} from './cell-colour.js';
 import {channelRange,inRanges,uniqueExposures} from './cell-selection.js';
 
 export function wavelengthParameters(position,wavelengths,channel){
@@ -49,12 +50,19 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
  const panels=new Map(),button=root.querySelector('#cell-add-wavelength'),layerList=root.querySelector('#cell-layer-list');
  let nextId=0,dead=false;
  const saved=new URLSearchParams(location.search),hidden=(saved.get('hiddenLayers')||'').split(','),opacities=(saved.get('layerOpacity')||'').split(',');
- const base={visible:!hidden.includes('1'),opacity:1};
+ const savedHues=(saved.get('layerHue')||'').split(',').map(parseLayerHue);
+ const base={visible:!hidden.includes('1'),opacity:1,hue:savedHues[0]??210,colour:savedHues[0]!==null};
+ const colourMarkup='<div class="cell-layer-colour"><label class="cell-layer-colour-toggle"><span>Colour</span><input type="checkbox" class="cell-colour-toggle"></label><label class="cell-layer-hue"><span>Hue <output>Grayscale</output><i class="cell-colour-swatch" aria-hidden="true"></i></span><input type="range" min="0" max="359" step="1" value="210" title="Adjust hue while preserving brightness"></label></div>';
  const options=metadata.wavelengths.map((w,i)=>`<option value="${i}">${w.toFixed(3)} µm</option>`).join('');
  function controls(layer,number){
   const toggle=layer.card.querySelector('.cell-layer-visible');toggle.textContent=layer.visible?'Visible':'Hidden';toggle.setAttribute('aria-pressed',String(layer.visible));toggle.setAttribute('aria-label',`Layer ${number} visibility`);
   layer.card.classList.toggle('layer-hidden',!layer.visible);
-  const opacity=layer.card.querySelector('[type=range]');if(opacity){opacity.setAttribute('aria-label',`Layer ${number} opacity`);layer.card.querySelector('output').textContent=Math.round(layer.opacity*100)+'%';}
+  const opacity=layer.card.querySelector('.cell-layer-opacity input');if(opacity){opacity.setAttribute('aria-label',`Layer ${number} opacity`);layer.card.querySelector('.cell-layer-opacity output').textContent=Math.round(layer.opacity*100)+'%';}
+  const colour=layer.card.querySelector('.cell-colour-toggle'),hue=layer.card.querySelector('.cell-layer-hue input');
+  colour.checked=layer.colour;colour.setAttribute('aria-label',`Layer ${number} colour`);
+  hue.value=layer.hue;hue.setAttribute('aria-label',`Layer ${number} hue`);hue.setAttribute('aria-valuetext',layer.colour?layer.hue+' degrees':'Grayscale; adjust to add colour');
+  layer.card.querySelector('.cell-layer-hue output').textContent=layer.colour?layer.hue+'°':'Grayscale';
+  layer.card.querySelector('.cell-colour-swatch').style.background=layer.colour?'hsl('+layer.hue+' 85% 65%)':'#c3c3c3';
  }
  function update(){
   let number=2;const hiddenNumbers=base.visible?[]:[1];
@@ -66,8 +74,12 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
   controls(base,1);button.disabled=panels.size>=4;root.querySelector('#cell-wavelength-limit').hidden=panels.size<4;
   onChange([...panels.values()].map(p=>p.channel));
   const u=new URL(location.href);if(hiddenNumbers.length)u.searchParams.set('hiddenLayers',hiddenNumbers.join(','));else u.searchParams.delete('hiddenLayers');
-  if(panels.size)u.searchParams.set('layerOpacity',[...panels.values()].map(p=>Math.round(p.opacity*100)).join(','));else u.searchParams.delete('layerOpacity');history.replaceState({},'',u.pathname+u.search);
+  if(panels.size)u.searchParams.set('layerOpacity',[...panels.values()].map(p=>Math.round(p.opacity*100)).join(','));else u.searchParams.delete('layerOpacity');const colourLayers=[base,...panels.values()];if(colourLayers.some(l=>l.colour))u.searchParams.set('layerHue',colourLayers.map(l=>l.colour?l.hue:'gray').join(','));else u.searchParams.delete('layerHue');history.replaceState({},'',u.pathname+u.search);
   redraw();
+ }
+ function bindColour(layer){
+  layer.card.querySelector('.cell-colour-toggle').onchange=e=>{layer.colour=e.target.checked;update();};
+  layer.card.querySelector('.cell-layer-hue input').oninput=e=>{layer.hue=Number(e.target.value);layer.colour=true;update();};
  }
  const sideNames={left:'L',right:'R'};
  function details(panel){
@@ -109,16 +121,16 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
  function add(channel,{focus=true}={}){
   if(dead||panels.size>=4)return;
   const id=++nextId,index=panels.size,card=document.createElement('section');card.className='cell-layer-card';
-  card.innerHTML=`<div class="cell-layer-title"><h2></h2><button type="button" class="cell-layer-visible" aria-pressed="true">Visible</button><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field">Wavelength<select>${options}</select></label><label class="cell-field cell-layer-opacity"><span>Opacity <output>100%</output></span><input type="range" min="0" max="100" step="1" value="100"></label><div class="cell-layer-dates"><div><b>L</b> <time data-layer-date="left">—</time><span data-layer-band="left"></span></div><div><b>R</b> <time data-layer-date="right">—</time><span data-layer-band="right"></span></div></div><p class="cell-layer-status" role="status"></p><button type="button" class="cell-retry" hidden>Retry</button>`;
-  const restoredOpacity=Number(opacities[index]),panel={channel,card,current:{},status:{},errors:{},visible:focus||!hidden.includes(String(index+2)),opacity:!focus&&opacities[index]?.trim()&&Number.isFinite(restoredOpacity)?Math.max(0,Math.min(100,restoredOpacity))/100:1};
-  panels.set(id,panel);layerList.append(card);resetLayer(panel);const select=card.querySelector('select');select.value=String(channel);card.querySelector('[type=range]').value=panel.opacity*100;
+  card.innerHTML=`<div class="cell-layer-title"><h2></h2><button type="button" class="cell-layer-visible" aria-pressed="true">Visible</button><button type="button" class="cell-layer-remove">×</button></div><label class="cell-field">Wavelength<select>${options}</select></label>${colourMarkup}<label class="cell-field cell-layer-opacity"><span>Opacity <output>100%</output></span><input type="range" min="0" max="100" step="1" value="100"></label><div class="cell-layer-dates"><div><b>L</b> <time data-layer-date="left">—</time><span data-layer-band="left"></span></div><div><b>R</b> <time data-layer-date="right">—</time><span data-layer-band="right"></span></div></div><p class="cell-layer-status" role="status"></p><button type="button" class="cell-retry" hidden>Retry</button>`;
+  const restoredOpacity=Number(opacities[index]),savedHue=focus?null:savedHues[index+1],panel={hue:savedHue??210,colour:savedHue!=null,channel,card,current:{},status:{},errors:{},visible:focus||!hidden.includes(String(index+2)),opacity:!focus&&opacities[index]?.trim()&&Number.isFinite(restoredOpacity)?Math.max(0,Math.min(100,restoredOpacity))/100:1};
+  panels.set(id,panel);layerList.append(card);resetLayer(panel);const select=card.querySelector('select');select.value=String(channel);card.querySelector('.cell-layer-opacity input').value=panel.opacity*100;bindColour(panel);
   select.onchange=()=>{panel.channel=Number(select.value);resetLayer(panel);refresh();update();};
   card.querySelector('.cell-layer-visible').onclick=()=>{panel.visible=!panel.visible;update();};
-  card.querySelector('[type=range]').oninput=e=>{panel.opacity=Number(e.target.value)/100;update();};
+  card.querySelector('.cell-layer-opacity input').oninput=e=>{panel.opacity=Number(e.target.value)/100;update();};
   card.querySelector('.cell-layer-remove').onclick=()=>{panel.controller?.abort();panels.delete(id);card.remove();refresh();update();button.focus();};
   card.querySelector('.cell-retry').onclick=refresh;update();refresh();if(focus){select.focus();card.scrollIntoView({block:'nearest'});}
  }
- base.card=root.querySelector('.cell-base-layer');controls(base,1);base.card.querySelector('.cell-layer-visible').onclick=()=>{base.visible=!base.visible;update();};
+ base.card=root.querySelector('.cell-base-layer');base.card.insertAdjacentHTML('beforeend',colourMarkup);bindColour(base);controls(base,1);base.card.querySelector('.cell-layer-visible').onclick=()=>{base.visible=!base.visible;update();};
  button.disabled=false;button.onclick=()=>{const used=new Set([Number(root.querySelector('#cell-wave').value),...[...panels.values()].map(p=>p.channel)]),baseChannel=Number(root.querySelector('#cell-wave').value),start=Number.isInteger(baseChannel)?baseChannel:62;let chosen=(start+1)%metadata.wavelengths.length;while(used.has(chosen))chosen=(chosen+1)%metadata.wavelengths.length;add(chosen);};
  return {panels,base,add,sync:timeline.sync,pending:timeline.pending,clear(){timeline.clear();for(const panel of panels.values()){panel.current={};panel.status={};details(panel);}},close(){dead=true;timeline.close();for(const p of panels.values())p.controller?.abort();panels.clear();}};
 }

@@ -1,3 +1,4 @@
+import {tintGrayscale} from './cell-colour.js';
 import {mountWavelengthViews,composeLayers} from './cell-wavelengths.js';
 import {center,ORDER,parseSky} from './sky-model.js';
 import {parseSpectralImage,createSkyGrid,alignImage,drawAligned,sharedStretch} from './science/spectral.js';
@@ -54,22 +55,22 @@ export function mountCell(){
  }
  function preloadStatus(){if(dead||!loader)return;const {ready,failed,total}=loader.counts();q('#cell-preload-progress').textContent=total?`${ready} / ${total} images ready${failed?` · ${failed} unavailable`:''}`:'';q('#cell-preload-retry').hidden=!failed;}
  function mixUi(){q('#cell-mix').hidden=mode!=='mix';q('#cell-mix-chips').innerHTML=mix.map(i=>`<button data-remove-wave="${i}" ${mix.length===1?'disabled':''}>${metadata.wavelengths[i].toFixed(3)} µm ×</button>`).join('');}
- function rendered(current,combined=false,extraChannel){
+ function rendered(current,combined=false,extraChannel,hue=null){
   const displayMode=extraChannel===undefined?mode:'single',displayChannel=extraChannel??channel,displayRanges=extraChannel===undefined?ranges():selectionRanges(metadata.wavelengths,'single',extraChannel);const source=original?current.individual.raw:!q('#cell-background').checked?current.raw:current.clean;
-  const style=[original,q('#cell-quality').checked,q('#cell-background').checked,q('#cell-noise').value,q('#cell-repair').checked,q('#cell-contrast').value].join('|'),id=current.obs.path+'|'+style+'|'+combined+'|'+displayMode+'|'+displayChannel+'|'+JSON.stringify(displayRanges);
+  const style=[original,q('#cell-quality').checked,q('#cell-background').checked,q('#cell-noise').value,q('#cell-repair').checked,q('#cell-contrast').value].join('|'),id=current.obs.path+'|'+style+'|'+combined+'|'+displayMode+'|'+displayChannel+'|'+JSON.stringify(displayRanges)+'|'+hue;
   if(renders.has(id)){const hit=renders.get(id);renders.delete(id);renders.set(id,hit);return hit;}
   const display=processDisplay(source,{quality:original?false:q('#cell-quality').checked,denoise:original?0:Number(q('#cell-noise').value),repair:original?false:q('#cell-repair').checked,ranges:displayRanges,spectralMask:displayMode!=='all'});
   const localGroup=metadata.wavelengths.reduce((best,w,i)=>Math.abs(w-source.wavelength)<Math.abs(metadata.wavelengths[best]-source.wavelength)?i:best,0),scaleKey=(displayMode==='single'?displayChannel:localGroup)+'|'+(original?'original':q('#cell-background').checked?'clean':'raw');
   if(!scales.has(scaleKey))scales.set(scaleKey,{clean:displayScale(display),raw:sharedStretch([display])});const scale=scales.get(scaleKey),canvas=document.createElement('canvas');
-  if(original)drawAligned(canvas,display,scale.raw);else drawClean(canvas,display,scale.clean,Number(q('#cell-contrast').value));const result={canvas,coverage:display.coverage};renders.set(id,result);while(renders.size>64)renders.delete(renders.keys().next().value);return result;
+  if(original)drawAligned(canvas,display,scale.raw);else drawClean(canvas,display,scale.clean,Number(q('#cell-contrast').value));if(hue!==null){const context=canvas.getContext('2d'),pixels=context.getImageData(0,0,canvas.width,canvas.height);pixels.data.set(tintGrayscale(pixels.data,hue));context.putImageData(pixels,0,0);}const result={canvas,coverage:display.coverage};renders.set(id,result);while(renders.size>64)renders.delete(renders.keys().next().value);return result;
  }
  function draw(panel){
   panel.displayState=null;
   if(panel.loading||wavelengthViews?.pending(panel.side)){panel.canvas.hidden=true;status(panel,'Updating all layers…','',true);return;}
   if(panel.loadError){status(panel,'Could not load exposure',panel.loadError);return;}
-  const baseImage=panel.current?rendered(panel.current,panel.combined):null;
+  const baseImage=panel.current?rendered(panel.current,panel.combined,undefined,wavelengthViews?.base.colour?wavelengthViews.base.hue:null):null;
   const layers=[{canvas:baseImage?.canvas,visible:wavelengthViews?.base.visible??true,opacity:1,coverage:baseImage?.coverage,name:'Layer 1'}];
-  for(const extra of wavelengthViews?.panels.values()||[]){const current=extra.current[panel.side];if(!current||!extra.visible||extra.opacity<=0)continue;const image=rendered(current,false,extra.channel);layers.push({canvas:image.canvas,visible:true,opacity:extra.opacity,coverage:image.coverage,name:'Layer '+extra.number});}
+  for(const extra of wavelengthViews?.panels.values()||[]){const current=extra.current[panel.side];if(!current||!extra.visible||extra.opacity<=0)continue;const image=rendered(current,false,extra.channel,extra.colour?extra.hue:null);layers.push({canvas:image.canvas,visible:true,opacity:extra.opacity,coverage:image.coverage,name:'Layer '+extra.number});}
   const visible=layers.filter(l=>l.visible&&l.canvas&&l.opacity>0),canvas=panel.canvas;
   if(!panel.current&&!visible.length)return;
   canvas.width=grid.pixels;canvas.height=grid.pixels;composeLayers(canvas.getContext('2d'),layers);
