@@ -29,5 +29,5 @@ test('source downloads are restricted to IRSA and saved viewer links stay local'
 test('saved display settings restore real controls and bound malformed values',()=>{
  const values=displaySettings({quality:false,background:false,original:true,contrast:1.7,noise:0,zoom:3,pan:{x:.2,y:-.4},combined:{left:true}});
  assert.equal(values.quality,false);assert.equal(values.contrast,1.7);assert.equal(values.noise,0);assert.equal(values.zoom,3);assert.deepEqual(values.pan,{x:.2,y:-.4});assert.equal(values.combined.left,true);
- assert.equal(displaySettings({zoom:Infinity,contrast:999,noise:10}).contrast,2.5);assert.equal(displaySettings({zoom:Infinity}).zoom,1);assert.equal(displaySettings(null).quality,true);
+ assert.equal(displaySettings({zoom:Infinity,contrast:999,noise:10}).contrast,2.5);assert.equal(displaySettings({zoom:Infinity}).zoom,1);assert.equal(displaySettings(null).quality,false);assert.equal(displaySettings({quality:true}).quality,true);
 });

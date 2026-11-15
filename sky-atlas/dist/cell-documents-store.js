@@ -16,7 +16,7 @@ export function fitsLink(path,position,width=.2){
 export function displaySettings(value={}){
  if(!value||typeof value!=='object')value={};
  const n=(key,fallback,min,max)=>Number.isFinite(value[key])?Math.max(min,Math.min(max,value[key])):fallback,b=(key,fallback)=>typeof value[key]==='boolean'?value[key]:fallback;
- return {original:b('original',false),quality:b('quality',true),background:b('background',true),noise:Math.round(n('noise',2,0,2)),interpolate:b('interpolate',true),repair:b('repair',false),contrast:n('contrast',1,.4,2.5),zoom:n('zoom',1,1,12),pan:{x:Number.isFinite(value.pan?.x)?value.pan.x:0,y:Number.isFinite(value.pan?.y)?value.pan.y:0},combined:{left:value.combined?.left===true,right:value.combined?.right===true}};
+ return {original:b('original',false),quality:b('quality',false),background:b('background',true),noise:Math.round(n('noise',2,0,2)),interpolate:b('interpolate',true),repair:b('repair',false),contrast:n('contrast',1,.4,2.5),zoom:n('zoom',1,1,12),pan:{x:Number.isFinite(value.pan?.x)?value.pan.x:0,y:Number.isFinite(value.pan?.y)?value.pan.y:0},combined:{left:value.combined?.left===true,right:value.combined?.right===true}};
 }
 export function appendSnapshot(existing,snapshot){
  const key=cellKey(snapshot.cellId,snapshot.order),position=candidatePosition({...snapshot.position,radius:600});
