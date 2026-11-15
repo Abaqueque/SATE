@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findWavelengthObservation,wavelengthParameters} from '../sky-atlas/dist/cell-wavelengths.js';
+import {findWavelengthObservation,wavelengthParameters,composeLayers} from '../sky-atlas/dist/cell-wavelengths.js';
 
 const wavelengths=[1,1.1,1.2],observations=Array.from({length:9},(_,i)=>({id:String(i),path:'/image'+i,band:'D1',mjd:60000+i}));
 test('additional wavelengths keep the same sky region and request their own band',()=>{
@@ -26,4 +26,11 @@ test('no coverage differs from an unavailable archive',async()=>{
 test('changing or removing a wavelength cancels pending results',async()=>{
  const controller=new AbortController();
  await assert.rejects(findWavelengthObservation({observations,wavelengths,channel:1,signal:controller.signal,inspect:async()=>{controller.abort();return {covered:true,wavelength:1.1};}}),{name:'AbortError'});
+});
+
+test('overlay compositor paints bottom to top, skips hidden layers and restores canvas state',()=>{
+ const calls=[],ctx={globalAlpha:.3,globalCompositeOperation:'multiply',save(){this.saved=[this.globalAlpha,this.globalCompositeOperation];},restore(){[this.globalAlpha,this.globalCompositeOperation]=this.saved;},drawImage(canvas,x,y){calls.push([canvas,this.globalAlpha,this.globalCompositeOperation,x,y]);}};
+ composeLayers(ctx,[{canvas:'base',visible:true,opacity:1},{canvas:'hidden',visible:false,opacity:1},{canvas:'middle',visible:true,opacity:.5},{canvas:'transparent',visible:true,opacity:0},{canvas:'top',visible:true,opacity:1}]);
+ assert.deepEqual(calls,[['base',1,'source-over',0,0],['middle',.5,'source-over',0,0],['top',1,'source-over',0,0]]);
+ assert.equal(ctx.globalAlpha,.3);assert.equal(ctx.globalCompositeOperation,'multiply');
 });
