@@ -73,3 +73,10 @@
 .known-markers{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:4}
 .cell-image-area .known-marker{position:absolute;width:18px;height:18px;transform:translate(-50%,-50%);border:1px solid #91d9ff;border-radius:50%;padding:0;background:transparent;color:#c9edff;pointer-events:auto;cursor:pointer;box-shadow:0 0 2px #000}
 .cell-image-area .known-marker.solar{border-color:#ffd17e;border-radius:2px;transform:translate(-50%,-50%) rotate(45deg);color:#ffe4b6}.known-marker span{display:none;position:absolute;left:20px;top:-4px;padding:3px 6px;background:#081118e8;border-radius:3px;white-space:nowrap;font:10px/1.4 var(--sans)}.known-marker.solar span{transform:rotate(-45deg);transform-origin:left center}.known-marker:hover,.known-marker:focus-visible,.known-marker.selected{z-index:1;border-width:2px}.known-marker:hover span,.known-marker:focus-visible span,.known-marker.selected span{display:block}
+
+.cell-layer-target{display:grid;gap:8px;margin:10px 0 16px;font:11px var(--sans)}
+.cell-layer-target>span{color:var(--layer-muted)}
+.cell-layer-target [role=group]{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:3px;background:var(--surface-raised);border:1px solid var(--border-control);border-radius:6px}
+.cell-layer-target button{min-height:30px;padding:5px 4px;border:0;border-radius:4px;background:transparent;color:var(--layer-text);font:12px var(--sans);cursor:pointer}
+.cell-layer-target button[aria-pressed=true]{background:var(--accent);color:#fff}.cell-layer-target button:focus-visible{outline:2px solid var(--accent-text);outline-offset:2px}
+.cell-workspace.single-view .cell-layer-target{display:none}

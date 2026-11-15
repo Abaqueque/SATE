@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findWavelengthObservation,wavelengthParameters,composeLayers,createLayerTimeline} from '../sky-atlas/dist/cell-wavelengths.js';
+import {findWavelengthObservation,wavelengthParameters,composeLayers,createLayerTimeline,layerApplies,layerTarget} from '../sky-atlas/dist/cell-wavelengths.js';
 
 const wavelengths=[1,1.1,1.2],observations=Array.from({length:9},(_,i)=>({id:String(i),path:'/image'+i,band:'D1',mjd:60000+i}));
 test('additional wavelengths keep the same sky region and request their own band',()=>{
@@ -65,4 +65,19 @@ test('coverage cropping keeps every wavelength layer on the same displayed sky g
  const calls=[],ctx={save(){},restore(){},drawImage(...args){calls.push([this.globalAlpha,...args]);}};
  composeLayers(ctx,[{canvas:'base',visible:true,opacity:1},{canvas:'overlay',visible:true,opacity:.4}],{x:12,y:18,size:160});
  assert.deepEqual(calls,[[1,'base',12,18,160,160,0,0,160,160],[.4,'overlay',12,18,160,160,0,0,160,160]]);
+});
+
+
+test('viewer targets preserve legacy both-view defaults and isolate explicit assignments',()=>{
+ assert.equal(layerTarget('invalid'),'both');assert.equal(layerTarget(undefined),'both');
+ assert(layerApplies({},'left'));assert(layerApplies({},'right'));
+ assert(layerApplies({target:'left'},'left'));assert(!layerApplies({target:'left'},'right'));
+ assert(layerApplies({target:'right'},'right'));assert(!layerApplies({target:'right'},'left'));
+ assert(layerApplies({target:'right'},'left',false),'single-view mode shows all configured layers');
+});
+test('a wavelength assigned to one viewer never loads or commits on the other',async()=>{
+ const layers=[{id:1,target:'left'},{id:2,target:'right'}],loaded=[],commits=[];
+ const timeline=createLayerTimeline({layers:side=>layers.filter(layer=>layerApplies(layer,side)),load:async(layer,target)=>{loaded.push([layer.id,target.mjd]);return layer.id;},onCommit:(side,result)=>commits.push([side,result.map(r=>r.value)])});
+ await timeline.sync('left',{mjd:60000});await timeline.sync('right',{mjd:61000});
+ assert.deepEqual(loaded,[[1,60000],[2,61000]]);assert.deepEqual(commits,[['left',[1]],['right',[2]]]);
 });
