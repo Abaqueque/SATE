@@ -1,3 +1,4 @@
+import {saveSnapshot,displaySettings} from './cell-documents-store.js';
 import {tintGrayscale} from './cell-colour.js';
 import {mountWavelengthViews,composeLayers} from './cell-wavelengths.js';
 import {center,ORDER,parseSky} from './sky-model.js';
@@ -15,6 +16,7 @@ export function cellMarkup(){const selected=parseSky(location.search),p=center(s
 <div class="cell-viewers">${['left','right'].map((side,i)=>`<section class="cell-pane ${side}" data-pane="${side}" aria-label="${side} viewer"><button class="cell-pane-heading" data-active="${side}" aria-pressed="${!i}"><b>${i?'R':'L'}</b><span>${i?'Right':'Left'} viewer</span><time id="cell-date-${side}">Loading…</time></button><div class="cell-stage"><canvas id="cell-canvas-${side}" aria-label="${side} SPHEREx exposure" hidden></canvas><div class="cell-image-message" role="status"><span class="cell-spinner"></span><strong>Loading observations…</strong><p></p><button class="cell-retry" hidden>Retry</button></div><div class="cell-compass" hidden>N ↑<br>E ←</div><div class="cell-image-caption"></div></div></section>`).join('')}</div>
 <div class="cell-image-footer"><output id="cell-pixel"></output><label>Zoom <input id="cell-zoom" type="range" min="1" max="12" step=".25" value="1" aria-label="Shared image zoom"></label><button id="cell-fit">Fit</button></div></section>
 <aside class="cell-rail"><h1>Cell ${selected.id}</h1><p class="cell-coordinate">RA ${p.ra.toFixed(5)}°<br>Dec ${p.dec.toFixed(5)}°</p>
+<div class="cell-document-actions"><button id="cell-document" type="button" disabled>Document cell</button><a href="/saved-cells/">Saved cells ↗</a></div><p id="cell-document-status" role="status"></p>
 <button id="cell-add-wavelength" class="cell-combine" disabled>＋ Add layer</button><p class="cell-wavelength-note">Layers follow each timeline date using the nearest available observation. Higher numbers sit on top.</p>
 <section class="cell-layer-card cell-base-layer" aria-label="Layer 1"><div class="cell-layer-title"><h2>Layer 1</h2><button type="button" class="cell-layer-visible" aria-label="Layer 1 visibility" aria-pressed="true">Visible</button></div><label class="cell-field">Wavelength <select id="cell-wave" aria-label="Wavelength" disabled><option>Loading…</option></select></label><div id="cell-mix" hidden><div id="cell-mix-chips"></div><div class="cell-add-wave"><select id="cell-mix-add" aria-label="Add wavelength"></select><button id="cell-mix-button">Add</button></div></div>
 </section><div id="cell-layer-list" aria-label="Added layers"></div><p id="cell-wavelength-limit" class="cell-wavelength-note" hidden>Four extra layers added. Remove one to add another.</p>
@@ -28,7 +30,11 @@ export function mountCell(){
  let dead=false,metadata,channel=62,mode='single',mix=[62],items=[],original=false,active='left',playing=false,playTimer,searchController,generation=0,checking=false,failures=0,loader,zoom=1,pan={x:0,y:0},drag;
  const savedComparison=new URLSearchParams(location.search),savedOpacity=Number(savedComparison.get('compareOpacity'));
  let comparing=savedComparison.get('overlay')==='1',compareOpacity=savedComparison.has('compareOpacity')&&Number.isFinite(savedOpacity)?Math.max(0,Math.min(100,savedOpacity)):50;
- let wavelengthViews;
+ let wavelengthViews,documenting=false;
+ let restoredDisplay;try{restoredDisplay=displaySettings(JSON.parse(new URLSearchParams(location.search).get('viewSettings')||'{}'));}catch{restoredDisplay=displaySettings();}
+ original=restoredDisplay.original;zoom=restoredDisplay.zoom;pan={...restoredDisplay.pan};const restoreStacks={...restoredDisplay.combined};
+ for(const name of ['quality','background','interpolate','repair'])q('#cell-'+name).checked=restoredDisplay[name];
+ q('#cell-noise').value=restoredDisplay.noise;q('#cell-contrast').value=restoredDisplay.contrast;
  const allPanels=()=>Object.values(panes);
  const infos=new Map(),scales=new Map(),renders=new Map(),cache=createFrameCache();
  const ranges=()=>selectionRanges(metadata.wavelengths,mode,channel,mix);
@@ -84,6 +90,7 @@ export function mountCell(){
  }
  function comparisonUi(){
   const {left,right}=panes,ready=!!left.displayState&&!!right.displayState;
+  q('#cell-document').disabled=documenting||!ready;
   root.classList.toggle('comparing',comparing);right.el.hidden=comparing;
   left.el.setAttribute('aria-label',comparing?'Comparison viewer':'left viewer');
   left.el.querySelector('.cell-pane-heading span').textContent=comparing?'Left + right':'Left viewer';
@@ -115,7 +122,7 @@ export function mountCell(){
   if(!autoplay)stop();const panel=panes[side],obs=items.find(o=>o.path===selected&&o.match&&!o.unusable);if(!obs)return;const token=++panel.token,searchToken=generation;panel.path=selected;panel.combined=false;panel.el.querySelector('.cell-retry').hidden=true;timeline();updateUrl();
   panel.loading=true;panel.loadError=null;panel.current=null;panel.canvas.hidden=true;status(panel,'Updating all layers…','',true);drawBoth();
   const overlays=wavelengthViews?.sync(side,obs);
-  try{const [frame]=await Promise.all([cache.peek(key(obs))||loader.get(obs,true),overlays]);if(dead||searchToken!==generation||token!==panel.token)return;panel.loading=false;show(panel,frame,obs);timeline();if(playing&&active===side)playTimer=setTimeout(()=>{const list=rows(),i=list.findIndex(o=>o.path===panel.path);if(i+1<list.length)selectExposure(side,list[i+1].path,{autoplay:true});else stop();},1600);
+  try{const [frame]=await Promise.all([cache.peek(key(obs))||loader.get(obs,true),overlays]);if(dead||searchToken!==generation||token!==panel.token)return;panel.loading=false;show(panel,frame,obs);timeline();if(restoreStacks[side]){restoreStacks[side]=false;await combine(side);}if(playing&&active===side)playTimer=setTimeout(()=>{const list=rows(),i=list.findIndex(o=>o.path===panel.path);if(i+1<list.length)selectExposure(side,list[i+1].path,{autoplay:true});else stop();},1600);
   }catch(e){if(dead||searchToken!==generation||token!==panel.token)return;panel.loading=false;panel.loadError=e.message;stop();status(panel,'Could not load exposure',e.message);panel.el.querySelector('.cell-retry').hidden=false;drawBoth();}
 
  }
@@ -132,11 +139,31 @@ export function mountCell(){
  async function search(){const params=new URLSearchParams(location.search),preferred={left:params.get('exposure'),right:params.get('compare')};stop();searchController?.abort();loader?.close();const token=++generation;searchController=new AbortController();const signal=searchController.signal;items=[];failures=0;checking=true;wavelengthViews?.clear();scales.clear();renders.clear();for(const panel of Object.values(panes)){panel.token++;panel.path=null;panel.loading=false;panel.scrubbing=false;clear(panel);status(panel,'Finding observations…','',true);}loader=createFrameLoader({load:obs=>loadFrame(obs,signal),onChange:preloadStatus});timeline();mixUi();updateUrl();drawBoth();
   try{const r=await fetch('/api/observations?'+parameters(),{signal}),data=await r.json();if(!r.ok)throw Error(data.error||'Search unavailable.');if(dead||signal.aborted||token!==generation)return;items=uniqueExposures(data.observations);for(const panel of Object.values(panes))status(panel,'Matching wavelengths…','',true);await checkItems(signal,token,false,preferred);}catch(e){if(dead||signal.aborted||token!==generation)return;checking=false;timeline();for(const panel of Object.values(panes)){status(panel,'Archive unavailable',e.message);panel.el.querySelector('.cell-retry').hidden=false;}}
  }
- async function combine(){const panel=panes[active];if(!panel.current)return;stop();if(panel.combined){panel.combined=false;show(panel,panel.current.individual,panel.current.obs);return;}const anchor=panel.current.obs,candidates=stackCandidates(rows(),anchor).slice(0,12),token=panel.token,searchToken=generation,individual=panel.current.individual;if(!candidates.length)return;q('#cell-combine').disabled=true;q('#cell-combine-status').textContent='Combining…';
+ async function combine(side=active){const panel=panes[side];if(!panel.current)return;stop();if(panel.combined){panel.combined=false;show(panel,panel.current.individual,panel.current.obs);return;}const anchor=panel.current.obs,candidates=stackCandidates(rows(),anchor).slice(0,12),token=panel.token,searchToken=generation,individual=panel.current.individual;if(!candidates.length)return;q('#cell-combine').disabled=true;q('#cell-combine-status').textContent='Combining…';
   const loaded=await Promise.allSettled(candidates.map(async obs=>({obs,frame:await loader.get(obs,true)})));if(dead||token!==panel.token||searchToken!==generation)return;const available=[{obs:anchor,frame:individual},...loaded.filter(r=>r.status==='fulfilled').map(r=>r.value)];
-  const blend=type=>{const jobs=available.map(({obs,frame})=>({obs,status:'ready',frame:{...frame[type],quality:Uint8Array.from(frame[type].quality,(v,i)=>v&&inRanges(frame[type].wavelengths[i],ranges())?1:0)}})),a=jobs[0],result=averageNearby(jobs,a,{hours:6,wavelengthPercent:1});if(!result.frame)return result;const frame={...a.frame,values:Float32Array.from(a.frame.values),variance:Float64Array.from(a.frame.variance),quality:Uint8Array.from(a.frame.quality)};for(let i=0;i<frame.values.length;i++)if(result.frame.counts[i]>=2){frame.values[i]=result.frame.values[i];frame.variance[i]=result.frame.variance[i];frame.quality[i]=1;}return {frame,members:result.members.length};};
-  const clean=blend('clean'),raw=blend('raw');if(!clean.frame||!raw.frame){q('#cell-combine-status').textContent='No compatible overlap';info();return;}panel.combined=true;original=false;renders.clear();show(panel,{clean:clean.frame,raw:raw.frame,members:clean.members,individual},anchor);drawBoth();q('#cell-combine-status').textContent='';
+  const blend=type=>{const jobs=available.map(({obs,frame})=>({obs,status:'ready',frame:{...frame[type],quality:Uint8Array.from(frame[type].quality,(v,i)=>v&&inRanges(frame[type].wavelengths[i],ranges())?1:0)}})),a=jobs[0],result=averageNearby(jobs,a,{hours:6,wavelengthPercent:1});if(!result.frame)return result;const frame={...a.frame,values:Float32Array.from(a.frame.values),variance:Float64Array.from(a.frame.variance),quality:Uint8Array.from(a.frame.quality)};for(let i=0;i<frame.values.length;i++)if(result.frame.counts[i]>=2){frame.values[i]=result.frame.values[i];frame.variance[i]=result.frame.variance[i];frame.quality[i]=1;}return {frame,members:result.members.length,sources:result.members.map(({obs})=>({id:obs.id,path:obs.path,date:obs.date,band:obs.band,wavelength:obs.wavelength}))};};
+  const clean=blend('clean'),raw=blend('raw');if(!clean.frame||!raw.frame){q('#cell-combine-status').textContent='No compatible overlap';info();return;}panel.combined=true;original=false;renders.clear();show(panel,{clean:clean.frame,raw:raw.frame,members:clean.members,sources:clean.sources,individual},anchor);drawBoth();q('#cell-combine-status').textContent='';
  }
+ function currentDisplay(){return displaySettings({original,quality:q('#cell-quality').checked,background:q('#cell-background').checked,noise:Number(q('#cell-noise').value),interpolate:q('#cell-interpolate').checked,repair:q('#cell-repair').checked,contrast:Number(q('#cell-contrast').value),zoom,pan,combined:{left:panes.left.combined,right:panes.right.combined}});}
+ function observationRecord(current,combined=false){
+  if(!current)return null;const obs=current.obs;
+  return {id:obs.id,date:obs.date,mjd:obs.mjd,band:obs.band,path:obs.path,wavelength:current.clean.wavelength,unit:current.clean.unit,combined,members:combined?current.members:1,sources:combined?current.sources:undefined};
+ }
+ q('#cell-document').onclick=async()=>{
+  if(documenting||allPanels().some(panel=>!panel.displayState||panel.loading)||['left','right'].some(side=>wavelengthViews?.pending(side)))return;
+  stop();documenting=true;q('#cell-document-status').textContent='Saving observation…';
+  try{
+   drawBoth();const comparison=comparing?panes.left.canvas.toDataURL('image/png'):null;
+   for(const panel of allPanels())draw(panel);
+   const previews={left:panes.left.canvas.toDataURL('image/png'),right:panes.right.canvas.toDataURL('image/png'),comparison};
+   const display=currentDisplay(),url=new URL(location.href);url.searchParams.set('viewSettings',JSON.stringify(display));
+   const base=wavelengthViews?.base||{visible:true,colour:false};
+   const layers=[{number:1,channel,mode,mix:[...mix],wavelength:metadata.wavelengths[channel],visible:base.visible,opacity:1,hue:base.colour?base.hue:null,observations:Object.fromEntries(allPanels().map(panel=>[panel.side,observationRecord(panel.current,panel.combined)]))},...[...wavelengthViews?.panels.values()||[]].map(layer=>({number:layer.number,channel:layer.channel,mode:'single',wavelength:metadata.wavelengths[layer.channel],visible:layer.visible,opacity:layer.opacity,hue:layer.colour?layer.hue:null,status:{...layer.status},observations:Object.fromEntries(['left','right'].map(side=>[side,observationRecord(layer.current[side])]))}))];
+   const snapshot={id:crypto.randomUUID(),savedAt:new Date().toISOString(),cellId:cell.id,order:cell.order,position:{...p},fieldDegrees:.2,viewerUrl:url.pathname+url.search,display,comparing,compareOpacity,previews,layers};
+   drawBoth();const record=await saveSnapshot(snapshot);if(!dead)location.href='/saved-cells/?cell='+encodeURIComponent(record.key);
+  }catch(error){if(!dead)q('#cell-document-status').textContent='Not saved: '+error.message;}
+  finally{documenting=false;if(!dead)drawBoth();}
+ };
  const step=(side,n)=>{const list=rows(),i=list.findIndex(o=>o.path===panes[side].path),next=list[i+n];if(next)selectExposure(side,next.path);};
  q('#cell-times').onclick=e=>{const b=e.target.closest('[data-exposure]');if(b)selectExposure(active,b.dataset.exposure);};q('#cell-prev').onclick=()=>step(active,-1);q('#cell-next').onclick=()=>step(active,1);
  for(const panel of Object.values(panes)){
@@ -145,7 +172,7 @@ export function mountCell(){
   scrub.onkeydown=e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(e.key)){e.preventDefault();setActive(side);const list=rows();if(e.key==='Home'||e.key==='End'){if(list.length)selectExposure(side,(e.key==='Home'?list[0]:list.at(-1)).path);}else step(side,['ArrowLeft','ArrowDown'].includes(e.key)?-1:1);}};
  }
  q('#cell-play').onclick=()=>{if(playing){stop();return;}const list=rows(),i=list.findIndex(o=>o.path===panes[active].path);if(list.length<2)return;playing=true;q('#cell-play').textContent='Pause';selectExposure(active,list[(i+1)%list.length].path,{autoplay:true});};
- q('#cell-index-retry').onclick=()=>checkItems(searchController.signal,generation,true);q('#cell-preload-retry').onclick=()=>{for(const obs of rows())if(loader.state(obs.path)==='error')warm(obs,generation);};q('#cell-original').onclick=()=>{original=!original;drawBoth();};q('#cell-combine').onclick=combine;for(const id of ['quality','background','noise','interpolate','repair','contrast'])q('#cell-'+id).oninput=drawBoth;
+ q('#cell-index-retry').onclick=()=>checkItems(searchController.signal,generation,true);q('#cell-preload-retry').onclick=()=>{for(const obs of rows())if(loader.state(obs.path)==='error')warm(obs,generation);};q('#cell-original').onclick=()=>{original=!original;drawBoth();};q('#cell-combine').onclick=()=>combine();for(const id of ['quality','background','noise','interpolate','repair','contrast'])q('#cell-'+id).oninput=drawBoth;
  function transform(){pan.x=Math.max(-(zoom-1)/2,Math.min((zoom-1)/2,pan.x));pan.y=Math.max(-(zoom-1)/2,Math.min((zoom-1)/2,pan.y));for(const panel of allPanels()){const stage=panel.el.querySelector('.cell-stage'),side=Math.min(stage.clientWidth,stage.clientHeight);panel.canvas.style.width=side+'px';panel.canvas.style.height=side+'px';panel.canvas.style.transform=`translate(${pan.x*side}px,${pan.y*side}px) scale(${zoom})`;}q('#cell-zoom').value=zoom;}
  q('#cell-compare').onclick=()=>{comparing=!comparing;drawBoth();transform();updateUrl();};
  q('#cell-compare-opacity').oninput=e=>{compareOpacity=Number(e.target.value);drawBoth();updateUrl();};
