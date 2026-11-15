@@ -49,7 +49,13 @@ test('header calibration uses the requested sky position and rejects positions o
 test('frame metadata fetches only the header and this exact exposure calibration',async()=>{
  const old=globalThis.fetch,requests=[];const primary=hdu({SIMPLE:'T',BITPIX:8,NAXIS:0}),body=new Uint8Array(5760);body.set(primary);body.set(hdu(header),2880);
  globalThis.fetch=async(u,options)=>{requests.push({url:String(u),range:options.headers.range});return new Response(options.headers.range==='bytes=-5760'?table:body,{status:206});};
- try{const image='/ibe/data/spherex/dr1/level2/metadata-test.fits',response=await handleFrameInfo(new Request(query+'&image='+encodeURIComponent(image)));assert.equal(response.status,200);const info=await response.json();assert.equal(info.covered,true);assert(Math.abs(info.wavelength-1.5)<1e-8);assert.equal(requests.length,2);assert(requests.every(r=>r.url.endsWith(image)));assert(requests.every(r=>r.range));}finally{globalThis.fetch=old;}
+ try{const image='/ibe/data/spherex/dr1/level2/metadata-test.fits',response=await handleFrameInfo(new Request(query+'&image='+encodeURIComponent(image)));assert.equal(response.status,200);const info=await response.json();assert.equal(info.covered,true);assert(info.coverage>0&&info.coverage<.8);assert(Math.abs(info.wavelength-1.5)<1e-8);assert.equal(requests.length,2);assert(requests.every(r=>r.url.endsWith(image)));assert(requests.every(r=>r.range));
+ const small=new URL(query);small.searchParams.set('image',image);small.searchParams.set('size','.05');
+ const smaller=await(await handleFrameInfo(new Request(small))).json();assert.equal(smaller.coverage,1);assert.equal(requests.length,3);
+ small.searchParams.set('sampleRa','20.01');small.searchParams.set('sampleDec','10');
+ const shifted=await(await handleFrameInfo(new Request(small))).json();assert.equal(shifted.coverage,smaller.coverage);assert.notEqual(shifted.wavelength,smaller.wavelength);assert.equal(requests.length,4);
+ small.searchParams.delete('sampleDec');assert.equal((await handleFrameInfo(new Request(small))).status,400);
+ }finally{globalThis.fetch=old;}
 });
 
 test('timeline spacing reflects elapsed time and retains individual same-day observations',()=>{
