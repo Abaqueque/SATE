@@ -11,13 +11,13 @@ export const demoTargets=[...targetCatalogue.slice(0,5).map((t,i)=>{
       'Fixed query centre predicted for 1 January 2026 from the existing SIMBAD J2000 position and linear proper motion. No parallax correction.',
     description:t.name==='Epsilon Indi B'?'Unresolved brown-dwarf pair; the display does not resolve or separately measure its components.':t.kind==='motion'?'Proper-motion target; compare movement against a fixed background.':'Variable-star target; display brightness alone is not calibrated photometry.'};
 }),
-  {id:'5',name:'Orion Nebula',ra:83.8221,dec:-5.3911,wave:3.29,size:.30,kind:'extended',
+  {id:'5',comparison:{channel:10,exposure:'2025W36_2B_0728_2'},name:'Orion Nebula',ra:83.8221,dec:-5.3911,wave:3.29,size:.30,kind:'extended',
     positionNote:'Fixed Orion Nebula landmark coordinates from the existing project presets.',
     description:'A 0.30° field centred on the Orion Nebula core; the full nebula extends beyond this view.'},
-  {id:'6',name:'Galactic Centre',ra:266.4168,dec:-29.0078,wave:4.678,size:.30,kind:'extended',
+  {id:'6',comparison:{channel:40,exposure:'2025W34_2B_0104_2'},name:'Galactic Centre',ra:266.4168,dec:-29.0078,wave:4.678,size:.30,kind:'extended',
     positionNote:'Fixed Galactic Centre landmark coordinates from the existing project presets.',
     description:'A 0.30° field in the central Milky Way. Crowding and diffuse emission complicate source comparisons.'},
-  {id:'7',name:'Andromeda',ra:10.6847,dec:41.269,wave:1.286,size:.35,kind:'extended',
+  {id:'7',comparison:{channel:74,exposure:'2025W29_1A_0186_2'},name:'Andromeda',ra:10.6847,dec:41.269,wave:1.286,size:.35,kind:'extended',
     positionNote:'Fixed Andromeda landmark coordinates from the existing project presets.',
     description:'A 0.35° field around the galaxy nucleus; the full galaxy extends far beyond this cutout.'},
 ];
@@ -30,7 +30,7 @@ export function demoTargetUrl(id,metadata){
  const params=new URLSearchParams({hpx:cellAt(target.ra,target.dec),order:9,view:'cell',example:target.id,channel,mode:'single',sourceRa:target.ra,sourceDec:target.dec,size:target.size,framing:'full',stretch:target.kind==='extended'?'detail':'sources',zoom:target.kind==='motion'?2:1});
  if(target.kind!=='extended'){params.set('dual','1');params.set('dates','ends');params.set('known','1');}
  if(target.kind==='motion')params.set('tracking','1');
- if(target.kind==='extended')params.set('nearby','1');
+ if(target.kind==='extended'){params.set('nearby','1');params.set('dual','1');params.set('waves',target.comparison.channel);params.set('layerTarget','left,right');params.set('layerNearby','2');params.set('exposure',target.comparison.exposure);params.set('compare',target.comparison.exposure);}
  if(target.id==='0'){const motion=new URLSearchParams(motionExampleUrl('barnard').split('?')[1]);for(const key of ['target','exposure','compare','nearby'])params.set(key,motion.get(key));}
  return '/explore/?'+params;
 }
