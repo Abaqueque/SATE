@@ -10,13 +10,13 @@ export function catalogueLinks(position){
  const p=candidatePosition(position),coord=p.ra.toFixed(7)+' '+(p.dec>=0?'+':'')+p.dec.toFixed(7);
  return {simbad:'https://simbad.cds.unistra.fr/simbad/sim-coo?'+new URLSearchParams({Coord:coord,Radius:p.radius,'Radius.unit':'arcsec',CooFrame:'ICRS'}),vizier:'https://vizier.cds.unistra.fr/viz-bin/VizieR?'+new URLSearchParams({'-c':coord,'-c.rs':p.radius,'-c.eq':'J2000'})};
 }
-export function fitsLink(path,position){
- try{const url=new URL(path,'https://irsa.ipac.caltech.edu');if(url.origin!=='https://irsa.ipac.caltech.edu'||!url.pathname.startsWith('/ibe/data/spherex/'))return null;url.searchParams.set('center',position.ra+','+position.dec);url.searchParams.set('size','.3');url.searchParams.set('gzip','false');return url.href;}catch{return null;}
+export function fitsLink(path,position,width=.2){
+ try{const url=new URL(path,'https://irsa.ipac.caltech.edu');if(url.origin!=='https://irsa.ipac.caltech.edu'||!url.pathname.startsWith('/ibe/data/spherex/'))return null;url.searchParams.set('center',position.ra+','+position.dec);url.searchParams.set('size',String(Number((width*1.5).toPrecision(12))));url.searchParams.set('gzip','false');return url.href;}catch{return null;}
 }
 export function displaySettings(value={}){
  if(!value||typeof value!=='object')value={};
  const n=(key,fallback,min,max)=>Number.isFinite(value[key])?Math.max(min,Math.min(max,value[key])):fallback,b=(key,fallback)=>typeof value[key]==='boolean'?value[key]:fallback;
- return {original:b('original',false),quality:b('quality',true),background:b('background',true),noise:Math.round(n('noise',2,0,2)),interpolate:b('interpolate',true),repair:b('repair',false),contrast:n('contrast',1,.4,2.5),zoom:n('zoom',1,1,12),pan:{x:Number.isFinite(value.pan?.x)?value.pan.x:0,y:Number.isFinite(value.pan?.y)?value.pan.y:0},combined:{left:value.combined?.left===true,right:value.combined?.right===true}};
+ return {original:b('original',false),quality:b('quality',false),background:b('background',true),noise:Math.round(n('noise',2,0,2)),interpolate:b('interpolate',true),repair:b('repair',false),contrast:n('contrast',1,.4,2.5),zoom:n('zoom',1,1,12),pan:{x:Number.isFinite(value.pan?.x)?value.pan.x:0,y:Number.isFinite(value.pan?.y)?value.pan.y:0},combined:{left:value.combined?.left===true,right:value.combined?.right===true}};
 }
 export function appendSnapshot(existing,snapshot){
  const key=cellKey(snapshot.cellId,snapshot.order),position=candidatePosition({...snapshot.position,radius:600});

@@ -106,3 +106,12 @@ html .cell-workspace .cell-rail select:focus-visible {outline-offset: -2px}
 .cell-dual-toggle input::before{content:'';position:absolute;top:3px;left:3px;width:11px;height:11px;border-radius:50%;background:var(--muted);transition:transform .15s}
 .cell-dual-toggle input:checked{background:var(--accent);border-color:var(--accent)}
 .cell-dual-toggle input:checked::before{transform:translateX(13px);background:#fff}
+
+html .cell-workspace .cell-image-message,
+html .cell-workspace .cell-stage,
+html .cell-workspace .cell-stage canvas{background:#000}
+.cell-width-form{display:flex;align-items:flex-end;gap:8px;margin:13px 0}
+.cell-width-form .cell-field{flex:1;min-width:0;margin:0}
+.cell-width-form input{width:100%;min-height:38px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;background:var(--layer-control);color:var(--layer-text);font:13px var(--sans)}
+.cell-width-form button{min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:5px;font-size:11px;white-space:nowrap}
+@media(max-width:850px){.cell-width-form{grid-column:1/-1}}

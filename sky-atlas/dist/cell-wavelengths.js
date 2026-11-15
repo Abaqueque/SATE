@@ -1,12 +1,13 @@
 import {wavelengthOptions} from './wavelength-options.js';
 import {visibilityIcon} from './cell-sidebar.js';
+import {fieldWidth} from './cell-field.js';
 import {hasFieldCoverage} from './cell-coverage.js';
 import {parseLayerHue} from './cell-colour.js';
 import {channelRange,inRanges,uniqueExposures} from './cell-selection.js';
 
 export function wavelengthParameters(position,wavelengths,channel){
  const range=channelRange(wavelengths,channel);
- return new URLSearchParams({ra:position.ra,dec:position.dec,size:.2,wavelength:range.centre,tolerance:Math.min(.5,Math.max(.01,range.centre-range.low,range.high-range.centre)),mode:'single'});
+ return new URLSearchParams({ra:position.ra,dec:position.dec,size:fieldWidth(position.size),wavelength:range.centre,tolerance:Math.min(.5,Math.max(.01,range.centre-range.low,range.high-range.centre)),mode:'single'});
 }
 
 // Check the actual wavelength at the cell centre, not just detector coverage.
