@@ -1,40 +1,62 @@
-const SOURCE='https://science.nasa.gov/photojournal/spherexs-dust-cloud-reveal/';
+import {ORDER,parseSky,center,boundary,channelTransportHz} from './sky-model.js';
+export const DEMO_CELL=1372138; // HEALPix NESTED order 9, containing M42 (CDS Sesame).
 export function demoReturn(search=''){
  const value=new URLSearchParams(search).get('return');
  if(!value||!/^\/explore\/(?:\?|$)/.test(value))return '/explore/';
  const url=new URL(value,'https://sate.invalid');
  return url.origin==='https://sate.invalid'&&url.pathname==='/explore/'?url.pathname+url.search:'/explore/';
 }
-export function wavelengthDemoMarkup(){return `<main id="main" class="wave-demo" data-wave-demo>
+export function demoSelection(search=''){
+ const params=new URLSearchParams(search),back=new URL(demoReturn(search),'https://sate.invalid');
+ const direct=parseSky(search),returned=parseSky(back.search);
+ const cell=direct?.order===ORDER?direct:returned?.order===ORDER?returned:{id:DEMO_CELL,order:ORDER};
+ const raw=params.get('channel')??back.searchParams.get('channel'),n=raw===null?62:Number(raw);
+ return {...cell,channel:Number.isInteger(n)&&n>=0&&n<102?n:62};
+}
+export function availableChannels(metadata){return metadata.wavelengths.map((w,index)=>({index,wavelength:w})).filter(v=>Number.isFinite(v.wavelength)&&!metadata.blankFrames.includes(v.index));}
+export function wavelengthDemoMarkup(){const cell=demoSelection(location.search),p=center(cell.id);return `<main id="main" class="wave-demo" data-wave-demo>
 <a class="wave-back" id="wave-return" href="/explore/">← Back to the atlas</a>
-<div class="wave-intro"><p class="eyebrow">Interactive wavelength demo · real SPHEREx images</p><h1>Same sky.<br>A different part of the story.</h1><p>A wavelength is the spacing between light’s waves. Choosing one selects a different slice of the light arriving from space. Try these two infrared views of the same region in the Large Magellanic Cloud.</p></div>
-<section class="wave-lab" aria-label="Compare infrared wavelengths">
-<div class="wave-steps" aria-label="Demo views"><button type="button" data-reveal="0" aria-pressed="true"><span>01 · Starlight</span><strong>0.98 µm</strong></button><button type="button" data-reveal="100" aria-pressed="false"><span>02 · Reveal dust</span><strong>3.29 µm</strong></button><button type="button" data-reveal="50" aria-pressed="false"><span>03 · Overlay</span><strong>Compare both</strong></button></div>
-<div class="wave-image" id="wave-image"><img src="/assets/wavelength-098.jpg" width="2280" height="1282" alt="At 0.98 micrometres, a dense star field is visible without the prominent dust cloud."/><img id="wave-dust" src="/assets/wavelength-329.jpg" width="2280" height="1282" alt="At 3.29 micrometres, a large branching dust cloud appears across the same star field." style="opacity:0"/><span class="wave-image-label" id="wave-image-label">0.98 µm · starlight view</span><p id="wave-image-error" hidden>Image unavailable. Reload to retry, or open the NASA source below.</p></div>
-<div class="wave-controls"><label for="wave-opacity">Reveal the 3.29 µm layer <output id="wave-opacity-value">0%</output></label><input id="wave-opacity" type="range" min="0" max="100" value="0" step="1" aria-label="3.29 micrometre layer opacity"/><div class="wave-range-labels"><span>0.98 µm only</span><span>3.29 µm only</span></div><label class="wave-gray"><input id="wave-gray" type="checkbox"/> View in grayscale to compare structure</label></div>
-<div class="wave-observation" role="status"><strong id="wave-observation-title">Start with the stars.</strong><p id="wave-observation-copy">Notice the bright points and the central star cluster. Now choose “Reveal dust” and look for the broad, branching cloud around the centre.</p></div>
-<p class="wave-credit">NASA/JPL-Caltech · SPHEREx, April 2025 · <a href="${SOURCE}" target="_blank" rel="noreferrer">Image source &amp; science ↗</a></p>
+<div class="wave-intro"><p class="eyebrow">Real SPHEREx data · wavelength explorer</p><h1>Cell ${cell.id}</h1><p>${cell.id===DEMO_CELL?'This cell contains the Orion Nebula (M42).':'This is the cell selected in your atlas.'} Move the slider to view the same sky area in different measured infrared channels.</p><p class="wave-coordinate">Cell centre · RA ${p.ra.toFixed(5)}° · Dec ${p.dec.toFixed(5)}°<br>HEALPix NESTED · order 9 · cell boundary shown in blue</p></div>
+<section class="wave-lab" aria-label="Real SPHEREx wavelength channels">
+<div class="wave-controls"><label for="wave-channel">Wavelength <output id="wave-value">Loading channels…</output></label><input id="wave-channel" type="range" min="0" max="99" step="1" value="0" aria-label="SPHEREx wavelength" disabled/><div class="wave-range-labels"><span>Shorter · 0.753 µm</span><span>Longer · 4.988 µm</span></div><div class="wave-presets"><button type="button" data-channel="11" disabled>0.978 µm</button><button type="button" data-channel="62" disabled>3.293 µm</button><button type="button" data-channel="90" disabled>4.600 µm</button></div><p id="wave-band" class="wave-band"></p></div>
+<div class="wave-sky-wrap"><div id="wave-sky" aria-label="SPHEREx survey image of cell ${cell.id}"></div><div id="wave-loading" role="status">Loading SPHEREx survey…</div><span class="wave-image-label" id="wave-image-label">Cell ${cell.id}</span></div>
+<div class="wave-observation"><strong>One measured channel at a time.</strong><p>The slider switches channels in NASA/IPAC’s SPHEREx DR1 sky cube. There is no image blending, generated imagery, or interpolation between wavelengths. The view stays centred on this cell.</p><p id="wave-status" role="status"></p><button type="button" id="wave-retry" hidden>Reload survey</button></div>
+<p class="wave-credit">NASA/IPAC IRSA · SPHEREx DR1 · <a href="https://irsa.ipac.caltech.edu/data/hips/SPHEREx/spherex_allsky_cube/properties" target="_blank" rel="noreferrer">Exact dataset &amp; channel wavelengths ↗</a></p>
 </section>
-<section class="wave-lessons" aria-label="What the difference means"><article><span>WHY IT APPEARS</span><h2>Materials leave a signature.</h2><p>The cloud contains polycyclic aromatic hydrocarbons (PAHs): soot-like molecules that emit at particular wavelengths. Their emission stands out at 3.29 µm; this cloud is not visible in the 0.98 µm image.</p></article><article><span>WHAT COLOUR MEANS</span><h2>Wavelength is data. Hue is display.</h2><p>Both views are infrared, beyond human vision. NASA assigned their visible colours. The grayscale switch removes those hues while the cloud remains. Changing a layer’s hue in SATE recolours its existing image; changing its wavelength loads a different measurement.</p></article><article><span>HOW TO USE IT</span><h2>Look for patterns across layers.</h2><p>In a cell, add a second wavelength, then toggle its visibility or opacity. Compare the same position and check each layer’s actual date. A feature appearing in one wavelength can be a clue to its composition; it does not by itself mean a new object or a change over time.</p></article></section>
-<div class="wave-next"><div><h2>Try it on a cell.</h2><p>Add layer → choose another wavelength → compare the structure.</p></div><a id="wave-try" class="button lime" href="/explore/">Try wavelength layers ↗</a></div>
-<details class="wave-notes"><summary>About this demonstration</summary><p>These are NASA’s published images of the same region, not the cell you currently have open. The slider blends two images; it does not simulate intermediate wavelengths. This is a visual comparison of structure, not a calibrated brightness or flux-ratio measurement. Image processing and angular resolution can also affect appearances. A longer wavelength does not make every object more visible.</p><p>µm means micrometre: one millionth of a metre. 3.29 µm is about 3.4 times the wavelength of 0.98 µm. SPHEREx samples approximately 0.75–5 µm. <a href="https://irsa.ipac.caltech.edu/onlinehelp/spherex/spherex/overview.html" target="_blank" rel="noreferrer">Instrument overview ↗</a></p></details>
+<section class="wave-lessons" aria-label="Reading the wavelength changes"><article><h2>Follow the same structure.</h2><p>Try 0.978 µm, then 3.293 µm. Look at compact bright sources and the more extended emission around them. Changing wavelength samples different light from the same position; different materials can emit or absorb differently across these channels.</p></article><article><h2>Wavelength, not time.</h2><p>This is a real survey mosaic combining observations across dates. Moving the slider does not show an object evolving. Use the cell viewer’s dated exposures to investigate changes over time.</p></article><article><h2>Check the observations.</h2><p>These survey images are for visual exploration, with approximately 12.9 arcseconds per pixel. Display scaling and coverage can affect brightness. Open the cell for individual observations, their dates, and original FITS data.</p></article></section>
+<div class="wave-next"><div><h2>Investigate cell ${cell.id}.</h2><p>Open the selected wavelength in the full cell viewer.</p></div><a id="wave-open-cell" class="button lime" href="/explore/?hpx=${cell.id}&amp;order=9&amp;view=cell&amp;channel=${cell.channel}">Open this cell ↗</a></div>
+<p class="wave-footnote">µm means micrometre. Two blank dichroic channels are skipped. Missing or dark pixels are not evidence that an object is absent. <a href="https://irsa.ipac.caltech.edu/onlinehelp/spherex/spherex/overview.html" target="_blank" rel="noreferrer">SPHEREx data guide ↗</a></p>
 </main>`;}
 export function mountWavelengthDemo(){
  const root=document.querySelector('[data-wave-demo]');if(!root)return ()=>{};
- const q=s=>root.querySelector(s),events=new AbortController(),on={signal:events.signal};
- const back=demoReturn(location.search);q('#wave-return').href=back;q('#wave-try').href=back;
- if(back.includes('view=cell'))q('#wave-return').textContent='← Back to your cell';
- function reveal(value){
-  const n=Math.max(0,Math.min(100,Number(value)||0));q('#wave-opacity').value=n;q('#wave-opacity-value').textContent=n+'%';q('#wave-dust').style.opacity=n/100;
-  q('#wave-opacity').setAttribute('aria-valuetext',n===0?'0.98 micrometres only':n===100?'3.29 micrometres only':n+' percent 3.29 micrometre overlay');
-  for(const b of root.querySelectorAll('[data-reveal]'))b.setAttribute('aria-pressed',String(Number(b.dataset.reveal)===n));
-  q('#wave-image-label').textContent=n===0?'0.98 µm · starlight view':n===100?'3.29 µm · dust emission':'0.98 + 3.29 µm · blended views';
-  q('#wave-observation-title').textContent=n===0?'Start with the stars.':n===100?'The cloud was there all along.':'Same position, different light.';
-  q('#wave-observation-copy').textContent=n===0?'Notice the bright points and the central star cluster. Now choose “Reveal dust” and look for the broad, branching cloud around the centre.':n===100?'The broad cloud now stands out around the central stars. This wavelength picks up emission from molecules in the dust. Switch back to 0.98 µm to see how much structure disappears.':'Use the slider to follow the cloud as it appears over the star field. You are blending two measured wavelengths, not watching the cloud form or move.';
+ const q=s=>root.querySelector(s),events=new AbortController(),on={signal:events.signal},cell=demoSelection(location.search),p=center(cell.id);
+ let dead=false,viewer,survey,metadata,channels=[],channel=cell.channel,ready=false,timer;
+ q('#wave-return').href=demoReturn(location.search);
+ if(demoReturn(location.search).includes('view=cell'))q('#wave-return').textContent='← Back to your cell';
+ function showSelection(){
+  const selected=channels.find(v=>v.index===channel);if(!selected)return;
+  q('#wave-channel').value=channels.indexOf(selected);q('#wave-value').textContent=selected.wavelength.toFixed(3)+' µm';
+  q('#wave-channel').setAttribute('aria-valuetext',selected.wavelength.toFixed(3)+' micrometres');
+  q('#wave-band').textContent='Band '+(Math.floor(channel/17)+1)+' · channel '+(channel%17+1)+' · cube plane '+(channel+1)+' / 102';
+  q('#wave-image-label').textContent='Cell '+cell.id+' · '+selected.wavelength.toFixed(3)+' µm';
+  q('#wave-sky').setAttribute('aria-label','SPHEREx '+selected.wavelength.toFixed(3)+' micrometre survey image of cell '+cell.id);
+  q('#wave-open-cell').href='/explore/?'+new URLSearchParams({hpx:cell.id,order:9,view:'cell',mode:'single',channel});
+  for(const b of root.querySelectorAll('[data-channel]'))b.setAttribute('aria-pressed',String(Number(b.dataset.channel)===channel));
+  const u=new URL(location.href);u.searchParams.set('hpx',cell.id);u.searchParams.set('order',9);u.searchParams.set('channel',channel);history.replaceState({},'',u.pathname+u.search);
  }
- q('#wave-opacity').addEventListener('input',e=>reveal(e.target.value),on);
- for(const b of root.querySelectorAll('[data-reveal]'))b.addEventListener('click',()=>reveal(b.dataset.reveal),on);
- q('#wave-gray').addEventListener('change',e=>q('#wave-image').classList.toggle('grayscale',e.target.checked),on);
- for(const img of root.querySelectorAll('.wave-image img')){const failed=()=>{q('#wave-image-error').hidden=false;};img.addEventListener('error',failed,on);if(img.complete&&!img.naturalWidth)failed();}
- reveal(0);return ()=>events.abort();
+ function choose(index){if(!ready||!channels.some(v=>v.index===index))return;channel=index;survey.setFrequency({unit:'Hz',value:channelTransportHz(channel)});showSelection();}
+ q('#wave-channel').addEventListener('input',e=>choose(channels[Number(e.target.value)]?.index),on);
+ for(const b of root.querySelectorAll('[data-channel]'))b.addEventListener('click',()=>choose(Number(b.dataset.channel)),on);
+ q('#wave-retry').addEventListener('click',()=>location.reload(),on);
+ function failed(message){if(dead)return;ready=false;q('#wave-loading').hidden=false;q('#wave-loading').textContent=message;q('#wave-status').textContent='No substitute image is shown. Retry when the archive is available.';q('#wave-retry').hidden=false;q('#wave-channel').disabled=true;for(const b of root.querySelectorAll('[data-channel]'))b.disabled=true;}
+ (async()=>{try{
+  const result=await Promise.all([import('./vendor/aladin-3.8.1.js'),fetch('/assets/spherex-survey.json',{signal:events.signal}).then(r=>{if(!r.ok)throw Error('Channel metadata unavailable');return r.json();})]);if(dead)return;
+  const A=result[0].default;metadata=result[1];channels=availableChannels(metadata);if(!channels.length)throw Error('No measured channels available');if(!channels.some(v=>v.index===channel))channel=channels[0].index;
+  q('#wave-channel').max=channels.length-1;showSelection();await A.init;if(dead)return;
+  survey=A.imageHiPS(metadata.url,{imgFormat:'png',successCallback:h=>{if(dead)return;survey=h;h.setFrequency({unit:'Hz',value:channelTransportHz(channel)});h.setColormap('native');ready=true;q('#wave-loading').hidden=true;q('#wave-channel').disabled=false;for(const b of root.querySelectorAll('[data-channel]'))b.disabled=false;q('#wave-status').textContent='Live archive tiles load as you change channels. Black areas can indicate missing coverage.';clearTimeout(timer);},errorCallback:()=>failed('SPHEREx imagery unavailable. Please retry.')});
+  viewer=A.aladin('#wave-sky',{survey,target:p.ra+' '+p.dec,fov:.32,projection:'TAN',cooFrame:'ICRSd',showZoomControl:false,showLayersControl:false,showFullscreenControl:false,showFrame:false,showProjectionControl:false,showStatusBar:false,showGotoControl:false,showReticle:false,showCooGrid:false,showFov:false,showCooLocation:false,log:false,inertia:false,backgroundColor:'#080e16'});
+  const overlay=A.graphicOverlay({color:'#98c3ed',lineWidth:1.5});viewer.addOverlay(overlay);overlay.addFootprints([A.polygon(boundary(cell.id),{color:'#98c3ed',lineWidth:1.5})]);
+  timer=setTimeout(()=>{if(!dead&&!ready)q('#wave-loading').textContent='Waiting for the SPHEREx archive…';},15000);
+ }catch(error){if(!dead)failed('Could not load SPHEREx data. Please retry in a WebGL2 browser.');}})();
+ return()=>{dead=true;events.abort();clearTimeout(timer);};
 }
