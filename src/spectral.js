@@ -258,7 +258,7 @@ export function sharedStretch(frames, {quality=false,wavelength=NaN,tolerance=0}
 }
 
 // Sequential intensity palette. This does not combine spectral bands into RGB.
-const colourStops=[[4,3,16],[50,15,87],[118,35,112],[186,61,83],[235,114,53],[251,185,71],[252,250,202]];
+const colourStops=[[2,7,18],[6,27,63],[10,65,119],[16,112,169],[54,163,208],[136,212,235],[239,250,255]];
 export function brightnessColour(level,palette='false-colour'){
   const t=Math.max(0,Math.min(1,level));
   if(palette==='grayscale'){const v=Math.round(t*255);return [v,v,v];}
