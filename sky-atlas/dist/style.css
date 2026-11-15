@@ -69,3 +69,22 @@ p,.legal-content,.science-details,.sky-details,.tiny{font-family:var(--body)}
 .comparison-control p{font-size:13px}
 @media(max-width:800px){.hero h1{font-size:clamp(38px,7vw,58px)}.hero .eyebrow{font-size:11px}}
 @media(max-width:520px){.hero h1{font-size:clamp(32px,8.2vw,42px);letter-spacing:-.03em}.hero p{font-size:17px}.section-title{font-size:30px}.header-nav{font-size:12px;gap:16px}.eyebrow{font-size:11px}.hero-actions .button-large{font-size:16px}}
+
+/* Full-width telescope imagery with a readable white foreground. */
+.hero-photo{position:relative;isolation:isolate;display:block;min-height:680px;padding:0;background:#07101b;color:#fff;overflow:hidden}
+.hero-background{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center 48%}
+.hero-photo::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(3,10,20,.88) 0%,rgba(3,10,20,.72) 38%,rgba(3,10,20,.22) 76%),linear-gradient(0deg,rgba(3,10,20,.7),transparent 35%)}
+.hero-inner{position:relative;z-index:2;min-height:inherit;display:flex;align-items:center;padding-top:76px;padding-bottom:110px}
+.hero-photo .hero-copy{width:100%;max-width:660px}
+.hero-photo h1{color:#fff;font-size:clamp(42px,5vw,74px);line-height:1.08;margin:27px 0}
+.hero-photo h1 em{color:#fff}
+.hero-photo p{color:#fff;max-width:430px;text-shadow:0 1px 3px #0005}
+.hero-photo .eyebrow{color:#fff}
+.hero-photo .button.outline{border-color:#ffffffa6;color:#fff;background:#07101b55}
+.hero-photo .button.outline:hover{background:#ffffff22;border-color:#fff}
+.hero-photo a:focus-visible{outline-color:#fff}
+.hero-image-credit{position:absolute;z-index:2;right:5%;bottom:24px;max-width:90%;font:12px/1.6 var(--body);color:#fff;text-align:right;text-shadow:0 1px 4px #000}
+.hero-image-credit span{font-size:11px}
+.hero-image-credit:hover{text-decoration:underline;text-underline-offset:3px}
+@media(max-width:800px){.hero-photo{min-height:640px}.hero-photo::before{background:linear-gradient(90deg,rgba(3,10,20,.83),rgba(3,10,20,.48)),linear-gradient(0deg,rgba(3,10,20,.75),transparent 45%)}.hero-inner{padding-top:65px;padding-bottom:110px}.hero-photo h1{font-size:clamp(38px,7vw,58px)}}
+@media(max-width:520px){.hero-photo{min-height:620px}.hero-inner{padding-top:50px;padding-bottom:105px}.hero-photo h1{font-size:clamp(32px,8.2vw,42px)}.hero-photo .hero-actions{gap:14px}.hero-photo .hero-actions .button-large{width:100%}.hero-image-credit{right:6%;bottom:22px;text-align:left;left:6%}.hero-background{object-position:58% center}}
