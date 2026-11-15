@@ -14,7 +14,7 @@ test('quality and wavelength masking are distinct controls and gaps are not sile
  f.values[0]=NaN;f.values[20]=NaN;f.values[21]=NaN;f.values[22]=NaN;const large=processDisplay(f,{wavelength:2,denoise:0,repair:true});assert(Number.isNaN(large.values[0]));assert(Number.isNaN(large.values[21]));
 });
 test('false colour is a deterministic brightness palette; grayscale remains neutral',()=>{
- const low=brightnessColour(0),high=brightnessColour(1),mid=brightnessColour(.5);assert(mid[2]>mid[1]&&mid[1]>mid[0]);for(let i=0;i<=100;i++){const c=brightnessColour(i/100);assert(c[2]>=c[1]&&c[1]>=c[0],'blue ramp has no purple/red segment');}assert(high.reduce((a,b)=>a+b)>low.reduce((a,b)=>a+b));const g=brightnessColour(.5,'grayscale');assert.equal(g[0],g[1]);assert.equal(g[1],g[2]);
+ const low=brightnessColour(0),high=brightnessColour(1),mid=brightnessColour(.5);assert(high.reduce((a,b)=>a+b)>low.reduce((a,b)=>a+b));assert(high[0]>high[2],'Milky Way highlights are warm cream');assert(mid[2]>mid[0],'Milky Way midtones retain violet-blue');assert.notDeepEqual(brightnessColour(.5,'blue-violet'),mid);const g=brightnessColour(.5,'grayscale');assert.equal(g[0],g[1]);assert.equal(g[1],g[2]);
 });
 test('visits use UTC dates and deduplicate re-released exposures',()=>{
  const make=(id,mjd,date,path,band='D2')=>({id,mjd,date,path,band});const rows=[make('b',3,'2025-06-10T02:00:00Z','/b'),make('a',1,'2025-05-10T22:00:00Z','/a'),make('a',1,'2025-05-10T22:00:00Z','/duplicate'),make('a',1,'2025-05-10T22:00:00Z','/d3','D3')];const visits=groupVisits(rows);assert.deepEqual(visits.map(v=>v.day),['2025-05-10','2025-06-10']);assert.equal(visits[0].observations.length,2);
