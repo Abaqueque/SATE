@@ -90,3 +90,24 @@ html .cell-workspace .cell-rail select:focus-visible {outline-offset: -2px}
 .cell-workspace .cell-layer-hue input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:7px;margin:3px 0 7px;border:0;border-radius:8px;background:linear-gradient(to right,#e65b5b,#e6ce5b,#61c96c,#5bc9ce,#6379e6,#cf5bd7,#e65b5b);cursor:pointer}
 .cell-layer-hue input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:15px;height:15px;border:0;border-radius:50%;background:var(--layer-text);box-shadow:0 0 0 2px var(--layer-surface)}
 .cell-layer-hue input::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--layer-text);box-shadow:0 0 0 2px var(--layer-surface)}
+
+/* One observation and one timeline by default; comparison is optional. */
+.cell-workspace.single-view .cell-viewers{grid-template-columns:minmax(0,1fr)}
+.cell-workspace.single-view .cell-pane.right,
+.cell-workspace.single-view .cell-pane-heading b{display:none}
+.cell-workspace.single-view .cell-scrub-track input#cell-scrub-left{top:18px}
+.cell-workspace.single-view .cell-timeline-handle.left{top:20px}
+html .cell-workspace .cell-image-message,
+html .cell-workspace .cell-stage,
+html .cell-workspace .cell-stage canvas{background:#000}
+.cell-workspace.single-view #cell-scrub-right,
+.cell-workspace.single-view #cell-handle-right,
+.cell-workspace.single-view .cell-layer-dates>div:last-child,
+.cell-workspace.single-view .cell-layer-dates b{display:none}
+.cell-workspace.single-view .cell-layer-dates span{margin-left:0}
+
+.cell-width-form{display:flex;align-items:flex-end;gap:8px;margin:13px 0}
+.cell-width-form .cell-field{flex:1;min-width:0;margin:0}
+.cell-width-form input{width:100%;min-height:38px;padding:9px 10px;border:1px solid var(--line);border-radius:5px;background:var(--layer-control);color:var(--layer-text);font:13px var(--sans)}
+.cell-width-form button{min-height:38px;padding:8px 10px;border:1px solid var(--line);border-radius:5px;font-size:11px;white-space:nowrap}
+@media(max-width:850px){.cell-width-form{grid-column:1/-1}}

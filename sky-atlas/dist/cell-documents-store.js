@@ -10,8 +10,8 @@ export function catalogueLinks(position){
  const p=candidatePosition(position),coord=p.ra.toFixed(7)+' '+(p.dec>=0?'+':'')+p.dec.toFixed(7);
  return {simbad:'https://simbad.cds.unistra.fr/simbad/sim-coo?'+new URLSearchParams({Coord:coord,Radius:p.radius,'Radius.unit':'arcsec',CooFrame:'ICRS'}),vizier:'https://vizier.cds.unistra.fr/viz-bin/VizieR?'+new URLSearchParams({'-c':coord,'-c.rs':p.radius,'-c.eq':'J2000'})};
 }
-export function fitsLink(path,position){
- try{const url=new URL(path,'https://irsa.ipac.caltech.edu');if(url.origin!=='https://irsa.ipac.caltech.edu'||!url.pathname.startsWith('/ibe/data/spherex/'))return null;url.searchParams.set('center',position.ra+','+position.dec);url.searchParams.set('size','.3');url.searchParams.set('gzip','false');return url.href;}catch{return null;}
+export function fitsLink(path,position,width=.2){
+ try{const url=new URL(path,'https://irsa.ipac.caltech.edu');if(url.origin!=='https://irsa.ipac.caltech.edu'||!url.pathname.startsWith('/ibe/data/spherex/'))return null;url.searchParams.set('center',position.ra+','+position.dec);url.searchParams.set('size',String(Number((width*1.5).toPrecision(12))));url.searchParams.set('gzip','false');return url.href;}catch{return null;}
 }
 export function displaySettings(value={}){
  if(!value||typeof value!=='object')value={};
