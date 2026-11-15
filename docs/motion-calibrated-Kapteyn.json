@@ -1,0 +1,614 @@
+[
+  {
+    "id": "2025W33_2C_0488_2",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0488_2D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.511003,
+    "date": "2025-08-16T12:15:50.659Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.1364268556117276
+  },
+  {
+    "id": "2025W33_2C_0533_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0533_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.642535,
+    "date": "2025-08-16T15:25:15.024Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.1637555815560419
+  },
+  {
+    "id": "2025W33_2C_0533_2",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0533_2D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.644027,
+    "date": "2025-08-16T15:27:23.932Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.191500791890777
+  },
+  {
+    "id": "2025W33_2C_0533_3",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0533_3D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.645519,
+    "date": "2025-08-16T15:29:32.841Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.2201128253654883
+  },
+  {
+    "id": "2025W33_2C_0533_4",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0533_4D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.647011,
+    "date": "2025-08-16T15:31:41.750Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.249225615540007
+  },
+  {
+    "id": "2025W33_2C_0554_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0554_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.710947,
+    "date": "2025-08-16T17:03:45.820Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.2787845395346065
+  },
+  {
+    "id": "2025W33_2C_0554_2",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0554_2D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.71244,
+    "date": "2025-08-16T17:05:54.816Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.309267100523625
+  },
+  {
+    "id": "2025W33_2C_0554_3",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0554_3D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.713932,
+    "date": "2025-08-16T17:08:03.724Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.3401267125358185
+  },
+  {
+    "id": "2025W33_2C_0554_4",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0554_4D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.715424,
+    "date": "2025-08-16T17:10:12.633Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.3722415431646815
+  },
+  {
+    "id": "2025W33_2C_0574_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0574_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.778223,
+    "date": "2025-08-16T18:40:38.467Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.1073639206764376
+  },
+  {
+    "id": "2025W33_2C_0620_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0620_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.914338,
+    "date": "2025-08-16T21:56:38.803Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.4045088899550624
+  },
+  {
+    "id": "2025W33_2C_0620_2",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0620_2D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.91583,
+    "date": "2025-08-16T21:58:47.711Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.438417259027005
+  },
+  {
+    "id": "2025W33_2C_0620_3",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0620_3D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.917323,
+    "date": "2025-08-16T22:00:56.707Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.4730846643152278
+  },
+  {
+    "id": "2025W33_2C_0620_4",
+    "path": "/ibe/data/spherex/dr1/level2/2025W33_2C/l2b-v27-2026-228/2/level2_2025W33_2C_0620_4D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60903.918815,
+    "date": "2025-08-16T22:03:05.615Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5089779609473333
+  },
+  {
+    "id": "2025W34_1B_0044_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0044_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60905.202989,
+    "date": "2025-08-18T04:52:18.249Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5454953190290308
+  },
+  {
+    "id": "2025W34_1B_0044_2",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0044_2D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60905.204481,
+    "date": "2025-08-18T04:54:27.158Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5828568281722208
+  },
+  {
+    "id": "2025W34_1B_0044_3",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0044_3D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60905.205973,
+    "date": "2025-08-18T04:56:36.067Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.6209737655446037
+  },
+  {
+    "id": "2025W34_1B_0045_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0045_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60905.207785,
+    "date": "2025-08-18T04:59:12.624Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.110512968159708
+  },
+  {
+    "id": "2025W34_1B_0134_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_1B/l2b-v27-2026-228/2/level2_2025W34_1B_0134_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 60905.681328,
+    "date": "2025-08-18T16:21:06.739Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.6291660984813792
+  },
+  {
+    "id": "2025W34_2B_0564_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_2B/l2b-v27-2026-229/2/level2_2025W34_2B_0564_1D2_spx_l2b-v27-2026-229.fits",
+    "mjd": 60911.526152,
+    "date": "2025-08-24T12:37:39.532Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.6117909165618722
+  },
+  {
+    "id": "2025W34_2B_0578_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_2B/l2b-v27-2026-229/2/level2_2025W34_2B_0578_1D2_spx_l2b-v27-2026-229.fits",
+    "mjd": 60911.590763,
+    "date": "2025-08-24T14:10:41.923Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5013102398874505
+  },
+  {
+    "id": "2025W34_2B_0578_2",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_2B/l2b-v27-2026-229/2/level2_2025W34_2B_0578_2D2_spx_l2b-v27-2026-229.fits",
+    "mjd": 60911.592255,
+    "date": "2025-08-24T14:12:50.832Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5374128678651429
+  },
+  {
+    "id": "2025W34_2B_0578_3",
+    "path": "/ibe/data/spherex/dr1/level2/2025W34_2B/l2b-v27-2026-229/2/level2_2025W34_2B_0578_3D2_spx_l2b-v27-2026-229.fits",
+    "mjd": 60911.593748,
+    "date": "2025-08-24T14:14:59.827Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5746276208999506
+  },
+  {
+    "id": "2025W35_1A_0127_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W35_1A/l2b-v27-2026-230/2/level2_2025W35_1A_0127_1D2_spx_l2b-v27-2026-230.fits",
+    "mjd": 60912.609724,
+    "date": "2025-08-25T14:38:00.153Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.6617694721436875
+  },
+  {
+    "id": "2025W35_1A_0426_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W35_1A/l2b-v27-2026-230/2/level2_2025W35_1A_0426_1D2_spx_l2b-v27-2026-230.fits",
+    "mjd": 60914.172062,
+    "date": "2025-08-27T04:07:46.156Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.366117938098086
+  },
+  {
+    "id": "2025W35_2A_0033_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W35_2A/l2b-v27-2026-231/2/level2_2025W35_2A_0033_1D2_spx_l2b-v27-2026-231.fits",
+    "mjd": 60915.667869,
+    "date": "2025-08-28T16:01:43.881Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.649681290871469
+  },
+  {
+    "id": "2025W35_2A_0125_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W35_2A/l2b-v27-2026-231/2/level2_2025W35_2A_0125_1D2_spx_l2b-v27-2026-231.fits",
+    "mjd": 60916.14246,
+    "date": "2025-08-29T03:25:08.544Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.4656480860845948
+  },
+  {
+    "id": "2025W36_2B_0234_1",
+    "path": "/ibe/data/spherex/dr1/level2/2025W36_2B/l2b-v27-2026-234/2/level2_2025W36_2B_0234_1D2_spx_l2b-v27-2026-234.fits",
+    "mjd": 60923.685896,
+    "date": "2025-09-05T16:27:41.414Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.6292729880414574
+  },
+  {
+    "id": "2026W07_2A_0534_1",
+    "path": "/ibe/data/spherex/dr1/level2/2026W07_2A/l2b-v27-2026-226/2/level2_2026W07_2A_0534_1D2_spx_l2b-v27-2026-226.fits",
+    "mjd": 61086.372174,
+    "date": "2026-02-15T08:55:55.833Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.6357308479971095
+  },
+  {
+    "id": "2026W08_1A_0288_1",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0288_1D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61088.476325,
+    "date": "2026-02-17T11:25:54.480Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.1113678949746664
+  },
+  {
+    "id": "2026W08_1A_0288_2",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0288_2D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61088.477817,
+    "date": "2026-02-17T11:28:03.388Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.137163161156735
+  },
+  {
+    "id": "2026W08_1A_0288_3",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0288_3D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61088.479309,
+    "date": "2026-02-17T11:30:12.297Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.1646185273921525
+  },
+  {
+    "id": "2026W08_1A_0288_4",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0288_4D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61088.480801,
+    "date": "2026-02-17T11:32:21.206Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.1924009768936468
+  },
+  {
+    "id": "2026W08_1A_0462_1",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0462_1D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61089.425985,
+    "date": "2026-02-18T10:13:25.104Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.2209008389655525
+  },
+  {
+    "id": "2026W08_1A_0462_2",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0462_2D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61089.427477,
+    "date": "2026-02-18T10:15:34.012Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.2500293179317512
+  },
+  {
+    "id": "2026W08_1A_0462_3",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0462_3D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61089.428969,
+    "date": "2026-02-18T10:17:42.921Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.2797005599975508
+  },
+  {
+    "id": "2026W08_1A_0462_4",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_1A/l2b-v27-2026-227/2/level2_2026W08_1A_0462_4D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61089.430462,
+    "date": "2026-02-18T10:19:51.916Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.3101497384747245
+  },
+  {
+    "id": "2026W08_2A_0136_1",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0136_1D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61091.190505,
+    "date": "2026-02-20T04:34:19.632Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.3407850713783152
+  },
+  {
+    "id": "2026W08_2A_0136_2",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0136_2D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61091.192015,
+    "date": "2026-02-20T04:36:30.096Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.3727604582668536
+  },
+  {
+    "id": "2026W08_2A_0136_3",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0136_3D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61091.193507,
+    "date": "2026-02-20T04:38:39.004Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.4051242404053634
+  },
+  {
+    "id": "2026W08_2A_0136_4",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0136_4D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61091.195,
+    "date": "2026-02-20T04:40:48.000Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.438958834313301
+  },
+  {
+    "id": "2026W08_2A_0298_1",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0298_1D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61092.073227,
+    "date": "2026-02-21T01:45:26.812Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.4735125150242345
+  },
+  {
+    "id": "2026W08_2A_0298_2",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0298_2D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61092.074719,
+    "date": "2026-02-21T01:47:35.721Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5092012618719637
+  },
+  {
+    "id": "2026W08_2A_0298_3",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0298_3D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61092.076212,
+    "date": "2026-02-21T01:49:44.716Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.5458962214243264
+  },
+  {
+    "id": "2026W08_2A_0298_4",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0298_4D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61092.077704,
+    "date": "2026-02-21T01:51:53.625Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.583179892042482
+  },
+  {
+    "id": "2026W08_2A_0597_1",
+    "path": "/ibe/data/spherex/dr1/level2/2026W08_2A/l2b-v27-2026-227/2/level2_2026W08_2A_0597_1D2_spx_l2b-v27-2026-227.fits",
+    "mjd": 61093.702769,
+    "date": "2026-02-22T16:51:59.241Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.62115984448872
+  },
+  {
+    "id": "2026W09_1A_0055_1",
+    "path": "/ibe/data/spherex/dr1/level2/2026W09_1A/l2b-v27-2026-228/2/level2_2026W09_1A_0055_1D2_spx_l2b-v27-2026-228.fits",
+    "mjd": 61094.245826,
+    "date": "2026-02-23T05:53:59.366Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_dr1",
+    "wavelength": 1.101728509466699
+  },
+  {
+    "id": "2026W34_1A_0126_3",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0126_3D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61269.61117,
+    "date": "2026-08-17T14:40:05.087Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.1166062255471711
+  },
+  {
+    "id": "2026W34_1A_0157_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0157_1D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61269.743607,
+    "date": "2026-08-17T17:50:47.644Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.1211394021785348
+  },
+  {
+    "id": "2026W34_1A_0157_2",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0157_2D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61269.7451,
+    "date": "2026-08-17T17:52:56.640Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.1477125053198547
+  },
+  {
+    "id": "2026W34_1A_0157_3",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0157_3D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61269.746592,
+    "date": "2026-08-17T17:55:05.548Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.175159054234313
+  },
+  {
+    "id": "2026W34_1A_0157_4",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0157_4D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61269.748084,
+    "date": "2026-08-17T17:57:14.457Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.2034747515956856
+  },
+  {
+    "id": "2026W34_1A_0357_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0357_1D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61270.829365,
+    "date": "2026-08-18T19:54:17.135Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.2614050537251156
+  },
+  {
+    "id": "2026W34_1A_0357_2",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0357_2D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61270.830857,
+    "date": "2026-08-18T19:56:26.044Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.2912365419313772
+  },
+  {
+    "id": "2026W34_1A_0357_3",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0357_3D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61270.83235,
+    "date": "2026-08-18T19:58:35.039Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.3221245382079863
+  },
+  {
+    "id": "2026W34_1A_0357_4",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0357_4D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61270.833842,
+    "date": "2026-08-18T20:00:43.948Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.3535268079606757
+  },
+  {
+    "id": "2026W34_1A_0409_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0409_1D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61271.106232,
+    "date": "2026-08-19T02:32:58.444Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.3856052089241344
+  },
+  {
+    "id": "2026W34_1A_0529_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0529_1D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61271.711483,
+    "date": "2026-08-19T17:04:32.131Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.4186396097780274
+  },
+  {
+    "id": "2026W34_1A_0529_2",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0529_2D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61271.712975,
+    "date": "2026-08-19T17:06:41.040Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.4525472675841087
+  },
+  {
+    "id": "2026W34_1A_0529_3",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0529_3D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61271.714468,
+    "date": "2026-08-19T17:08:50.035Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.4881285724300628
+  },
+  {
+    "id": "2026W34_1A_0529_4",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_1A/l2b-v27-2026-243/2/level2_2026W34_1A_0529_4D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61271.71596,
+    "date": "2026-08-19T17:10:58.944Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.524131860188417
+  },
+  {
+    "id": "2026W34_2A_0143_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_2A/l2b-v27-2026-243/2/level2_2026W34_2A_0143_1D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61273.207078,
+    "date": "2026-08-21T04:58:11.539Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.5613368499748117
+  },
+  {
+    "id": "2026W34_2A_0143_2",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_2A/l2b-v27-2026-243/2/level2_2026W34_2A_0143_2D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61273.20857,
+    "date": "2026-08-21T05:00:20.448Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.598991008580676
+  },
+  {
+    "id": "2026W34_2A_0143_3",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_2A/l2b-v27-2026-243/2/level2_2026W34_2A_0143_3D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61273.210062,
+    "date": "2026-08-21T05:02:29.356Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.6372594960635114
+  },
+  {
+    "id": "2026W34_2A_0287_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_2A/l2b-v27-2026-243/2/level2_2026W34_2A_0287_1D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61273.8841,
+    "date": "2026-08-21T21:13:06.240Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.232023388005968
+  },
+  {
+    "id": "2026W34_2A_0548_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W34_2A/l2b-v27-2026-243/2/level2_2026W34_2A_0548_1D2_spx_l2b-v27-2026-243.fits",
+    "mjd": 61275.039922,
+    "date": "2026-08-23T00:57:29.260Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.6463585688967552
+  },
+  {
+    "id": "2026W36_1A_0028_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W36_1A/l2b-v27-2026-252/2/level2_2026W36_1A_0028_1D2_spx_l2b-v27-2026-252.fits",
+    "mjd": 61283.120447,
+    "date": "2026-08-31T02:53:26.620Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.1477089823900049
+  },
+  {
+    "id": "2026W37_1A_0114_1",
+    "path": "/ibe/data/spherex/qr3/level2/2026W37_1A/l2b-v27-2026-255/2/level2_2026W37_1A_0114_1D2_spx_l2b-v27-2026-255.fits",
+    "mjd": 61290.586465,
+    "date": "2026-09-07T14:04:30.576Z",
+    "band": "SPHEREx-D2",
+    "collection": "spherex_qr3",
+    "wavelength": 1.1751304412035504
+  }
+]

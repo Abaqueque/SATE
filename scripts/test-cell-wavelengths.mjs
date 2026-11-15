@@ -60,3 +60,9 @@ test('wavelength observations follow both ends of the timeline',async()=>{
  const early=await findWavelengthObservation({...args,anchorMjd:60000}),late=await findWavelengthObservation({...args,anchorMjd:60008});
  assert.equal(early.obs.id,'0');assert.equal(late.obs.id,'8');
 });
+
+test('coverage cropping keeps every wavelength layer on the same displayed sky grid',()=>{
+ const calls=[],ctx={save(){},restore(){},drawImage(...args){calls.push([this.globalAlpha,...args]);}};
+ composeLayers(ctx,[{canvas:'base',visible:true,opacity:1},{canvas:'overlay',visible:true,opacity:.4}],{x:12,y:18,size:160});
+ assert.deepEqual(calls,[[1,'base',12,18,160,160,0,0,160,160],[.4,'overlay',12,18,160,160,0,0,160,160]]);
+});

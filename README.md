@@ -34,3 +34,8 @@ The original coordinate-lab code and `/api/cutout` remain in the repository. Its
 
 Choose a cell in the atlas and select **Open region fully** for dated Level 2 images, wavelength controls, grayscale data, reversible noise reduction and a UTC observation timeline. [Data processing and verification](docs/cell-workspace.md).
 The Milky Way false-colour palette applies only to the sky-search map.
+
+The regional AllWISE inventory is available in both the atlas and the comparison
+workspace, with linked markers in both image panes. See the
+[integration notes](docs/inventory-integration.md) for usage, QR3 verification and
+the explanation of exact-wavelength exposure counts.

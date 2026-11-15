@@ -1,0 +1,491 @@
+{
+  "region": {
+    "ra": 178.28138830246803,
+    "dec": 37.67665862952473,
+    "size": 0.2,
+    "wavelength": 1.6,
+    "tolerance": 0.025,
+    "mode": "single"
+  },
+  "observations": [
+    {
+      "id": "2025W19_2B_0174_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/2/level2_2025W19_2B_0174_1D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60804.629753,
+      "date": "2025-05-09T15:06:50.659Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W19_2B_0174_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/2/level2_2025W19_2B_0174_2D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60804.631245,
+      "date": "2025-05-09T15:08:59.567Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W19_2B_0174_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/2/level2_2025W19_2B_0174_3D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60804.632737,
+      "date": "2025-05-09T15:11:08.476Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W19_2B_0174_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/2/level2_2025W19_2B_0174_4D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60804.63423,
+      "date": "2025-05-09T15:13:17.472Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W19_2B_0505_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/2/level2_2025W19_2B_0505_2D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60806.736371,
+      "date": "2025-05-11T17:40:22.454Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W19_2B_0505_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/2/level2_2025W19_2B_0505_3D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60806.737863,
+      "date": "2025-05-11T17:42:31.363Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W19_2B_0505_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W19_2B/l2b-v27-2026-198/2/level2_2025W19_2B_0505_4D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60806.739355,
+      "date": "2025-05-11T17:44:40.271Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W20_1C_0074_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_1C/l2b-v27-2026-198/2/level2_2025W20_1C_0074_1D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60807.483102,
+      "date": "2025-05-12T11:35:40.012Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W20_1C_0074_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_1C/l2b-v27-2026-198/2/level2_2025W20_1C_0074_2D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60807.484594,
+      "date": "2025-05-12T11:37:48.921Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W20_1C_0074_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_1C/l2b-v27-2026-198/2/level2_2025W20_1C_0074_3D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60807.486086,
+      "date": "2025-05-12T11:39:57.830Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W20_1C_0074_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_1C/l2b-v27-2026-198/2/level2_2025W20_1C_0074_4D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60807.487578,
+      "date": "2025-05-12T11:42:06.739Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W20_2D_0458_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_2D/l2b-v27-2026-198/2/level2_2025W20_2D_0458_1D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60813.257323,
+      "date": "2025-05-18T06:10:32.707Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W20_2D_0458_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W20_2D/l2b-v27-2026-198/2/level2_2025W20_2D_0458_2D2_spx_l2b-v27-2026-198.fits",
+      "mjd": 60813.258833,
+      "date": "2025-05-18T06:12:43.171Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W21_1B_0605_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W21_1B/l2b-v27-2026-199/2/level2_2025W21_1B_0605_1D2_spx_l2b-v27-2026-199.fits",
+      "mjd": 60817.197618,
+      "date": "2025-05-22T04:44:34.195Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W21_1B_0605_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W21_1B/l2b-v27-2026-199/2/level2_2025W21_1B_0605_2D2_spx_l2b-v27-2026-199.fits",
+      "mjd": 60817.19911,
+      "date": "2025-05-22T04:46:43.104Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W21_1B_0605_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W21_1B/l2b-v27-2026-199/2/level2_2025W21_1B_0605_3D2_spx_l2b-v27-2026-199.fits",
+      "mjd": 60817.200602,
+      "date": "2025-05-22T04:48:52.012Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W21_1B_0605_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W21_1B/l2b-v27-2026-199/2/level2_2025W21_1B_0605_4D2_spx_l2b-v27-2026-199.fits",
+      "mjd": 60817.202095,
+      "date": "2025-05-22T04:51:01.008Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W23_1C_0320_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W23_1C/l2b-v27-2026-200/2/level2_2025W23_1C_0320_1D2_spx_l2b-v27-2026-200.fits",
+      "mjd": 60829.768894,
+      "date": "2025-06-03T18:27:12.441Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W23_1C_0337_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W23_1C/l2b-v27-2026-200/2/level2_2025W23_1C_0337_1D2_spx_l2b-v27-2026-200.fits",
+      "mjd": 60829.842388,
+      "date": "2025-06-03T20:13:02.323Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W23_1C_0392_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W23_1C/l2b-v27-2026-200/2/level2_2025W23_1C_0392_1D2_spx_l2b-v27-2026-200.fits",
+      "mjd": 60830.114582,
+      "date": "2025-06-04T02:44:59.884Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W23_2B_0278_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W23_2B/l2b-v27-2026-201/2/level2_2025W23_2B_0278_1D2_spx_l2b-v27-2026-201.fits",
+      "mjd": 60832.825828,
+      "date": "2025-06-06T19:49:11.539Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W23_2B_0339_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W23_2B/l2b-v27-2026-201/2/level2_2025W23_2B_0339_1D2_spx_l2b-v27-2026-201.fits",
+      "mjd": 60833.098644,
+      "date": "2025-06-07T02:22:02.841Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W23_2B_0369_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W23_2B/l2b-v27-2026-201/2/level2_2025W23_2B_0369_1D2_spx_l2b-v27-2026-201.fits",
+      "mjd": 60833.233746,
+      "date": "2025-06-07T05:36:35.654Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W48_2A_0744_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0744_1D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61009.677101,
+      "date": "2025-11-30T16:15:01.526Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W48_2A_0744_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0744_2D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61009.678593,
+      "date": "2025-11-30T16:17:10.435Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W48_2A_0744_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0744_3D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61009.680085,
+      "date": "2025-11-30T16:19:19.344Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W48_2A_0744_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0744_4D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61009.681577,
+      "date": "2025-11-30T16:21:28.252Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W48_2A_0759_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0759_2D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61009.747983,
+      "date": "2025-11-30T17:57:05.731Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W48_2A_0759_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0759_3D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61009.749475,
+      "date": "2025-11-30T17:59:14.639Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W48_2A_0759_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W48_2A/l2b-v27-2026-209/2/level2_2025W48_2A_0759_4D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61009.750967,
+      "date": "2025-11-30T18:01:23.548Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0129_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0129_1D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61010.558313,
+      "date": "2025-12-01T13:23:58.243Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0129_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0129_2D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61010.559805,
+      "date": "2025-12-01T13:26:07.151Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0129_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0129_3D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61010.561297,
+      "date": "2025-12-01T13:28:16.060Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0129_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0129_4D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61010.562789,
+      "date": "2025-12-01T13:30:24.969Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0265_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0265_1D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61011.171754,
+      "date": "2025-12-02T04:07:19.545Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0265_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0265_2D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61011.173246,
+      "date": "2025-12-02T04:09:28.454Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0265_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0265_3D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61011.174738,
+      "date": "2025-12-02T04:11:37.363Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0265_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0265_4D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61011.17623,
+      "date": "2025-12-02T04:13:46.271Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0627_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0627_1D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61012.797156,
+      "date": "2025-12-03T19:07:54.278Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0627_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0627_2D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61012.798649,
+      "date": "2025-12-03T19:10:03.273Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W49_1A_0627_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W49_1A/l2b-v27-2026-209/2/level2_2025W49_1A_0627_3D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61012.800141,
+      "date": "2025-12-03T19:12:12.182Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2025W50_1A_0022_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_1A/l2b-v27-2026-209/2/level2_2025W50_1A_0022_1D2_spx_l2b-v27-2026-209.fits",
+      "mjd": 61017.079625,
+      "date": "2025-12-08T01:54:39.599Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1"
+    },
+    {
+      "id": "2026W20_2A_0133_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W20_2A/l2b-v27-2026-267/2/level2_2026W20_2A_0133_1D2_spx_l2b-v27-2026-267.fits",
+      "mjd": 61175.286993,
+      "date": "2026-05-15T06:53:16.195Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W20_2A_0133_2",
+      "path": "/ibe/data/spherex/qr3/level2/2026W20_2A/l2b-v27-2026-267/2/level2_2026W20_2A_0133_2D2_spx_l2b-v27-2026-267.fits",
+      "mjd": 61175.288485,
+      "date": "2026-05-15T06:55:25.103Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W20_2A_0133_3",
+      "path": "/ibe/data/spherex/qr3/level2/2026W20_2A/l2b-v27-2026-267/2/level2_2026W20_2A_0133_3D2_spx_l2b-v27-2026-267.fits",
+      "mjd": 61175.289978,
+      "date": "2026-05-15T06:57:34.099Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W20_2A_0133_4",
+      "path": "/ibe/data/spherex/qr3/level2/2026W20_2A/l2b-v27-2026-267/2/level2_2026W20_2A_0133_4D2_spx_l2b-v27-2026-267.fits",
+      "mjd": 61175.29147,
+      "date": "2026-05-15T06:59:43.007Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0400_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0400_1D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61183.911765,
+      "date": "2026-05-23T21:52:56.495Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0400_2",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0400_2D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61183.913257,
+      "date": "2026-05-23T21:55:05.404Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0400_3",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0400_3D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61183.91475,
+      "date": "2026-05-23T21:57:14.400Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0425_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0425_1D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.050527,
+      "date": "2026-05-24T01:12:45.532Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0437_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0437_1D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.118211,
+      "date": "2026-05-24T02:50:13.430Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0460_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0460_1D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.252781,
+      "date": "2026-05-24T06:04:00.278Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0555_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0555_1D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.79351,
+      "date": "2026-05-24T19:02:39.264Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0555_2",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0555_2D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.795002,
+      "date": "2026-05-24T19:04:48.172Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0555_3",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0555_3D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.796495,
+      "date": "2026-05-24T19:06:57.168Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0555_4",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0555_4D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.797987,
+      "date": "2026-05-24T19:09:06.076Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0589_1",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0589_1D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.997221,
+      "date": "2026-05-24T23:55:59.894Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0589_2",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0589_2D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61184.998713,
+      "date": "2026-05-24T23:58:08.803Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    },
+    {
+      "id": "2026W21_2A_0589_3",
+      "path": "/ibe/data/spherex/qr3/level2/2026W21_2A/l2b-v27-2026-268/2/level2_2026W21_2A_0589_3D2_spx_l2b-v27-2026-268.fits",
+      "mjd": 61185.000205,
+      "date": "2026-05-25T00:00:17.711Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_qr3"
+    }
+  ],
+  "complete": true,
+  "collections": [
+    "spherex_dr1",
+    "spherex_qr3",
+    "spherex_dr1_deep",
+    "spherex_qr3_deep"
+  ]
+}

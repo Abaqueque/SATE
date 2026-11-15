@@ -13,3 +13,7 @@ node_modules/
 
 # Generated, release-addressed deployment output.
 sky-atlas/build/
+
+# Local preview process output.
+preview-4184.log
+preview-4184.error.log

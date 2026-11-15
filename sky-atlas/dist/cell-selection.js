@@ -2,7 +2,8 @@ export function channelRange(wavelengths,index){
  const centre=wavelengths[index];
  return {centre,low:index? (wavelengths[index-1]+centre)/2:.75,high:index<wavelengths.length-1?(centre+wavelengths[index+1])/2:5};
 }
-export function selectionRanges(wavelengths,mode,channel,mix=[]){return mode==='all'?[]:(mode==='mix'?mix:[channel]).map(i=>channelRange(wavelengths,i));}
+// Nearby mode retains detector-band archive matches, as in the original viewer.
+export function selectionRanges(wavelengths,mode,channel,mix=[],nearby=false){return mode==='all'||nearby?[]:(mode==='mix'?mix:[channel]).map(i=>channelRange(wavelengths,i));}
 export function inRanges(wavelength,ranges){return Number.isFinite(wavelength)&&(!ranges.length||ranges.some(r=>wavelength>=r.low&&wavelength<r.high));}
 export function uniqueExposures(observations){const seen=new Set();return [...observations].sort((a,b)=>a.mjd-b.mjd||a.path.localeCompare(b.path)).filter(o=>{const key=o.id+'|'+o.band;if(seen.has(key))return false;seen.add(key);return true;});}
 export function matchingExposures(items){return items.filter(o=>o.match&&!o.unusable).sort((a,b)=>a.mjd-b.mjd||a.path.localeCompare(b.path));}

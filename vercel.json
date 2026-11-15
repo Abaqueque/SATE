@@ -18,6 +18,9 @@
     },
     "api/object-search.js": {
       "maxDuration": 20
+    },
+    "api/inventory.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

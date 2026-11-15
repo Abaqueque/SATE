@@ -24,9 +24,9 @@ export async function findWavelengthObservation({observations,wavelengths,channe
  return {obs:null,failures};
 }
 
-export function composeLayers(context,layers){
+export function composeLayers(context,layers,crop=null){
  context.save();context.globalCompositeOperation='source-over';
- for(const layer of layers){if(!layer.visible||!layer.canvas||layer.opacity<=0)continue;context.globalAlpha=layer.opacity;context.drawImage(layer.canvas,0,0);}
+ for(const layer of layers){if(!layer.visible||!layer.canvas||layer.opacity<=0)continue;context.globalAlpha=layer.opacity;if(crop)context.drawImage(layer.canvas,crop.x,crop.y,crop.size,crop.size,0,0,crop.size,crop.size);else context.drawImage(layer.canvas,0,0);}
  context.restore();
 }
 
