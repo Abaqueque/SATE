@@ -15,8 +15,8 @@ test('selected region references preserve real order, identity and sky position'
 });
 import {reviewGridState,reviewGridStyle,reviewGridLegend} from '../sky-atlas/dist/sky-review-grid.js';
 test('review shades are stable by real grid identity, subtle, and include all requested states',()=>{
- const states=new Set();for(let i=0;i<192;i++){states.add(reviewGridState(i,2));assert.equal(reviewGridState(i,2),reviewGridState(i,2));const style=reviewGridStyle(i,2);assert.equal(style.fill,true);assert.match(style.fillColor,/rgba/);}
- assert.deepEqual([...states].sort(),['followup','reviewed','unreviewed']);const legend=reviewGridLegend();assert(legend.includes('Needs further review'));assert(!legend.includes('Demo'));
+ const states=new Set();for(let i=0;i<192;i++){states.add(reviewGridState(i,9));assert.equal(reviewGridState(i,9),reviewGridState(i,9));const style=reviewGridStyle(i,9);assert.equal(style.fill,true);assert.match(style.fillColor,/rgba/);}
+ assert.deepEqual([...states].sort(),['followup','reviewed','unreviewed']);const legend=reviewGridLegend();assert(legend.includes('Needs further review'));assert(!legend.includes('Demo'));for(let order=0;order<9;order++){const style=reviewGridStyle(1,order);assert.equal(style.fill,false);assert.equal(style.fillColor,undefined);assert.equal(style.color,'rgba(170,181,193,.22)');}
 });
 import {continuousSkyPolygon} from '../sky-atlas/dist/sky-review-grid.js';
 test('review fills avoid closing across the sky projection seam',()=>{
