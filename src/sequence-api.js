@@ -1,4 +1,4 @@
-import { readHdus, readHeader, wavelengthRange } from './spectral.js';
+import { readHdus, readHeader, wavelengthRange, wavelengthAtSky } from './spectral.js';
 
 const IRSA = 'https://irsa.ipac.caltech.edu';
 const COLLECTIONS = ['spherex_dr1', 'spherex_qr3', 'spherex_dr1_deep', 'spherex_qr3_deep'];
@@ -22,6 +22,12 @@ export function parseRegion(url) {
   const mosaic=p.get('mosaic')==='true';
   if (values.size < .01 || values.size > (mosaic?1.05:.35)+1e-10) throw new Error('Image width is outside the supported range.');
   if (values.wavelength < .75 || values.wavelength > 5 || values.tolerance < .01 || values.tolerance > .5) throw new Error('Invalid wavelength or wavelength tolerance.');
+  values.mode=p.get('mode')||'single';
+  if(!['single','all','mix'].includes(values.mode))throw new Error('Invalid wavelength mode.');
+  if(values.mode==='mix'){
+    values.wavelengths=[...new Set((p.get('wavelengths')||'').split(',').map(Number))].sort((a,b)=>a-b);
+    if(!values.wavelengths.length||values.wavelengths.length>102||values.wavelengths.some(w=>!Number.isFinite(w)||w<.75||w>5))throw new Error('Select wavelengths for the mix.');
+  }
   values.ra %= 360;
   if(mosaic)values.mosaic=true;
   return values;
@@ -86,7 +92,7 @@ async function searchCircle(region, circle, signal) {
   const query = new URL('/SIA', IRSA);
   COLLECTIONS.forEach(c => query.searchParams.append('COLLECTION', c));
   query.searchParams.set('POS', 'CIRCLE ' + circle.ra + ' ' + circle.dec + ' ' + circle.radius);
-  query.searchParams.set('BAND', Math.max(.75, region.wavelength - region.tolerance) * 1e-6 + ' ' + Math.min(5, region.wavelength + region.tolerance) * 1e-6);
+  if(region.mode!=='all'){const waves=region.wavelengths||[region.wavelength];query.searchParams.set('BAND',Math.max(.75,Math.min(...waves)-region.tolerance)*1e-6+' '+Math.min(5,Math.max(...waves)+region.tolerance)*1e-6);}
   query.searchParams.set('MAXREC', String(MAX_ROWS));
   query.searchParams.set('RESPONSEFORMAT', 'VOTABLE');
   for (let attempt = 0; ; attempt++) {
@@ -256,4 +262,32 @@ export async function handleFrame(request) {
     if (request.signal.aborted) return json({ error: 'Image retrieval cancelled.' }, 499);
     return json({ error: e.name === 'TimeoutError' ? 'This exposure timed out. It can be retried.' : e.message }, 502);
   }
+}
+
+const exposureInfoCache=new Map();
+async function imageHeader(file,signal){
+  for(let attempt=0;attempt<3;attempt++){
+    const result=await fetch(file,{headers:{...HEADERS,range:'bytes=0-65535'},redirect:'error',signal});
+    if(!result.ok){await result.body?.cancel();if([429,500,502,503,504].includes(result.status)&&attempt<2){await new Promise(r=>setTimeout(r,800*(attempt+1)));continue;}throw new Error('Archive metadata unavailable ('+result.status+').');}
+    const reader=result.body.getReader();let bytes=new Uint8Array(0);
+    try{while(bytes.length<262144){const chunk=await reader.read();if(chunk.done)break;const joined=new Uint8Array(bytes.length+chunk.value.length);joined.set(bytes);joined.set(chunk.value,bytes.length);bytes=joined;let offset=0;
+      while(offset<bytes.length){const h=readHeader(bytes,offset);if(!h)break;if(h.header.EXTNAME==='IMAGE')return h.header;const extent=hduExtent(bytes,offset);if(!extent||extent.end<=offset)break;offset=extent.end;}
+    }}finally{await reader.cancel().catch(()=>{});}
+    throw new Error('Incomplete exposure metadata.');
+  }
+}
+export async function handleFrameInfo(request){
+  const url=new URL(request.url);let region,path;
+  try{region=parseRegion(url);path=validatedImagePath(url.searchParams.get('image')||'');}catch(e){return json({error:e.message},400);}
+  const key=JSON.stringify([path,region.ra,region.dec]);
+  if(exposureInfoCache.has(key))return Response.json(exposureInfoCache.get(key),{headers:{'cache-control':'public, max-age=86400'}});
+  try{
+    const signal=AbortSignal.any([request.signal,AbortSignal.timeout(35000)]),file=new URL(path,IRSA);
+    const [header,table]=await Promise.all([imageHeader(file,signal),waveTableTail(file,signal)]);
+    if(!table)throw new Error('Wavelength calibration unavailable.');
+    const calibrated=wavelengthAtSky(header,table,region.ra,region.dec);
+    const info={path,wavelength:calibrated?.wavelength??null,covered:!!calibrated};
+    exposureInfoCache.set(key,info);while(exposureInfoCache.size>1024)exposureInfoCache.delete(exposureInfoCache.keys().next().value);
+    return Response.json(info,{headers:{'cache-control':'public, max-age=86400'}});
+  }catch(e){return json({error:request.signal.aborted?'Cancelled.':e.message},request.signal.aborted?499:502);}
 }
