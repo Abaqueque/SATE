@@ -17,10 +17,18 @@ const sky=v=>({ra:normRA(Math.atan2(v[1],v[0])/R),dec:Math.asin(Math.max(-1,Math
 export function boundary(id,order=ORDER,steps=4){const n=2**order,p=[];for(let e=0;e<4;e++)for(let i=0;i<steps;i++){const t=i/steps,[x,y]=[[t,0],[1,t],[1-t,1],[0,1-t]][e];const v=sky(hp.pixcoord2vec_nest(n,id,x,y));p.push([v.ra,v.dec]);}p.push(p[0]);return p;}
 export function nearby(id){const ids=new Set([id]),eps=1e-7;for(const v of hp.corners_nest(NSIDE,id)){let e=[-v[1],v[0],0],len=Math.hypot(...e);if(len<1e-10){e=[1,0,0];len=1;}e=e.map(x=>x/len);const n=[v[1]*e[2]-v[2]*e[1],v[2]*e[0]-v[0]*e[2],v[0]*e[1]-v[1]*e[0]];for(let k=0;k<16;k++){const a=(k+.371)*Math.PI/8,w=v.map((x,i)=>x+eps*(Math.cos(a)*e[i]+Math.sin(a)*n[i]));const l=Math.hypot(...w);const p=sky(w.map(x=>x/l));ids.add(cellAt(p.ra,p.dec));}}return [...ids];}
 export function visibleCells(ra,dec,fov,order){const n=2**order,ids=[];if(fov>=80)return Array.from({length:12*n*n},(_,i)=>i);hp.query_disc_inclusive_nest(n,hp.ang2vec((90-dec)*R,normRA(ra)*R),Math.min(Math.PI/2-1e-5,fov*R*.8),i=>ids.push(i));return ids;}
-export const gridOrder=fov=>fov>=80?2:Math.max(0,Math.min(ORDER,Math.ceil(Math.log2(180/Math.max(.02,fov)))+2));
+export const gridOrder=fov=>fov>=80?2:Math.max(0,Math.min(ORDER,Math.ceil(Math.log2(180/Math.max(.02,fov)))+1));
 export const MIRA_CELL=cellAt(225.5412877,59.5224654);
 export function parseSky(search){const q=new URLSearchParams(search),id=Number(q.get('hpx')),order=Number(q.get('order')??9);return q.has('hpx')&&Number.isInteger(order)&&order>=0&&order<=9&&Number.isInteger(id)&&id>=0&&id<12*4**order?{id,order}:null;}
 // Aladin 3.8.1 indexes conventional HiPS cubes linearly in frequency. SPHEREx
 // supplies irregular wavelength labels: use a channel-index transport coordinate,
 // then label ONLY from data_cube_crval3_arr. This is not a physical frequency.
 export function channelTransportHz(index){return 299792458/5.009e-6+(index+.5)/102*(299792458/.743e-6-299792458/5.009e-6);}
+
+// Coarsen the entire grid instead of truncating a traversal-ordered cell list.
+// Truncation can remove the centre of the view and leave only one edge outlined.
+export function viewportGrid(ra,dec,fov){
+ let order=gridOrder(fov),ids=visibleCells(ra,dec,fov,order);
+ while(ids.length>500&&order>0){order--;ids=visibleCells(ra,dec,fov,order);}
+ return {order,ids};
+}
