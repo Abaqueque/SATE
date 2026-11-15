@@ -35,3 +35,33 @@
   font-display: swap;
   src: url(/assets/fonts/source-sans-pro-700.ttf) format('truetype');
 }
+
+/* Public Sans: locally hosted, SIL Open Font License; source fonts.google.com/specimen/Public+Sans. */
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./public-sans-400.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(./public-sans-500.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(./public-sans-600.ttf) format('truetype');
+}
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(./public-sans-700.ttf) format('truetype');
+}
