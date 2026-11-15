@@ -81,3 +81,10 @@ test('a wavelength assigned to one viewer never loads or commits on the other',a
  await timeline.sync('left',{mjd:60000});await timeline.sync('right',{mjd:61000});
  assert.deepEqual(loaded,[[1,60000],[2,61000]]);assert.deepEqual(commits,[['left',[1]],['right',[2]]]);
 });
+
+test('native nearby-wavelength layers retain measured bands while strict layers reject them',async()=>{
+ const args={observations:[observations[0]],wavelengths,channel:1,signal:new AbortController().signal,inspect:async()=>({coverage:1,covered:true,wavelength:1.2})};
+ assert.equal((await findWavelengthObservation(args)).obs,null);
+ assert.equal((await findWavelengthObservation({...args,nearby:true})).obs.wavelength,1.2);
+ assert.equal((await findWavelengthObservation({...args,nearby:true,inspect:async()=>({coverage:.4,covered:true,wavelength:1.2})})).obs,null);
+});
