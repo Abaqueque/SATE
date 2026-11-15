@@ -21,3 +21,18 @@ export async function forEachConcurrent(items,task,{concurrency=INSPECTION_CONCU
   while(!signal?.aborted&&index<items.length){const item=items[index++];await task(item);}
  }));
 }
+
+// Inspect ahead in parallel, then dispatch image work oldest-first. Responses may
+// complete out of order; each completion is published immediately to the UI.
+export async function forEachChronological(items,inspect,consume,{concurrency=IMAGE_CONCURRENCY,lookahead=INSPECTION_CONCURRENCY,signal}={}){
+ const ordered=[...items].sort((a,b)=>a.mjd-b.mjd||a.path.localeCompare(b.path));
+ const prepared=new Map(),running=new Set(),errors=[];let next=0;
+ const fill=()=>{while(!signal?.aborted&&next<ordered.length&&prepared.size<lookahead){const i=next++,item=ordered[i];prepared.set(i,Promise.resolve().then(()=>{signal?.throwIfAborted();return inspect(item);}).then(value=>({value}),error=>({error})));}};
+ fill();
+ for(let i=0;i<ordered.length&&!signal?.aborted;i++){
+  const result=await prepared.get(i);prepared.delete(i);fill();if(signal?.aborted)break;
+  let work;work=Promise.resolve().then(()=>consume(ordered[i],result)).catch(error=>errors.push(error)).finally(()=>running.delete(work));running.add(work);
+  if(running.size>=concurrency)await Promise.race(running);
+ }
+ await Promise.all(running);if(errors.length)throw errors[0];
+}

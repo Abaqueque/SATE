@@ -28,3 +28,9 @@ export function sharedCoverageCrop(frames,pixels){
  }
  return{...full,partial:true};
 }
+
+// Lock an optional crop to the first ready frame; timeline seeks never change it.
+export function createStableCrop(pixels){
+ const full={x:0,y:0,size:pixels};let locked;
+ return {get(mode,frames=[]){if(mode!=='shared')return full;if(!locked&&frames.length)locked=sharedCoverageCrop(frames,pixels);return locked||full;},reset(){locked=undefined;}};
+}
