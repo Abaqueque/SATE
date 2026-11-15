@@ -1,4 +1,8 @@
 import {ORDER,parseSky,center,boundary,channelTransportHz} from './sky-model.js';
+const DEMO_PALETTES={
+ 'blue-gold':['#080e20','#1b3065','#2c609a','#409abb','#80c7ce','#c6d7b3','#f0cd8e','#fff5da'],
+ violet:['#100d25','#37235d','#65428a','#9a68af','#c18fc6','#deb5db','#f1d9e9','#fff5fc']
+};
 export const DEMO_CELL=1372138; // HEALPix NESTED order 9, containing M42 (CDS Sesame).
 export function demoReturn(search=''){
  const value=new URLSearchParams(search).get('return');
@@ -18,7 +22,7 @@ export function wavelengthDemoMarkup(){const cell=demoSelection(location.search)
 <a class="wave-back" id="wave-return" href="/explore/">← Back to the atlas</a>
 <div class="wave-intro"><p class="eyebrow">Real SPHEREx data · wavelength explorer</p><h1>Cell ${cell.id}</h1><p>${cell.id===DEMO_CELL?'This cell contains the Orion Nebula (M42).':'This is the cell selected in your atlas.'} Move the slider to view the same sky area in different measured infrared channels.</p><p class="wave-coordinate">Cell centre · RA ${p.ra.toFixed(5)}° · Dec ${p.dec.toFixed(5)}°<br>HEALPix NESTED · order 9 · cell boundary shown in blue</p></div>
 <section class="wave-lab" aria-label="Real SPHEREx wavelength channels">
-<div class="wave-controls"><label for="wave-channel">Wavelength <output id="wave-value">Loading channels…</output></label><input id="wave-channel" type="range" min="0" max="99" step="1" value="0" aria-label="SPHEREx wavelength" disabled/><div class="wave-range-labels"><span>Shorter · 0.753 µm</span><span>Longer · 4.988 µm</span></div><div class="wave-presets"><button type="button" data-channel="11" disabled>0.978 µm</button><button type="button" data-channel="62" disabled>3.293 µm</button><button type="button" data-channel="90" disabled>4.600 µm</button></div><p id="wave-band" class="wave-band"></p></div>
+<div class="wave-controls"><label for="wave-channel">Wavelength <output id="wave-value">Loading channels…</output></label><input id="wave-channel" type="range" min="0" max="99" step="1" value="0" aria-label="SPHEREx wavelength" disabled/><div class="wave-range-labels"><span>Shorter · 0.753 µm</span><span>Longer · 4.988 µm</span></div><div class="wave-presets"><button type="button" data-channel="11" disabled>0.978 µm</button><button type="button" data-channel="62" disabled>3.293 µm</button><button type="button" data-channel="90" disabled>4.600 µm</button></div><p id="wave-band" class="wave-band"></p><div class="wave-colour-controls"><label for="wave-colour">Display colour</label><select id="wave-colour" aria-label="Display colour"><option value="blue-gold">Blue &amp; gold</option><option value="violet">Violet</option><option value="grayscale">Grayscale</option></select></div><div class="wave-colour-key" aria-label="Display brightness scale"><span>Dimmer</span><i id="wave-colour-ramp" aria-hidden="true"></i><span>Brighter</span></div><p class="wave-colour-note">Colour represents image brightness. The wavelength slider still selects one real channel.</p></div>
 <div class="wave-sky-wrap"><div id="wave-sky" aria-label="SPHEREx survey image of cell ${cell.id}"></div><div id="wave-loading" role="status">Loading SPHEREx survey…</div><span class="wave-image-label" id="wave-image-label">Cell ${cell.id}</span></div>
 <div class="wave-observation"><strong>One measured channel at a time.</strong><p>The slider switches channels in NASA/IPAC’s SPHEREx DR1 sky cube. There is no image blending, generated imagery, or interpolation between wavelengths. The view stays centred on this cell.</p><p id="wave-status" role="status"></p><button type="button" id="wave-retry" hidden>Reload survey</button></div>
 <p class="wave-credit">NASA/IPAC IRSA · SPHEREx DR1 · <a href="https://irsa.ipac.caltech.edu/data/hips/SPHEREx/spherex_allsky_cube/properties" target="_blank" rel="noreferrer">Exact dataset &amp; channel wavelengths ↗</a></p>
@@ -30,7 +34,12 @@ export function wavelengthDemoMarkup(){const cell=demoSelection(location.search)
 export function mountWavelengthDemo(){
  const root=document.querySelector('[data-wave-demo]');if(!root)return ()=>{};
  const q=s=>root.querySelector(s),events=new AbortController(),on={signal:events.signal},cell=demoSelection(location.search),p=center(cell.id);
- let dead=false,viewer,survey,metadata,channels=[],channel=cell.channel,ready=false,timer;
+ let dead=false,viewer,survey,metadata,channels=[],channel=cell.channel,ready=false,timer,paletteReady=false;
+ let palette=new URLSearchParams(location.search).get('palette');if(!Object.hasOwn(DEMO_PALETTES,palette)&&palette!=='grayscale')palette='blue-gold';
+ function colourUi(){q('#wave-colour').value=palette;q('#wave-colour-ramp').style.background='linear-gradient(to right,'+(DEMO_PALETTES[palette]||['#080808','#ffffff']).join(',')+')';}
+ function applyColour(){if(paletteReady&&survey)survey.setColormap(palette==='grayscale'?'native':'sate-demo-'+palette);colourUi();}
+ colourUi();
+ q('#wave-colour').addEventListener('change',e=>{palette=e.target.value;applyColour();const u=new URL(location.href);u.searchParams.set('palette',palette);history.replaceState({},'',u.pathname+u.search);},on);
  q('#wave-return').href=demoReturn(location.search);
  if(demoReturn(location.search).includes('view=cell'))q('#wave-return').textContent='← Back to your cell';
  function showSelection(){
@@ -53,8 +62,9 @@ export function mountWavelengthDemo(){
   const result=await Promise.all([import('./vendor/aladin-3.8.1.js'),fetch('/assets/spherex-survey.json',{signal:events.signal}).then(r=>{if(!r.ok)throw Error('Channel metadata unavailable');return r.json();})]);if(dead)return;
   const A=result[0].default;metadata=result[1];channels=availableChannels(metadata);if(!channels.length)throw Error('No measured channels available');if(!channels.some(v=>v.index===channel))channel=channels[0].index;
   q('#wave-channel').max=channels.length-1;showSelection();await A.init;if(dead)return;
-  survey=A.imageHiPS(metadata.url,{imgFormat:'png',successCallback:h=>{if(dead)return;survey=h;h.setFrequency({unit:'Hz',value:channelTransportHz(channel)});h.setColormap('native');ready=true;q('#wave-loading').hidden=true;q('#wave-channel').disabled=false;for(const b of root.querySelectorAll('[data-channel]'))b.disabled=false;q('#wave-status').textContent='Live archive tiles load as you change channels. Black areas can indicate missing coverage.';clearTimeout(timer);},errorCallback:()=>failed('SPHEREx imagery unavailable. Please retry.')});
+  survey=A.imageHiPS(metadata.url,{imgFormat:'png',successCallback:h=>{if(dead)return;survey=h;h.setFrequency({unit:'Hz',value:channelTransportHz(channel)});applyColour();ready=true;q('#wave-loading').hidden=true;q('#wave-channel').disabled=false;for(const b of root.querySelectorAll('[data-channel]'))b.disabled=false;q('#wave-status').textContent='Live archive tiles load as you change channels. Blank areas can indicate missing coverage.';clearTimeout(timer);},errorCallback:()=>failed('SPHEREx imagery unavailable. Please retry.')});
   viewer=A.aladin('#wave-sky',{survey,target:p.ra+' '+p.dec,fov:.32,projection:'TAN',cooFrame:'ICRSd',showZoomControl:false,showLayersControl:false,showFullscreenControl:false,showFrame:false,showProjectionControl:false,showStatusBar:false,showGotoControl:false,showReticle:false,showCooGrid:false,showFov:false,showCooLocation:false,log:false,inertia:false,backgroundColor:'#080e16'});
+  for(const [name,colours] of Object.entries(DEMO_PALETTES))viewer.addColormap('sate-demo-'+name,colours);paletteReady=true;applyColour();
   const overlay=A.graphicOverlay({color:'#98c3ed',lineWidth:1.5});viewer.addOverlay(overlay);overlay.addFootprints([A.polygon(boundary(cell.id),{color:'#98c3ed',lineWidth:1.5})]);
   timer=setTimeout(()=>{if(!dead&&!ready)q('#wave-loading').textContent='Waiting for the SPHEREx archive…';},15000);
  }catch(error){if(!dead)failed('Could not load SPHEREx data. Please retry in a WebGL2 browser.');}})();
