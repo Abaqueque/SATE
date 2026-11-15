@@ -29,3 +29,8 @@ The original coordinate-lab code and `/api/cutout` remain in the repository. Its
 - [Software licences and credits](sky-atlas/dist/vendor/NOTICE.txt)
 - [NASA/IPAC SPHEREx map metadata](https://irsa.ipac.caltech.edu/data/hips/SPHEREx/spherex_allsky_cube/properties)
 - The known-variable example retains four original observation records in `sky-atlas/dist/assets/mira.json`.
+
+## Cell observation workspace
+
+Choose a cell in the atlas and select **Open region fully** for dated Level 2 images, wavelength controls, grayscale data, reversible noise reduction and a UTC observation timeline. [Data processing and verification](docs/cell-workspace.md).
+The Milky Way false-colour palette applies only to the sky-search map.
