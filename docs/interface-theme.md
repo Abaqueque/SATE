@@ -21,7 +21,7 @@ Aladin 3.8.1's `backgroundColor` option applies to unfilled sky inside the proje
 
 ## Observation sidebar hierarchy
 
-The sidebar now has a compact cell title and Two views switch, wavelength layers, then collapsed Image adjustments, Motion tracking and Observation details. The RA/Dec readout and standing explanatory paragraphs are removed. Hue controls are only shown when Colour is enabled. The tools scroll independently above a stationary Document cell / Saved cells footer; mobile keeps the same bounded control panel. Motion demo links with active tracking open the tracking section.
+The sidebar now has a compact cell title and Two viewers switch, wavelength layers, then collapsed Image adjustments, Motion tracking and Observation details. The RA/Dec readout and standing explanatory paragraphs are removed. Hue controls are only shown when Colour is enabled. The tools scroll independently above a stationary Document cell / Saved cells footer; mobile keeps the same bounded control panel. Motion demo links with active tracking open the tracking section. The existing field-width control remains under Image adjustments, and the current quality-mask default remains off.
 
 Common wavelength shortcuts precede the full 102-channel list in the atlas, base layer, extra layers and mix picker. They select the nearest available SPHEREx channel to J (1.235 µm), H (1.662 µm), Kₛ (2.159 µm), W1 (3.4 µm) and W2 (4.6 µm). For the bundled metadata these are 1.224, 1.656, 2.139, 3.383 and 4.600 µm. The “Near” labels distinguish monochromatic SPHEREx channels from broadband 2MASS/WISE measurements. “Starlight”, “Through dust” and “Cool objects” are browsing cues, not classifications or promises that an object will be detected.
 
