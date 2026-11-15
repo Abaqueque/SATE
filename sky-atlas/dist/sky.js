@@ -7,7 +7,8 @@ export async function mountSky(){
  const root=document.querySelector('[data-sky]');if(!root)return()=>{};
  let dead=false,viewer,survey,overlay,selected=parseSky(location.search),timer,gridTimer,channel=62,metadata,drawOrder=2,reviewTimer,milkyWay=true,paletteReady=false,searchController,searchToken=0,objectMarker;
  const q=s=>root.querySelector(s),loading=q('#sky-loading'),panel=q('#sky-selection');
- const clean=()=>{dead=true;clearTimeout(timer);clearTimeout(gridTimer);clearTimeout(reviewTimer);searchController?.abort();};
+ const selectionEvents=new AbortController();
+ const clean=()=>{selectionEvents.abort();dead=true;clearTimeout(timer);clearTimeout(gridTimer);clearTimeout(reviewTimer);searchController?.abort();};
  const coordText=p=>`RA ${p.ra.toFixed(4)}° · Dec ${p.dec<0?'−':'+'}${Math.abs(p.dec).toFixed(4)}°`;
  let reviews={};try{const saved=JSON.parse(localStorage.getItem('sate-healpix-reviews-v1')||'{}');reviews=saved&&typeof saved==='object'&&!Array.isArray(saved)?saved:{};}catch{}
  function url(){const u=new URL(location.href);u.search='';if(selected){u.searchParams.set('hpx',selected.id);u.searchParams.set('order',selected.order);}u.searchParams.set('channel',channel);history.replaceState({},'',u.pathname+u.search);}
@@ -16,6 +17,7 @@ export async function mountSky(){
  const p=center(selected.id,selected.order),isCell=selected.order===ORDER,isMira=isCell&&selected.id===MIRA_CELL,size=(CELL_ARCMIN*2**(ORDER-selected.order)),reviewed=reviews[selected.id];
  panel.innerHTML=`<button class="back-button" data-sky-action="whole">← Whole sky</button><h1>${isCell?'Cell '+selected.id:'Region '+selected.id}</h1><p class="sky-size">${size<60?size.toFixed(2)+'′':(size/60).toFixed(2)+'°'} · equal-area ${isCell?'cell':'region'}</p>${isCell?`<a class="button full-width" href="/explore/?hpx=${selected.id}&order=9&channel=${channel}&view=cell">Open region fully ↗</a><div class="status-line"><i class="dot"></i>${reviewed?'Sample review saved':'Not reviewed'}</div>${isMira?`<div class="cell-preview"><img src="/assets/mira-1.png" alt="November observation"><img src="/assets/mira-2.png" alt="June observation"></div><a href="/observations/mira/" class="button full-width">Compare observations ↗</a>`:`<button class="button full-width" data-sky-action="review">Try a sample review ↗</button><p class="tiny">Demo only · no AI connected.</p>`}<div class="rail-actions"><button class="button outline" data-sky-action="focus">Centre this cell</button><button class="button outline" data-sky-action="find">Find another cell →</button></div><div class="sky-neighbours"><span>Neighbouring cells</span><div>${nearby(selected.id).filter(id=>id!==selected.id).map(id=>`<button data-neighbour="${id}" aria-label="Select neighbouring cell ${id}">${id}</button>`).join('')}</div></div><button class="share-button" data-sky-action="copy">Copy cell link</button>`:`<p class="rail-intro">${(4**(ORDER-selected.order)).toLocaleString()} search cells in this region.</p><button class="button full-width" data-sky-action="open">Open region ↗</button>`}`;
  }
+ function clearSelection(){selected=null;updatePanel();coordinates();draw();url();}
  function pick(id,order,{focus=false}={}){selected={id,order};if(viewer&&focus){const p=center(id,order);viewer.gotoRaDec(p.ra,p.dec);viewer.setFoV(order===ORDER?.48:Math.min(150,Math.max(.48,CELL_ARCMIN/60*2**(ORDER-order)*1.4)));}updatePanel();coordinates();draw();url();}
  function draw(){if(dead||!viewer||!overlay)return;clearTimeout(gridTimer);gridTimer=setTimeout(()=>{if(dead)return;const [ra,dec]=viewer.getRaDec(),fov=viewer.getFov()[0];drawOrder=gridOrder(fov);let ids=visibleCells(ra,dec,fov,drawOrder);if(ids.length>350)ids=ids.slice(0,350);const shapes=ids.map(id=>A.polygon(boundary(id,drawOrder,drawOrder<3?8:2),{color:drawOrder===ORDER&&reviews[id]?'#80bda438':'#aac1b51f',lineWidth:drawOrder===ORDER&&reviews[id]?0.7:0.45,hoverColor:'#aabcc43d',selectionColor:'#b6c8cf52',selectionLineWidth:.8}));if(selected){if(selected.order===ORDER&&fov<4)for(const id of nearby(selected.id))if(id!==selected.id)shapes.push(A.polygon(boundary(id),{color:'#b9cbb429',lineWidth:.55,hoverColor:'#b9cbb43d',selectionColor:'#b9cbb452',selectionLineWidth:.8}));shapes.push(A.polygon(boundary(selected.id,selected.order),{color:'#c8d6b98c',lineWidth:1.1,hoverColor:'#c8d6b999',selectionColor:'#c8d6b999',selectionLineWidth:1.1}));}overlay.removeAll();overlay.addFootprints(shapes);},80);}
  let A;
@@ -27,10 +29,20 @@ export async function mountSky(){
   survey=A.imageHiPS(metadata.url,{imgFormat:'png',successCallback:h=>{if(dead)return;survey=h;h.setFrequency({unit:'Hz',value:channelTransportHz(channel)});if(paletteReady)h.setColormap(milkyWay?'sate-milky-way':'native');loading.hidden=true;},errorCallback:()=>{loading.hidden=false;loading.textContent='SPHEREx imagery unavailable. Reload to retry.';}});
   const initial=selected?center(selected.id,selected.order):{ra:266.4,dec:-29};
   viewer=A.aladin('#aladin-sky',{survey,target:`${initial.ra} ${initial.dec}`,fov:selected?Math.min(360,Math.max(.48,CELL_ARCMIN/60*2**(ORDER-selected.order)*1.4)):360,projection:'AIT',cooFrame:'ICRSd',showZoomControl:false,showLayersControl:false,showFullscreenControl:false,showFrame:false,showProjectionControl:false,showStatusBar:false,showGotoControl:false,showReticle:false,showCooGrid:false,showFov:false,showCooLocation:false,log:false,inertia:false,backgroundColor:'#0c1a20'});
+  // Aladin 3.8.1 destructures an absent inverse-projection result outside the
+  // sky ellipse. Return the undefined coordinate its own event handlers expect.
+  const projectPixel=viewer.pix2world.bind(viewer);viewer.pix2world=(...args)=>{try{return projectPixel(...args);}catch(error){if(error instanceof TypeError&&/not iterable/.test(error.message))return undefined;throw error;}};
   viewer.addColormap('sate-milky-way',MILKY_WAY_COLOURS);paletteReady=true;survey.setColormap('sate-milky-way');
   q('#sky-object-query').disabled=false;q('#sky-object-submit').disabled=false;objectMarker=A.catalog({name:'Search result',shape:'circle',sourceSize:18,color:'#d9ed98',displayLabel:true,labelColumn:'name',labelColor:'#e7efda',labelFont:'12px sans-serif'});viewer.addCatalog(objectMarker);
   overlay=A.graphicOverlay({color:'#9bb3a0',lineWidth:1});viewer.addOverlay(overlay);
-  viewer.on('click',p=>{if(Number.isFinite(p.ra)&&Number.isFinite(p.dec))pick(cellAt(p.ra,p.dec,drawOrder),drawOrder);});
+  viewer.on('click',p=>{if(!p.isDragging&&Number.isFinite(p.ra)&&Number.isFinite(p.dec))pick(cellAt(p.ra,p.dec,drawOrder),drawOrder);});
+  // Aladin emits its click callback only inside the projection. Listen for a
+  // stationary pointer release on the canvas to handle the surrounding blank area.
+  const sky=q('#aladin-sky'),events={capture:true,signal:selectionEvents.signal};let press=null;
+  sky.addEventListener('pointerdown',e=>{press=e.isPrimary&&e.button===0&&e.target instanceof HTMLCanvasElement?{id:e.pointerId,x:e.clientX,y:e.clientY,moved:false}:null;},events);
+  sky.addEventListener('pointermove',e=>{if(press?.id===e.pointerId&&Math.hypot(e.clientX-press.x,e.clientY-press.y)>6)press.moved=true;},events);
+  sky.addEventListener('pointercancel',()=>{press=null;},events);
+  sky.addEventListener('pointerup',e=>{const start=press;press=null;if(!start||start.id!==e.pointerId||start.moved||Math.hypot(e.clientX-start.x,e.clientY-start.y)>6)return;const r=sky.getBoundingClientRect(),position=viewer.pix2world(e.clientX-r.left,e.clientY-r.top,'icrs');if(!position||!position.every(Number.isFinite))clearSelection();},events);
   viewer.on('positionChanged',()=>{coordinates();draw();});viewer.on('zoomChanged',()=>{coordinates();draw();});
   viewer.on('resizeChanged',draw);draw();coordinates();
   timer=setTimeout(()=>{if(!dead&&!loading.hidden)loading.textContent='SPHEREx is taking longer to load. You can still select a region.';},20000);
