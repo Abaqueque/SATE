@@ -21,6 +21,9 @@
     },
     "api/inventory.js": {
       "maxDuration": 60
+    },
+    "api/known-objects.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
