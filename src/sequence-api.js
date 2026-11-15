@@ -105,11 +105,13 @@ async function searchCircle(region, circle, signal) {
   }
 }
 
+function observationResponse(data){return Response.json(data,{headers:{'cache-control':'public, max-age=600, s-maxage=600, stale-while-revalidate=60'}});}
+
 export async function handleObservations(request) {
   let region;
   try { region = parseRegion(new URL(request.url)); } catch (e) { return json({ error: e.message }, 400); }
   try {
-    const cacheKey=JSON.stringify(region),cached=cachedObservations(cacheKey);if(cached)return json(cached);
+    const cacheKey=JSON.stringify(region),cached=cachedObservations(cacheKey);if(cached)return observationResponse(cached);
     const signal = AbortSignal.any([request.signal, AbortSignal.timeout(50000)]);
     const circles = searchCircles(region);
     const rows = (await Promise.all(circles.map(circle => searchCircle(region, circle, signal)))).flat();
@@ -124,7 +126,7 @@ export async function handleObservations(request) {
       observations.push({ id: row.obs_id, path, mjd, date: new Date((mjd - 40587) * 86400000).toISOString(), band: row.energy_bandpassname, collection: row.obs_collection });
     }
     observations.sort((a, b) => a.mjd - b.mjd || a.path.localeCompare(b.path));
-    const result={ region, observations, complete: true, collections: COLLECTIONS };rememberObservations(cacheKey,result);return json(result);
+    const result={ region, observations, complete: true, collections: COLLECTIONS };rememberObservations(cacheKey,result);return observationResponse(result);
   } catch (e) {
     if (request.signal.aborted) return json({ error: 'Search cancelled.' }, 499);
     return json({ error: e.name === 'TimeoutError' ? 'The archive search timed out. Please retry.' : e.message }, 502);
