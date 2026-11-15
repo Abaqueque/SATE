@@ -2,13 +2,19 @@
   "name": "sate",
   "private": true,
   "type": "module",
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "validate": "node scripts/validate-artifact.mjs",
+    "build": "npm --prefix sky-atlas run check && npm --prefix sky-atlas run build",
+    "validate": "npm --prefix sky-atlas run check",
     "test": "node --test scripts/test-*.mjs",
-    "dev": "node scripts/preview.mjs",
+    "dev": "npm --prefix sky-atlas run preview",
     "prepare:presets": "node scripts/prepare-presets.mjs",
-    "deploy:vercel": "npx vercel --prod"
+    "deploy:vercel": "npx vercel --prod",
+    "build:lab": "node scripts/build.mjs",
+    "validate:lab": "node scripts/validate-artifact.mjs",
+    "dev:lab": "node scripts/preview.mjs",
+    "test:atlas": "npm --prefix sky-atlas run check"
   }
 }

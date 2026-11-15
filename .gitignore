@@ -6,3 +6,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+
+# Buildless atlas source assets are intentionally tracked.
+!sky-atlas/dist/
+!sky-atlas/dist/**
