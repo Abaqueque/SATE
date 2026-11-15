@@ -90,3 +90,19 @@ html .cell-workspace .cell-rail select:focus-visible {outline-offset: -2px}
 .cell-workspace .cell-layer-hue input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:7px;margin:3px 0 7px;border:0;border-radius:8px;background:linear-gradient(to right,#e65b5b,#e6ce5b,#61c96c,#5bc9ce,#6379e6,#cf5bd7,#e65b5b);cursor:pointer}
 .cell-layer-hue input::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;width:15px;height:15px;border:0;border-radius:50%;background:var(--layer-text);box-shadow:0 0 0 2px var(--layer-surface)}
 .cell-layer-hue input::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--layer-text);box-shadow:0 0 0 2px var(--layer-surface)}
+
+/* One observation by default; two views are enabled from the settings rail. */
+.cell-workspace.single-view .cell-viewers{grid-template-columns:minmax(0,1fr)}
+.cell-workspace.single-view .cell-pane.right,
+.cell-workspace.single-view #cell-handle-right,
+.cell-workspace.single-view #cell-scrub-right,
+.cell-workspace.single-view .cell-compare-controls,
+.cell-workspace.single-view .cell-layer-dates>div:nth-child(2),
+.cell-workspace.single-view .cell-pane-heading b{display:none}
+.cell-workspace.single-view .cell-scrub-track{height:42px}
+.cell-workspace.single-view .cell-time-axis{height:72px}
+.cell-dual-toggle{margin:0 0 16px;min-height:30px}
+.cell-dual-toggle input{appearance:none;-webkit-appearance:none;position:relative;flex-shrink:0;width:32px;height:19px;margin:0;border:1px solid var(--border-control);border-radius:12px;background:var(--surface-raised);cursor:pointer}
+.cell-dual-toggle input::before{content:'';position:absolute;top:3px;left:3px;width:11px;height:11px;border-radius:50%;background:var(--muted);transition:transform .15s}
+.cell-dual-toggle input:checked{background:var(--accent);border-color:var(--accent)}
+.cell-dual-toggle input:checked::before{transform:translateX(13px);background:#fff}
