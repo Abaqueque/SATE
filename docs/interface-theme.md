@@ -4,7 +4,7 @@ The dark interface uses **#1A1A1A**, sampled from the user's reference image. Th
 
 `sky-atlas/dist/theme-tokens.css` owns surface, text, accent, interaction and focus colours. The page/rail background is the supplied charcoal; cards and fields use progressively lighter neutrals. NASA-inspired blue marks primary actions. Selected toggles use a subdued blue fill, lighter blue text and an inset edge. Hover, pressed, disabled and keyboard-focus states have distinct roles. Public Sans is bundled locally with its SIL Open Font License.
 
-The sky sidebar puts cell information and navigation first, then Wavelength. Decorative horizontal separators and the old simulated-review action/status were removed. Map metadata remains in the collapsed details. Actual Saved cells notebook reviews are unaffected. Dark is the default; an explicit saved light/dark choice is respected.
+The sky sidebar puts cell information and navigation first, then object search, expanded coordinate entry and Wavelength. Search suggests common object identifiers and up to eight recent successful searches; any other name can still be submitted to CDS. Decorative horizontal separators, the old simulated-review action/status, map instructions, example shortcut and Map details block were removed. The dark-mode control has no outer frame. Actual Saved cells notebook reviews are unaffected. Dark is the default; an explicit saved light/dark choice is respected.
 
 ## Research
 
