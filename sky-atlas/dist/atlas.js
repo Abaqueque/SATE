@@ -20,7 +20,7 @@ export async function drawAtlas(canvas, options = {}) {
     }
     return [(b.west - ra) / (b.west - b.east) * width, (b.north - dec) / (b.north - b.south) * height];
   }
-  ctx.strokeStyle = '#a8c6b513'; ctx.lineWidth = .7;
+  ctx.strokeStyle = '#a8b7c613'; ctx.lineWidth = .7;
   if (polar) {
     for (let i = 1; i <= 6; i++) { ctx.beginPath();ctx.arc(width/2,height/2,width*.55*i/6,0,Math.PI*2);ctx.stroke(); }
     for (let i = 0; i < 12; i++) { const a=i*Math.PI/6;ctx.beginPath();ctx.moveTo(width/2,height/2);ctx.lineTo(width/2+Math.sin(a)*width,height/2+Math.cos(a)*height);ctx.stroke(); }
@@ -35,13 +35,13 @@ export async function drawAtlas(canvas, options = {}) {
     if (x<0 || y<0 || x>width || y>height) continue;
     const radius=Math.max(.35,(6.6-mag)*.33) * (options.bounds ? 1.5 : 1);
     const alpha=Math.min(.95,.22+(6.4-mag)*.11);
-    if(mag<2.2){ctx.fillStyle=`rgba(177,205,196,${alpha*.10})`;ctx.beginPath();ctx.arc(x,y,radius*4.5,0,Math.PI*2);ctx.fill();}
-    ctx.fillStyle=`rgba(217,228,216,${alpha})`;ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
-    if(mag<1.5){ctx.strokeStyle=`rgba(211,225,206,${alpha*.42})`;ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(x-radius*3,y);ctx.lineTo(x+radius*3,y);ctx.moveTo(x,y-radius*3);ctx.lineTo(x,y+radius*3);ctx.stroke();}
+    if(mag<2.2){ctx.fillStyle=`rgba(177,191,205,${alpha*.10})`;ctx.beginPath();ctx.arc(x,y,radius*4.5,0,Math.PI*2);ctx.fill();}
+    ctx.fillStyle=`rgba(216,222,228,${alpha})`;ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
+    if(mag<1.5){ctx.strokeStyle=`rgba(206,216,225,${alpha*.42})`;ctx.lineWidth=.6;ctx.beginPath();ctx.moveTo(x-radius*3,y);ctx.lineTo(x+radius*3,y);ctx.moveTo(x,y-radius*3);ctx.lineTo(x,y+radius*3);ctx.stroke();}
   }
   if(!options.bounds&&!polar){
     const labels=[['ORION',85,-6],['CYGNUS',305,42],['URSA MAJOR',165,56],['SCORPIUS',246,-32],['CASSIOPEIA',25,62],['SOUTHERN CROSS',186,-62],['PEGASUS',340,20]];
-    ctx.font='8px ui-monospace,monospace';ctx.fillStyle='#9db9a650';ctx.textAlign='center';
+    ctx.font='8px ui-monospace,monospace';ctx.fillStyle='#9dabb950';ctx.textAlign='center';
     for(const [label,ra,dec]of labels){const[x,y]=position(ra,dec);ctx.fillText(label,x,y+16);}
   }
 }
