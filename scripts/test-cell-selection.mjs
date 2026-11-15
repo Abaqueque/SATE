@@ -64,3 +64,9 @@ test('scrubbing chooses the nearest real observation across unequal time gaps',(
  assert.equal(nearestExposure(rows,.1).id,1);assert.equal(nearestExposure(rows,.4).id,1);assert.equal(nearestExposure(rows,.8).id,2);
  assert.equal(nearestExposure(rows,-1).id,0);assert.equal(nearestExposure(rows,2).id,2);assert.equal(nearestExposure([rows[1]],.7).id,1);assert.equal(nearestExposure([],0),null);
 });
+test('multi-cone archive searches start every independent request before awaiting results',async()=>{
+ const old=globalThis.fetch,releases=[],urls=[];let block=true,operation;
+ const empty='<VOTABLE><TABLE><DATA><TABLEDATA/></DATA></TABLE></VOTABLE>';
+ globalThis.fetch=async url=>{urls.push(String(url));if(block)await new Promise(resolve=>releases.push(resolve));return new Response(empty);};
+ try{operation=handleObservations(new Request(query.replace('ra=20','ra=21').replace('size=.2','size=.3')+'&mosaic=true'));await new Promise(resolve=>setImmediate(resolve));assert.equal(urls.length,9);block=false;releases.forEach(resolve=>resolve());assert.equal((await operation).status,200);}finally{block=false;releases.forEach(resolve=>resolve());if(operation)await operation;globalThis.fetch=old;}
+});

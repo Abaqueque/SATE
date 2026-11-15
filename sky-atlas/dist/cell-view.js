@@ -68,16 +68,15 @@ export function mountCell(){
   }catch(e){if(dead||signal.aborted||token!==frameToken)return;stop();status('Could not load exposure',e.message);q('#cell-retry').hidden=false;}
  }
  async function checkItems(signal,token,onlyFailed=false,preferred=''){
-  const pending=items.filter(o=>onlyFailed?o.infoError:!o.checked);checking=true;failures=items.filter(o=>o.infoError).length;let cursor=0;timeline();
-  await Promise.all(Array.from({length:Math.min(3,pending.length)},async()=>{
-   while(cursor<pending.length&&!signal.aborted){const obs=pending[cursor++];try{
+  const pending=items.filter(o=>onlyFailed?o.infoError:!o.checked);checking=true;failures=items.filter(o=>o.infoError).length;timeline();
+  await Promise.all(pending.map(async obs=>{
+   if(signal.aborted)return;try{
     let info=infos.get(obs.path);if(!info){const params=parameters();params.set('image',obs.path);const r=await fetch('/api/frame-info?'+params,{signal});if(!r.ok){const error=await r.json();throw Error(error.error||'Unavailable.');}info=await r.json();infos.set(obs.path,info);}
     if(dead||signal.aborted||token!==generation)return;
     obs.wavelength=info.wavelength;obs.match=info.covered&&inRanges(info.wavelength,ranges());obs.infoError=false;
    }catch(e){if(dead||signal.aborted||token!==generation)return;obs.infoError=true;}
    obs.checked=true;checked=items.filter(o=>o.checked).length;failures=items.filter(o=>o.infoError).length;timeline();
    if(!path){const wanted=items.find(o=>o.id===preferred);if(!wanted||wanted.checked){const list=rows(),first=list.find(o=>o.id===preferred)||list[0];if(first)selectExposure(first.path);}}
-   }
   }));
   if(dead||signal.aborted||token!==generation)return;checking=false;timeline();if(!rows().length){status(failures?'Some observations are unavailable':'No matching exposures',failures?'Retry unavailable observations.':'');q('#cell-retry').hidden=!failures;}
  }
@@ -89,7 +88,7 @@ export function mountCell(){
  async function combine(){if(!current)return;stop();if(combined){combined=false;show(frames.get(current.obs.path),current.obs);q('#cell-combine-status').textContent='';return;}
   const anchor=current.obs;await fetchFrame(anchor,frameController.signal);const candidates=stackCandidates(rows(),anchor).slice(0,12),token=frameToken,signal=frameController.signal;if(!candidates.length)return;q('#cell-combine').disabled=true;q('#cell-combine-status').textContent='Combining…';
   try{
-   const available=[anchor];for(const obs of candidates){try{await fetchFrame(obs,signal);available.push(obs);}catch(e){if(signal.aborted)throw e;}}
+   const loaded=await Promise.allSettled(candidates.map(async obs=>{await fetchFrame(obs,signal);return obs;}));const available=[anchor,...loaded.filter(r=>r.status==='fulfilled').map(r=>r.value)];
    if(dead||signal.aborted||token!==frameToken)return;
    const blend=type=>{const jobs=available.map(obs=>({obs,status:'ready',frame:{...frames.get(obs.path)[type],quality:Uint8Array.from(frames.get(obs.path)[type].quality,(v,i)=>v&&inRanges(frames.get(obs.path)[type].wavelengths[i],ranges())?1:0)}})),a=jobs[0],result=averageNearby(jobs,a,{hours:6,wavelengthPercent:1});if(!result.frame)return result;const frame={...a.frame,values:Float32Array.from(a.frame.values),variance:Float64Array.from(a.frame.variance),quality:Uint8Array.from(a.frame.quality)};for(let i=0;i<frame.values.length;i++)if(result.frame.counts[i]>=2){frame.values[i]=result.frame.values[i];frame.variance[i]=result.frame.variance[i];frame.quality[i]=1;}return {frame,members:result.members.length};};
    const clean=blend('clean'),raw=blend('raw');if(!clean.frame||!raw.frame){q('#cell-combine-status').textContent='No compatible overlap';updateCombine();return;}
