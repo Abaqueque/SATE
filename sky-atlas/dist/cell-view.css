@@ -22,7 +22,6 @@
 .cell-workspace {
   --layer-surface: #ffffff;
   --layer-control: #edf1f5;
-  --layer-border: #84929e;
   --layer-text: #192d3a;
   --layer-muted: #526473;
   --layer-active: #dce9f4;
@@ -31,7 +30,6 @@
 html[data-theme=dark] .cell-workspace {
   --layer-surface: #2a3944;
   --layer-control: #14212a;
-  --layer-border: #7b8d9b;
   --layer-text: #f1f5f8;
   --layer-muted: #c0ced8;
   --layer-active: #c4dced;
@@ -39,7 +37,7 @@ html[data-theme=dark] .cell-workspace {
 }
 .cell-workspace .cell-layer-card {
   background: var(--layer-surface);
-  border-color: var(--layer-border);
+  border: 0;
   color: var(--layer-text);
   box-shadow: 0 3px 10px #00000018;
 }
@@ -48,21 +46,20 @@ html .cell-workspace .cell-layer-card :is(time, .cell-layer-dates span, .cell-la
 html .cell-workspace .cell-rail .cell-field select,
 html .cell-workspace .cell-rail .cell-layer-card :is(select, .cell-layer-visible, .cell-layer-remove, .cell-retry) {
   background: var(--layer-control);
-  border-color: var(--layer-border);
+  border: 0;
   color: var(--layer-text);
 }
 html .cell-workspace .cell-rail .cell-layer-card .cell-layer-visible[aria-pressed=true] {
   background: var(--layer-active);
-  border-color: var(--layer-active);
   color: #192d3a;
 }
 html .cell-workspace .cell-rail #cell-add-wavelength {
   background: var(--layer-surface);
-  border-color: var(--layer-border);
+  border: 0;
   color: var(--layer-text);
   font-weight: 600;
 }
-html .cell-workspace .cell-rail :is(button:not(:disabled), select):hover {border-color: var(--cell-focus)}
+html .cell-workspace .cell-rail :is(button:not(:disabled), select):hover {filter: brightness(1.08)}
 html .cell-workspace :is(button, a, input, select):focus-visible {
   outline: 2px solid var(--cell-focus);
   outline-offset: 2px;
