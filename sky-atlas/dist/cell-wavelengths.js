@@ -50,7 +50,7 @@ export function createLayerTimeline({layers,load,onPending=()=>{},onCommit=()=>{
  return {sync,pending:side=>jobs.get(side)?.pending??false,clear(){for(const job of jobs.values())job.controller.abort();jobs.clear();},close(){closed=true;this.clear();}};
 }
 
-export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,anchor,onChange}){
+export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,anchor,sides=()=>['left','right'],onChange}){
  const panels=new Map(),button=root.querySelector('#cell-add-wavelength'),layerList=root.querySelector('#cell-layer-list');
  let nextId=0,dead=false;
  const saved=new URLSearchParams(location.search),hidden=(saved.get('hiddenLayers')||'').split(','),opacities=(saved.get('layerOpacity')||'').split(',');
@@ -88,7 +88,7 @@ export function mountWavelengthViews({root,metadata,position,loadFrame,redraw,an
  const sideNames={left:'L',right:'R'};
  function details(panel){
   const messages=[];
-  for(const side of ['left','right']){
+  for(const side of sides()){
    const current=panel.current[side],time=panel.card.querySelector(`[data-layer-date="${side}"]`),band=panel.card.querySelector(`[data-layer-band="${side}"]`);
    time.textContent=current?new Date(current.obs.date).toLocaleString('en-AU',{timeZone:'UTC'})+' UTC':'—';
    band.textContent=current?current.obs.wavelength.toFixed(3)+' µm':'';
