@@ -6,6 +6,12 @@
   "functions": {
     "api/cutout.js": {
       "maxDuration": 60
+    },
+    "api/frame.js": {
+      "maxDuration": 60
+    },
+    "api/observations.js": {
+      "maxDuration": 60
     }
   },
   "headers": [
