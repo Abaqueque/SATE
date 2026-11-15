@@ -19,7 +19,7 @@ Open http://127.0.0.1:4182. `npm run validate` checks the atlas, including 590 i
 
 ## Deployment
 
-Vercel builds with `npm run build` and serves `sky-atlas/dist`, as configured in `vercel.json`. The existing GitHub connection deploys `main` to production and branches to previews. Direct page routes are generated during the build.
+Vercel builds with `npm run build` and serves generated `sky-atlas/build`, as configured in `vercel.json`. The existing GitHub connection deploys `main` to production and branches to previews. Direct page routes are generated during the build. Source assets remain in `sky-atlas/dist`; each build copies them into a content-addressed `/releases/<hash>/` directory so HTML, CSS imports and the JavaScript module graph use matching asset versions. Root assets remain available for previously opened tabs. To preview the deployment output after building, run `SATE_PREVIEW_BUILD=1 npm run dev`.
 
 The original coordinate-lab code and `/api/cutout` remain in the repository. Its local workflow is `npm run build:lab`, `npm run validate:lab`, and `npm run dev:lab`. See [coordinate-lab documentation](docs/coordinate-lab.md).
 

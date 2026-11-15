@@ -10,3 +10,6 @@ node_modules/
 # Buildless atlas source assets are intentionally tracked.
 !sky-atlas/dist/
 !sky-atlas/dist/**
+
+# Generated, release-addressed deployment output.
+sky-atlas/build/
