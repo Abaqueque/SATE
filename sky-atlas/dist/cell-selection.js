@@ -16,3 +16,9 @@ export function timelineLayout(observations){
  const labels=positions.map(position=>({position,date:new Date(Math.round(((span>0?start+span*position:start)-40587)*86400)*1000).toISOString()}));
  return {points,labels,sameDay};
 }
+
+export function nearestExposure(observations,position){
+ if(!observations.length||!Number.isFinite(position))return null;
+ const list=[...observations].sort((a,b)=>a.mjd-b.mjd),target=list[0].mjd+Math.max(0,Math.min(1,position))*(list.at(-1).mjd-list[0].mjd);
+ return list.reduce((closest,obs)=>Math.abs(obs.mjd-target)<Math.abs(closest.mjd-target)?obs:closest,list[0]);
+}
