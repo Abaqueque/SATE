@@ -35,6 +35,14 @@ Dual-view validation: deterministic Chromium fixtures cover independent mouse/to
 
 ## Find a known object
 
+The regional inventory lists AllWISE objects in the selected HEALPix cell. It is
+available in both the atlas and this workspace. Search catalogue IDs, include the
+surrounding query area, select records or markers, and use **Centre source** to
+centre the selected catalogue position in both images. Overlays follow the shared
+zoom and pan; **Show catalogue markers** toggles both panes. Catalogue positions
+are fixed reference positions, without exposure-date proper-motion propagation.
+Details and verification: [regional inventory integration](inventory-integration.md).
+
 The sky atlas has a Search field at the top of the map. Enter a name or catalogue identifier and press Enter / Go. `/api/object-search?q=...` resolves the name through CDS Sesame (SIMBAD/NED/VizieR), with a second official mirror on failure, bounded six-second upstream requests and a 24-hour successful-result cache. No coordinates are hardcoded for search results. The common `WISE 0855` shorthand expands to its catalogue identifier.
 
 A successful search centres the map on the object, marks it with its resolved name, zooms to a 0.48-degree field, and selects the order-9 search cell containing that position. Unknown names and service failures leave the current map in place; stale responses cannot replace a newer search. When both catalogue proper-motion components are supplied, J2000 coordinates are approximately propagated to 2026.0 for navigation, with the epoch shown beside the result. Otherwise the catalogue position is used and labelled. This is not date-specific precision astrometry and excludes parallax and radial velocity; Solar System object ephemerides are not implemented.

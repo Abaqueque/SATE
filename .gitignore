@@ -10,3 +10,7 @@ node_modules/
 # Buildless atlas source assets are intentionally tracked.
 !sky-atlas/dist/
 !sky-atlas/dist/**
+
+# Local preview process output.
+preview-4184.log
+preview-4184.error.log

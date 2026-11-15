@@ -1,0 +1,56 @@
+{
+  "name": "C/2025 R2 (SWAN)",
+  "source": "https://irsa.ipac.caltech.edu/applications/MOST/MOSTProgramInterface.html",
+  "retrieved": "2026-11-15",
+  "note": "NASA IRSA MOST ephemeris seeds; fit original image pixels. Local wavelengths vary.",
+  "observations": [
+    {
+      "id": "2025W44_1A_0045_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W44_1A/l2b-v27-2026-245/4/level2_2025W44_1A_0045_1D4_spx_l2b-v27-2026-245.fits",
+      "mjd": 60975.202814329,
+      "date": "2025-10-27T04:52:03.158Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 314.234115,
+        "dec": -5.693692
+      }
+    },
+    {
+      "id": "2025W44_1A_0045_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W44_1A/l2b-v27-2026-245/4/level2_2025W44_1A_0045_2D4_spx_l2b-v27-2026-245.fits",
+      "mjd": 60975.204306586,
+      "date": "2025-10-27T04:54:12.089Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 314.23954,
+        "dec": -5.691044
+      }
+    },
+    {
+      "id": "2025W44_1A_0045_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W44_1A/l2b-v27-2026-245/4/level2_2025W44_1A_0045_3D4_spx_l2b-v27-2026-245.fits",
+      "mjd": 60975.205816586,
+      "date": "2025-10-27T04:56:22.553Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 314.244998,
+        "dec": -5.68834
+      }
+    },
+    {
+      "id": "2025W44_1A_0045_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W44_1A/l2b-v27-2026-245/4/level2_2025W44_1A_0045_4D4_spx_l2b-v27-2026-245.fits",
+      "mjd": 60975.207308843,
+      "date": "2025-10-27T04:58:31.484Z",
+      "band": "SPHEREx-D4",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 314.250358,
+        "dec": -5.685667
+      }
+    }
+  ]
+}

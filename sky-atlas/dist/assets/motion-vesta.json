@@ -1,0 +1,128 @@
+{
+  "name": "4 Vesta",
+  "source": "https://irsa.ipac.caltech.edu/applications/MOST/MOSTProgramInterface.html",
+  "retrieved": "2026-11-15",
+  "note": "NASA IRSA MOST ephemeris seeds; fit original image pixels. Local wavelengths vary.",
+  "observations": [
+    {
+      "id": "2025W27_1A_0191_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0191_1D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60856.946791273,
+      "date": "2025-06-30T22:43:22.765Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.055891,
+        "dec": -6.914875
+      }
+    },
+    {
+      "id": "2025W27_1A_0191_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0191_2D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60856.94828353,
+      "date": "2025-06-30T22:45:31.696Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.05607,
+        "dec": -6.914819
+      }
+    },
+    {
+      "id": "2025W27_1A_0191_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0191_3D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60856.949775775,
+      "date": "2025-06-30T22:47:40.626Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.056233,
+        "dec": -6.914759
+      }
+    },
+    {
+      "id": "2025W27_1A_0321_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0321_3D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60857.629817049,
+      "date": "2025-07-01T15:06:56.193Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.119303,
+        "dec": -6.999828
+      }
+    },
+    {
+      "id": "2025W27_1A_0321_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0321_4D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60857.631309294,
+      "date": "2025-07-01T15:09:05.123Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.11945,
+        "dec": -6.999771
+      }
+    },
+    {
+      "id": "2025W27_1A_0365_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0365_1D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60857.897072558,
+      "date": "2025-07-01T21:31:47.069Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.144871,
+        "dec": -7.034248
+      }
+    },
+    {
+      "id": "2025W27_1A_0365_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0365_2D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60857.898564815,
+      "date": "2025-07-01T21:33:56.000Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.145067,
+        "dec": -7.034201
+      }
+    },
+    {
+      "id": "2025W27_1A_0404_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0404_1D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60858.101458125,
+      "date": "2025-07-02T02:26:05.982Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.164867,
+        "dec": -7.060006
+      }
+    },
+    {
+      "id": "2025W27_1A_0404_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0404_2D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60858.102950382,
+      "date": "2025-07-02T02:28:14.913Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.165059,
+        "dec": -7.059957
+      }
+    },
+    {
+      "id": "2025W27_1A_0404_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W27_1A/l2b-v27-2026-214/2/level2_2025W27_1A_0404_3D2_spx_l2b-v27-2026-214.fits",
+      "mjd": 60858.104442627,
+      "date": "2025-07-02T02:30:23.842Z",
+      "band": "SPHEREx-D2",
+      "collection": "spherex_dr1",
+      "expected": {
+        "ra": 216.165237,
+        "dec": -7.059901
+      }
+    }
+  ]
+}

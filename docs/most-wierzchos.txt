@@ -1,0 +1,8 @@
+
+Object Name Error:
+
+User Input String=C/2024 E1
+
+HORIZONS name lookup failed
+
+Workspace URL: https://irsa.ipac.caltech.edu/workspace/TMP_QYJwZ5_2584713/MOST/pid2584713 

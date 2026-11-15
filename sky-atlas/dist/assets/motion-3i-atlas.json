@@ -1,0 +1,152 @@
+{
+  "name": "3I/ATLAS",
+  "source": "https://irsa.ipac.caltech.edu/data/SPHEREx/docs/comet3iatlas/index.html",
+  "table": "https://irsa.ipac.caltech.edu/data/SPHEREx/docs/comet3iatlas/obscore_3I_Atlas.vot",
+  "retrieved": "2026-11-15",
+  "note": "December 14 D5 exposures; local wavelengths vary. Positions are ephemeris seeds, not detections.",
+  "observations": [
+    {
+      "id": "2025W50_2A_0685_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0685_2D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.186749,
+      "date": "2025-12-14T04:28:55.113Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 3.9995704084651678,
+      "expected": {
+        "ra": 167.27744067241156,
+        "dec": 5.122151278393035
+      }
+    },
+    {
+      "id": "2025W50_2A_0685_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0685_3D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.188242,
+      "date": "2025-12-14T04:31:04.108Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.034538704844822,
+      "expected": {
+        "ra": 167.27579224044294,
+        "dec": 5.12272596967069
+      }
+    },
+    {
+      "id": "2025W50_2A_0685_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0685_4D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.189734,
+      "date": "2025-12-14T04:33:13.017Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.069802374065333,
+      "expected": {
+        "ra": 167.27414377886691,
+        "dec": 5.123300666018959
+      }
+    },
+    {
+      "id": "2025W50_2A_0698_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0698_1D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.250827,
+      "date": "2025-12-14T06:01:11.452Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.103715495433256,
+      "expected": {
+        "ra": 167.20665303736263,
+        "dec": 5.146825168641826
+      }
+    },
+    {
+      "id": "2025W50_2A_0698_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0698_2D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.25232,
+      "date": "2025-12-14T06:03:20.448Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.139547845019186,
+      "expected": {
+        "ra": 167.20500444973925,
+        "dec": 5.14739968815294
+      }
+    },
+    {
+      "id": "2025W50_2A_0698_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0698_3D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.253812,
+      "date": "2025-12-14T06:05:29.356Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.175403413408207,
+      "expected": {
+        "ra": 167.20335587130242,
+        "dec": 5.147974199186135
+      }
+    },
+    {
+      "id": "2025W50_2A_0698_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0698_4D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.255304,
+      "date": "2025-12-14T06:07:38.265Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.211443623460472,
+      "expected": {
+        "ra": 167.20170730314166,
+        "dec": 5.148548701361233
+      }
+    },
+    {
+      "id": "2025W50_2A_0712_1",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0712_1D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.319418,
+      "date": "2025-12-14T07:39:57.715Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.24637296975346,
+      "expected": {
+        "ra": 167.13087450913795,
+        "dec": 5.173227913957699
+      }
+    },
+    {
+      "id": "2025W50_2A_0712_2",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0712_2D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.32091,
+      "date": "2025-12-14T07:42:06.624Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.282931522682695,
+      "expected": {
+        "ra": 167.12922579980165,
+        "dec": 5.173802232742921
+      }
+    },
+    {
+      "id": "2025W50_2A_0712_3",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0712_3D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.322402,
+      "date": "2025-12-14T07:44:15.532Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.319687361347503,
+      "expected": {
+        "ra": 167.127577087617,
+        "dec": 5.174376547217039
+      }
+    },
+    {
+      "id": "2025W50_2A_0712_4",
+      "path": "/ibe/data/spherex/dr1/level2/2025W50_2A/l2b-v27-2026-210/5/level2_2025W50_2A_0712_4D5_spx_l2b-v27-2026-210.fits",
+      "mjd": 61023.323895,
+      "date": "2025-12-14T07:46:24.528Z",
+      "band": "SPHEREx-D5",
+      "collection": "spherex_dr1",
+      "wavelength": 4.356568084967099,
+      "expected": {
+        "ra": 167.12592838474777,
+        "dec": 5.174950853142384
+      }
+    }
+  ]
+}
