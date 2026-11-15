@@ -211,6 +211,18 @@ export function createSkyGrid(ra, dec, size, pixels = Math.max(32, Math.min(210,
   return { ra, dec, size, pixels, coordinates };
 }
 
+// Fraction of the fixed output grid inside the detector's bilinear footprint.
+// Uses the same grid and boundary convention as alignImage, including TAN/SIP.
+export function fieldCoverage(header,grid){
+ const transform=makeWorldToPixel(header);let covered=0;
+ if(!(header.NAXIS1>1&&header.NAXIS2>1))throw Error('Invalid detector dimensions.');
+ for(let i=0;i<grid.coordinates.length;i+=2){
+  const [x,y]=transform(grid.coordinates[i],grid.coordinates[i+1]);
+  if(Number.isFinite(x)&&Number.isFinite(y)&&x>=0&&y>=0&&x<header.NAXIS1-1&&y<header.NAXIS2-1)covered++;
+ }
+ return covered/(grid.pixels*grid.pixels);
+}
+
 export function alignImage(image, grid, wavelength, tolerance, { showAll = false } = {}) {
   const transform = makeWorldToPixel(image.header), centre = transform(grid.ra, grid.dec);
   let centreWavelength = NaN;

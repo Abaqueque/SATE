@@ -1,3 +1,4 @@
+import {IMAGE_CONCURRENCY} from './cell-requests.js';
 // Immutable aligned science arrays. IndexedDB keeps preloaded exposures across reloads.
 export function createFrameCache({memoryBytes=32*1024*1024,diskBytes=128*1024*1024,indexedDB=globalThis.indexedDB}={}){
  const memory=new Map();let bytes=0,opening,serial=Promise.resolve();
@@ -10,8 +11,8 @@ export function createFrameCache({memoryBytes=32*1024*1024,diskBytes=128*1024*10
 }
 
 // Shared promises: selecting an exposure joins its preload instead of restarting it.
-export function createFrameLoader({load,concurrency=4,onChange=()=>{}}){
+export function createFrameLoader({load,concurrency=IMAGE_CONCURRENCY,onChange=()=>{}}){
  const jobs=new Map(),queue=[];let active=0,closed=false;
- function pump(){while(!closed&&active<concurrency&&queue.length){const job=queue.shift();active++;job.state='loading';Promise.resolve().then(()=>load(job.item)).then(value=>{job.state='ready';job.resolve(value);},error=>{job.state='error';job.reject(error);}).finally(()=>{job.promise=null;active--;onChange();pump();});}onChange();}
- return {get(item,priority=false){let job=jobs.get(item.path);if(job?.promise&&job.state!=='error'){if(priority&&job.state==='queued'){queue.splice(queue.indexOf(job),1);queue.unshift(job);}return job.promise;}job={item,state:'queued'};job.promise=new Promise((resolve,reject)=>Object.assign(job,{resolve,reject}));jobs.set(item.path,job);priority?queue.unshift(job):queue.push(job);pump();return job.promise;},state:path=>jobs.get(path)?.state,close(){closed=true;for(const job of queue.splice(0)){job.state='error';job.reject(new DOMException('Cancelled','AbortError'));}},counts(){const values=[...jobs.values()];return {ready:values.filter(j=>j.state==='ready').length,failed:values.filter(j=>j.state==='error').length,total:values.length};}};
+ function pump(){while(!closed&&active<concurrency&&queue.length){const job=queue.shift();active++;job.state='loading';Promise.resolve().then(()=>load(job.item)).then(value=>{job.state='ready';job.resolve(value);},error=>{job.state=error.name==='InsufficientCoverageError'?'skipped':'error';job.reject(error);}).finally(()=>{job.promise=null;active--;onChange();pump();});}onChange();}
+ return {get(item,priority=false){let job=jobs.get(item.path);if(job?.promise&&job.state!=='error'){if(priority&&job.state==='queued'){queue.splice(queue.indexOf(job),1);queue.unshift(job);}return job.promise;}job={item,state:'queued'};job.promise=new Promise((resolve,reject)=>Object.assign(job,{resolve,reject}));jobs.set(item.path,job);priority?queue.unshift(job):queue.push(job);pump();return job.promise;},state:path=>jobs.get(path)?.state,close(){closed=true;for(const job of queue.splice(0)){job.state='error';job.reject(new DOMException('Cancelled','AbortError'));}},counts(){const values=[...jobs.values()];return {ready:values.filter(j=>j.state==='ready').length,failed:values.filter(j=>j.state==='error').length,total:values.filter(j=>j.state!=='skipped').length,skipped:values.filter(j=>j.state==='skipped').length};}};
 }
