@@ -21,3 +21,29 @@ body.explorer-page{background:var(--night)}.explorer-page .site-header{max-width
 /* Prominent homepage actions, with comfortable touch targets. */
 .hero-actions{gap:16px}.hero-actions .button-large{min-height:64px;padding:20px 26px;font-size:17px;gap:20px;max-width:100%;text-align:center}.hero-actions .button-large .arrow{font-size:25px;flex-shrink:0}.observation-action{padding:30px 0;align-items:center}.observation-action h3{font-size:23px;line-height:1.25}.observation-action p{font-size:15px}.observation-action>.arrow{font-size:25px}.observation-action:hover h3{text-decoration:underline;text-underline-offset:5px}
 @media(max-width:520px){.hero-actions .button-large{width:100%;justify-content:space-between;min-height:64px;padding:20px 22px}.observation-action h3{font-size:22px}}
+
+/* A compact, usable preview of the region comparison workflow. */
+.proof-inner > *{min-width:0}
+.proof-inner .section-copy{margin-bottom:26px}
+.comparison-preview{background:var(--night);color:#e1e9de;border:1px solid #3b514e;border-radius:12px;overflow:hidden;box-shadow:0 18px 45px #172c2e15}
+.comparison-topbar{display:flex;justify-content:space-between;gap:12px;padding:17px 20px;border-bottom:1px solid #314744;font:10px var(--mono);letter-spacing:1px}
+.comparison-topbar>span:first-child{display:flex;align-items:center;gap:9px;color:var(--lime)}
+.comparison-field{height:240px;position:relative;display:flex;justify-content:center;overflow:hidden;background:#050b0f}
+.comparison-field img{height:100%;width:100%;object-fit:contain;image-rendering:pixelated}
+.comparison-reticle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100px;height:100px;border:1px solid var(--lime);background:#d9ed9809;box-shadow:0 0 0 16px #d9ed9806;pointer-events:none}
+.comparison-region,.comparison-date{position:absolute;font:9px var(--mono);padding:7px 9px;background:#0c1a20dd;border-radius:3px;letter-spacing:.4px}
+.comparison-region{left:14px;top:14px;color:#d9ed98}
+.comparison-date{right:14px;bottom:14px}
+.comparison-controls{padding:22px 24px 19px;border-top:1px solid #314744}
+.comparison-control+.comparison-control{margin-top:22px;padding-top:20px;border-top:1px solid #314744}
+.comparison-label{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:15px}
+.comparison-label label{font-weight:550}
+.comparison-label output{font:11px var(--mono);color:var(--lime);text-align:right}
+.comparison-control input[type=range]{display:block;width:100%;min-width:0;height:32px;margin:9px 0 0;accent-color:var(--lime);cursor:pointer}
+.comparison-control input:disabled{cursor:wait;opacity:.45}
+.comparison-endpoints{display:flex;justify-content:space-between;gap:12px;font:10px var(--mono);color:#adc0b6}
+.comparison-control p{font-size:11px;line-height:1.5;color:#adc0b6;margin:10px 0 0}
+.comparison-open{display:flex;justify-content:space-between;align-items:center;gap:15px;padding-top:19px;margin-top:20px;border-top:1px solid #314744;color:var(--lime);font-size:13px;min-height:44px}
+.comparison-open:hover{text-decoration:underline;text-underline-offset:4px}
+@media(max-width:800px){.comparison-preview{width:100%;max-width:560px}.proof-inner .section-title{max-width:none}}
+@media(max-width:520px){.comparison-topbar{padding:15px}.comparison-field{height:210px}.comparison-controls{padding:20px 18px}.comparison-region{font-size:8px}.comparison-label output{font-size:10px}}
