@@ -19,3 +19,6 @@ html[data-theme=dark] .cell-time-tick.selected:after{background:#d9ed98}
 @media(prefers-reduced-motion:reduce){.theme-switch-track i{transition:none}}
 .sky-wavelength{display:flex;flex-direction:column;gap:9px;font-size:12px;padding-bottom:23px;margin-bottom:20px;border-bottom:1px solid var(--line)}.sky-wavelength select{width:100%;min-height:39px;border:1px solid #c9d0c2;border-radius:5px;padding:9px 10px;background:#fbfaf4;color:#1b3436;font-size:13px}
 @media(max-width:380px){.site-header .brand-mark{display:none}.site-header .header-nav{gap:10px}.site-header .brand{font-size:20px}}
+
+html[data-theme=dark] :is(.hero-photo p,.contribute-hero p,.contribution-photo p){color:#fff}
+html[data-theme=dark] .contribute-explanation .contribute-availability{color:var(--dark-muted)}
