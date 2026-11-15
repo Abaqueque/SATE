@@ -38,3 +38,11 @@ export function initialExposure(items,{preferred,oldest=false,endpoints=false}={
  for(const obs of ordered){if(endpoints&&!obs.checked)return null;if(obs.match&&!obs.unusable)return obs;}
  return null;
 }
+
+// A centred detector footprint is more likely to cover the whole requested
+// field than an arbitrary chronological endpoint. Saved dates retain priority.
+export function exposureDistance(obs,position){
+ const a=obs.centre;if(!a||![a.ra,a.dec].every(Number.isFinite))return Infinity;
+ const radians=Math.PI/180,s=Math.sin((a.dec-position.dec)*radians/2)**2+Math.cos(a.dec*radians)*Math.cos(position.dec*radians)*Math.sin((a.ra-position.ra)*radians/2)**2;
+ return 2*Math.asin(Math.sqrt(Math.max(0,Math.min(1,s))));
+}

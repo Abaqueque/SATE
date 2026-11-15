@@ -123,7 +123,7 @@ export async function handleObservations(request) {
       if (!row.t_min || !Number.isFinite(mjd)) throw new Error('An observation has no usable timestamp.');
       if (seen.has(path)) continue;
       seen.add(path);
-      observations.push({ id: row.obs_id, path, mjd, date: new Date((mjd - 40587) * 86400000).toISOString(), band: row.energy_bandpassname, collection: row.obs_collection });
+      observations.push({ id: row.obs_id, path, mjd, date: new Date((mjd - 40587) * 86400000).toISOString(), band: row.energy_bandpassname, collection: row.obs_collection, ...(row.s_ra?.trim()&&row.s_dec?.trim()&&Number.isFinite(Number(row.s_ra))&&Number.isFinite(Number(row.s_dec))?{centre:{ra:Number(row.s_ra),dec:Number(row.s_dec)}}:{}) });
     }
     observations.sort((a, b) => a.mjd - b.mjd || a.path.localeCompare(b.path));
     const result={ region, observations, complete: true, collections: COLLECTIONS };rememberObservations(cacheKey,result);return observationResponse(result);
