@@ -41,7 +41,7 @@ export async function drawAtlas(canvas, options = {}) {
   }
   if(!options.bounds&&!polar){
     const labels=[['ORION',85,-6],['CYGNUS',305,42],['URSA MAJOR',165,56],['SCORPIUS',246,-32],['CASSIOPEIA',25,62],['SOUTHERN CROSS',186,-62],['PEGASUS',340,20]];
-    ctx.font='8px ui-monospace,monospace';ctx.fillStyle='#9dabb950';ctx.textAlign='center';
+    ctx.font='8px Helvetica, "Helvetica Neue", Arial, sans-serif';ctx.fillStyle='#9dabb950';ctx.textAlign='center';
     for(const [label,ra,dec]of labels){const[x,y]=position(ra,dec);ctx.fillText(label,x,y+16);}
   }
 }

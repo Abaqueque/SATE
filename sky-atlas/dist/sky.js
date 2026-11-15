@@ -34,7 +34,7 @@ export async function mountSky(){
   // messages differ. Return the absent coordinate its own event handlers expect.
   const projectPixel=viewer.pix2world.bind(viewer);viewer.pix2world=(...args)=>{try{return projectPixel(...args);}catch(error){if(error instanceof TypeError)return undefined;throw error;}};
   viewer.addColormap('sate-milky-way',MILKY_WAY_COLOURS);paletteReady=true;survey.setColormap('sate-milky-way');
-  q('#sky-object-query').disabled=false;q('#sky-object-submit').disabled=false;objectMarker=A.catalog({name:'Search result',shape:'circle',sourceSize:18,color:'#98c3ed',displayLabel:true,labelColumn:'name',labelColor:'#dae4ef',labelFont:'12px sans-serif'});viewer.addCatalog(objectMarker);
+  q('#sky-object-query').disabled=false;q('#sky-object-submit').disabled=false;objectMarker=A.catalog({name:'Search result',shape:'circle',sourceSize:18,color:'#98c3ed',displayLabel:true,labelColumn:'name',labelColor:'#dae4ef',labelFont:'12px Helvetica, "Helvetica Neue", Arial, sans-serif'});viewer.addCatalog(objectMarker);
   overlay=A.graphicOverlay({color:'#9ba7b3',lineWidth:1});viewer.addOverlay(overlay);
   viewer.on('click',p=>{if(!p.isDragging&&Number.isFinite(p.ra)&&Number.isFinite(p.dec))pick(cellAt(p.ra,p.dec,drawOrder),drawOrder);});
   // Aladin emits its click callback only inside the projection. Listen for a
