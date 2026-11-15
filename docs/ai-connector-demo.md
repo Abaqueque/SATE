@@ -1,0 +1,13 @@
+# AI region queue
+
+`/contribute/` uses the real SPHEREx sky map to build an ordered queue of selected HEALPix regions. Selection uses actual region IDs and orders, with canonical celestial coordinates. The queue can include wide regions and individual order-9 cells. Map selections and queue entries stay synchronized; removing a region clears its selection. There is no fixed illustrative grid or number-based substitute for region selection.
+
+The selected queue is stored locally under `sate-ai-region-queue-v1`, separately from saved-cell reviews. It retains selection order and deduplicates by order and ID. Malformed records are ignored and the queue is bounded to 100 regions. Changing the queue is disabled while execution is active; Edit queue resets execution and restores selection controls.
+
+Only AI execution remains a preview. Assistant choices do not authenticate, access allowance or send provider requests. The timed run steps through exactly the selected regions in order, showing the real active sky region and a link to its observation viewer. The page explicitly identifies preview execution; it produces no AI findings or saved scientific reviews. There are no fabricated image-search results.
+
+`ai-demo-model.js` contains the validated queue and execution state. `ai-connector.js` renders the controls and schedules one timer while running. Inspection does not restart that timer. Pause retains its step, disconnect clears execution while retaining the queue, page hiding pauses, and route cleanup clears timers and destroys the map. The map's live imagery and selection lifecycle are owned by `ai-region-map.js`.
+
+A real connector still needs supported provider authorization and an enforceable work budget. The frontend does not claim that subscription allowances can be read or transferred. A server-side job contract should pass selected region identity, source files, cancellation and source-linked outputs to a supported provider adapter.
+
+Validation covers real-region identity, canonical coordinates, ordering, deduplication, bounded work, pause/resume, disconnect and separate queue persistence. Parent integration additionally verifies actual map selection, sequential active-region changes, responsive controls and browser cleanup.
