@@ -103,3 +103,11 @@ body .site-header .header-end{display:flex}
 @media(max-width:520px){.sky-review-legend{font-size:10px;gap:6px 12px;top:10px;left:10px;padding:7px 9px}}
 
 .sky-review-legend[hidden]{display:none}
+
+/* Keep the main sky-map entry prominent on every page. */
+body .site-header .header-nav a[href="/explore/"]{padding:9px 14px;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-weight:700}
+body .site-header .header-nav a[href="/explore/"]:hover{background:var(--accent-hover)}
+body .site-header .header-nav a[href="/explore/"]:active{background:var(--accent-pressed)}
+body .site-header .header-nav a[href="/explore/"].active:after{left:14px;right:14px;bottom:5px;background:currentColor}
+
+@media(max-width:380px){body .site-header .header-nav{gap:6px;font-size:12px}body .site-header .header-nav a[href="/explore/"]{padding-inline:9px}}
