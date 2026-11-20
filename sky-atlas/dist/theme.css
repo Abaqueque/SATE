@@ -111,3 +111,9 @@ body .site-header .header-nav a[href="/explore/"]:active{background:var(--accent
 body .site-header .header-nav a[href="/explore/"].active:after{left:14px;right:14px;bottom:5px;background:currentColor}
 
 @media(max-width:380px){body .site-header .header-nav{gap:6px;font-size:12px}body .site-header .header-nav a[href="/explore/"]{padding-inline:9px}}
+
+/* Make the ready-to-open example fields easy to find. */
+.sky-rail .sky-test-regions{margin:0 0 24px;padding:16px;border:1px solid var(--accent-border);border-left:4px solid var(--accent);border-radius:8px;background:var(--accent-selected);color:var(--accent-text);font-size:17px;font-weight:700;gap:12px}
+.sky-rail .sky-test-regions select{min-height:48px;padding:11px 12px;font-size:15px;font-weight:600;border:1px solid var(--accent-border);background:var(--surface-raised);color:var(--ink);cursor:pointer}
+.sky-rail .sky-test-regions select:hover{border-color:var(--accent-text);background:var(--accent-selected-hover)}
+.sky-rail .sky-test-regions select:disabled{cursor:wait}
